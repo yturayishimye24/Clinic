@@ -21,3 +21,4 @@ export const autheticate = async (req, res, next) => {
   req.user = user;
   next();
 };
+

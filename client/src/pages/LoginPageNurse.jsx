@@ -3,12 +3,16 @@ import GoogleButton from "react-google-button";
 import usFlag from "../../public/images/usFlag.png"
 import RwandaFlag from "../../public/images/RwandaFlag.png"
 import {Link,useNavigate} from "react-router-dom";
-import { useFirebase } from '../ContextFireBase/contextFire.jsx';
+import { useAuth } from '../../context/authContext.jsx';
 import {House} from "lucide-react";
+import {useState} from "react"
+import axios from "axios"
+import {delay} from "../"
 
 const LoginPageNurse = () => {
-    const { googleSignIn } = useFirebase();
+    const { googleSignIn } = useAuth();
     const navigate = useNavigate();
+    const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const handleGoogleSignIn = async () => {
        try {
         await googleSignIn();
@@ -16,6 +20,36 @@ const LoginPageNurse = () => {
         console.log("Error during Google Sign-In:", error);
        }
     }
+    const [email,setEmail] = useState("");
+    const [password,setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [error,setError] = useState(false);
+    const [progressing,setProgressing] = useState(false);
+
+
+    const handleLogin = async (e) =>{
+      e?.preventDefault();
+      setProgressing(true);
+      try{
+        const token = localStorage.getItem("token")
+        const response = await axios.post(`${backendUrl}/api/accounts/login`,{
+          email,
+          password
+        },{
+          headers:{ Authorization : `Bearer ${token}`},
+        })
+      }catch(error){
+        console.log("Error loggin in!", error);
+      }
+    }
+    const handleNext = ()=>{
+       if(email.trim() !==""){
+        setShowPassword(true);
+       }else{
+        setError(true);
+       }
+    }
+
   return (
     <div className="flex min-h-screen w-full font-sans text-gray-700">
       {/* Left Sidebar */}
@@ -89,12 +123,14 @@ const LoginPageNurse = () => {
             <div className="h-px flex-1 bg-gray-200"></div>
           </div>
 
-          {/* Email Input */}
+         {showPassword ? (
           <div className="w-full">
             <label className="mb-1 block text-sm font-medium text-gray-600">
               Email <span className="text-red-500">*</span>
             </label>
             <input
+              value={email}
+              onChange={(e)=>setEmail(e.target.value)}
               type="email"
               className="w-full rounded-md border border-[#E7F5EE] px-4 py-2 outline-none focus:border-green-400 focus:ring-1 focus:ring-blue-400"
             />
@@ -104,6 +140,26 @@ const LoginPageNurse = () => {
               </a>
             </div>
           </div>
+         ):( 
+          <div className="w-full">
+            <label className="mb-1 block text-sm font-medium text-gray-600">
+              Email <span className="text-red-500">*</span>
+            </label>
+            <input
+              value={email}
+              onChange={(e)=>setEmail(e.target.value)}
+              type="email"
+              className="w-full rounded-md border border-[#E7F5EE] px-4 py-2 outline-none focus:border-green-400 focus:ring-1 focus:ring-blue-400"
+            />
+            <div className="mt-2 text-right">
+              <a href="#" className="text-sm text-gray-500 hover:underline">
+                Forgot your login info?
+              </a>
+            </div>
+          </div>
+         )}
+          
+          
 
           <div className="my-8 w-full border-t border-gray-100"></div>
 
@@ -113,8 +169,8 @@ const LoginPageNurse = () => {
               <div className="h-3 w-3 rounded-full bg-[#87CEAB]"></div>
               <div className="h-3 w-3 rounded-full bg-gray-200"></div>
             </div>
-            <button className="rounded-md bg-[#87CEAB] px-6 py-2 font-semibold text-white hover:bg-[#57BA8A] shadow-sm">
-              Next »
+            <button className="rounded-md bg-[#87CEAB] px-6 py-2 font-semibold text-white hover:bg-[#57BA8A] shadow-sm" onClick={showPassword ? handleLogin : handleNext}>
+              {showPassword ? "Login" : "Next"}
             </button>
           </div>
           

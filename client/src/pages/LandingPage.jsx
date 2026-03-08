@@ -8,7 +8,7 @@ import {
   Label,
   TextInput,
 } from "flowbite-react";
-import {useFirebase} from "../ContextFireBase/contextFire.jsx";
+import {useAuth} from "../../context/authContext.jsx";
 
 import {
   Activity,
@@ -50,8 +50,7 @@ import LoginSelectionModal  from "../components/SelectionLoginModal.jsx"
 
 
 import {OrbitProgress} from "react-loading-indicators"
-import Aos from "aos"
-import "aos/dist/aos.css"
+
 import {
   Footer,
   FooterBrand,
@@ -60,7 +59,8 @@ import {
   FooterLink,
   FooterLinkGroup,
 } from "flowbite-react";
-
+import AOS from "aos"
+import "aos/dist/aos.css"
 
 // import { useFirebase } from "../ContextFireBase/contextFire.jsx";
 
@@ -85,24 +85,7 @@ const LandingPage = () => {
   const servicesRef = useRef(null);
   const whyChooseUsRef = useRef(null);
   const contactUsRef = useRef(null);
-  const {user, googleSignIn,authLoading} = useFirebase();
 
- 
-  const handleGoogleSignIn = async () =>{
-    try{
-    await googleSignIn();
-    }catch(error){
-      console.log("Error Signing in with Google", error.message);
-    }
-  }
- 
-  
-    if(user !=null){
-      navigate("/home")
-    }
-  
-    
-  
   const handleToggleBg = () => {
     setToggleBg(!toggleBg);
   };
@@ -240,9 +223,7 @@ const LandingPage = () => {
       </p>
     </div>
   )}
-  useEffect(()=>{
-    Aos.init()
-  },[])
+ 
   return (
     <div className="font-sans min-h-screen bg-white">
       <header className="absolute mb-20 top-0 left-0 w-full z-50 ">

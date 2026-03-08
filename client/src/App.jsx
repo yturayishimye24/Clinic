@@ -6,7 +6,8 @@ import { Routes, Route, BrowserRouter } from "react-router-dom";
 import CreatePage from "./pages/CreatePage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
-import {FirebaseProvider} from "./ContextFireBase/contextFire.jsx";
+import { AuthContext } from "../context/authContext.jsx";
+
 import "./index.css";
 import "flowbite";
 // import PrivateRoutes from "./utils/PrivateRoutes.jsx";
@@ -23,7 +24,7 @@ export const backendUrl = "http://localhost:4000";
 const App = () => {
   return (
   
-      <FirebaseProvider>
+      <AuthContext>
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<LandingPage />} />
@@ -49,7 +50,7 @@ const App = () => {
           </Routes>
           <ToastContainer containerStyle={{ zIndex: 99999 }} />
         </BrowserRouter>
-      </FirebaseProvider>
+      </AuthContext>
   );
 };
 

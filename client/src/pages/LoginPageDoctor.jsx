@@ -1,72 +1,87 @@
-import React from 'react';
+import React from "react";
 import GoogleButton from "react-google-button";
-import usFlag from "../../public/images/usFlag.png"
-import RwandaFlag from "../../public/images/RwandaFlag.png"
-import {Link,useNavigate} from "react-router-dom";
-import { useFirebase } from '../ContextFireBase/contextFire';
-import {House} from "lucide-react";
-import {useEffect,useState} from "react"
-import AOS from "aos"
-import "aos/dist/aos.css"
-
+import usFlag from "../../public/images/usFlag.png";
+import RwandaFlag from "../../public/images/RwandaFlag.png";
+import { Link, useNavigate } from "react-router-dom";
+import { House } from "lucide-react";
+import { useEffect, useState } from "react";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import { toast, ToastContainer } from "react-toastify";
+import { useAuth } from "../../context/authContext.jsx";
 import axios from "axios";
+import {OrbitProgress} from "react-loading-indicators"
+import {delay} from "../utils/Delay.jsx";
 
 const LoginPageDoctor = () => {
-    const [email,setEmail] = useState("");
-    const [password,setPassword] = useState("");
-    const [showPassword,setShowPassword] = useState(false)
-    const [error,setError] = useState(false);
- //let initialize aos
-    useEffect(()=>{
-      AOS.init()
-    },[])
-//handling next function
-const handleNext = ()=>{
-  
-  if(email.trim() === ""){
-    setError(true);
-    return
-  }
-  if(email.trim() !==""){
-    setShowPassword(true);
-  }
-}
-    const { googleSignIn } = useFirebase();
-    const backendUrl= import.meta.env.VITE_BACKEND_URL;
-    const navigate= useNavigate();
-    
-    const handleGoogleSignIn = async () => {
-       try {
-        await googleSignIn();
-       } catch (error) {
-        console.log("Error during Google Sign-In:", error);
-       }
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [progressing, setProgressing] = useState(false);
+  const [error, setError] = useState(false);
+  //let me initialize aos
+  useEffect(() => {
+    AOS.init();
+  }, []);
+  //handling next function
+  const handleNext = () => {
+    if (email.trim() === "") {
+      setError(true);
+      return;
     }
-
-    //backend
-    const handleSubmit = async(e)=>{
-      e?.preventDefault()
-      try{
-      const response = await axios.post(`${backendUrl}/api/accounts/login`,{email,password})
-      console.log(response.data)
-      navigate('/home')
-      }catch(error){
-
-     console.log('Error logging in as doctor!')
-      }
+    if (email.trim() !== "") {
+      setShowPassword(true);
     }
+  };
+  const { googleSignIn, login } = useAuth();
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const navigate = useNavigate();
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await googleSignIn();
+      navigate("/home/admin");
+    } catch (error) {
+      console.log("Error during Google Sign-In:", error);
+    }
+  };
+
+  //backend
+  const handleSubmit = async (e) => {
+    e?.preventDefault();
+    setProgressing(true);
+    try {
+      const responsePromise = await axios.post(`${backendUrl}/api/accounts/login`, {
+        email,
+        password,
+      });
+      const [response] = await Promise.all([responsePromise, delay(5000)]);
+      const { token, role, user: userData } = response.data;
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+
+      login(userData);
+
+      console.log(response.data);
+      toast.success("Login successful!");
+      navigate("/home");
+    } catch (error) {
+      console.log("Error logging in as doctor!");
+    } finally {
+      setProgressing(false);
+    }
+  };
   return (
     <div className="flex min-h-screen w-full font-sans text-gray-700">
       {/* Left Sidebar */}
       <div className="hidden w-[400px] flex-col bg-[#E7F5EE] px-10 py-8 lg:flex">
         <div className="mb-12 flex items-center text-3xl font-black cursor-pointer text-[#0F9D58]">
-          Clinic<span className="text-xl font-normal text-[#0F9D58]">Auth</span> 
+          Clinic<span className="text-xl font-normal text-[#0F9D58]">Auth</span>
         </div>
-       
+
         <div>
-           
           <div className="text-center text-sm text-blue-400 font-medium">
-             <img src={"/public/images/LoginImage.svg"}/>
+            <img src={"/public/images/LoginImage.svg"} />
           </div>
         </div>
 
@@ -75,18 +90,38 @@ const handleNext = ()=>{
             Prepare Your Students for Their Future
           </h2>
           <p className="text-md leading-relaxed font-poppins text-[#3f5c77]">
-            Manage, track, and report on student progress quickly and easily. 
-            Unlimited students, unlimited classes, unlimited teachers, unlimited 
+            Manage, track, and report on student progress quickly and easily.
+            Unlimited students, unlimited classes, unlimited teachers, unlimited
             schools. Typing.com is completely FREE!
           </p>
         </div>
       </div>
 
       {/* Right Content */}
-      <div className="relative flex flex-1 flex-col bg-white">
-        
+      <div className={`relative flex flex-1 flex-col ${progressing ? "bg-black/55" : "bg-white"}`}>
         {/* Top Navigation */}
-         <span className="flex absolute mt-6 gap-5 font-poppins text-[#0F9D58] cursor-pointer items-center" onClick={()=>navigate("/")}><House size={30} color={"green"} className="ml-10"/> <h2>Back home</h2></span>
+        {progressing && (
+          <div className="absolute top-0 left-0 w-full h-full bg-white bg-opacity-70 flex flex-col items-center justify-center z-50">
+            <OrbitProgress
+              variant="track-disc"
+              dense={false}
+              color={["#FBBC05","#FFBB00","#EA4335","#F65314","#34A853","#7CBB00","#4286F4","#00A1F1"]}
+              size="large"
+              text=""
+              textColor=""
+            />
+            <p className="mt-4 text-gray-600 text-lg font-medium">
+              <i>Logging you in...</i>
+              </p>
+          </div>
+        )}
+        <span
+          className="flex absolute mt-6 gap-5 font-poppins text-[#0F9D58] cursor-pointer items-center"
+          onClick={() => navigate("/")}
+        >
+          <House size={30} color={"green"} className="ml-10" />{" "}
+          <h2>Back home</h2>
+        </span>
         <div className="absolute right-6 top-6 flex items-center gap-4 text-sm">
           <button className="flex items-center gap-1 text-gray-500 hover:text-gray-700">
             <select>
@@ -96,11 +131,11 @@ const handleNext = ()=>{
           </button>
           <div className="h-6 w-px bg-gray-300"></div>
           <span className="text-gray-500">Not a doctor?</span>
-         <Link to={"/nurseLogin"}>
-           <button className="rounded-md bg-[#87CEAB] px-4 py-2 font-semibold text-white hover:bg-[#57BA8A] shadow-sm">
-            Nurse Login
-          </button>
-         </Link>
+          <Link to={"/nurseLogin"}>
+            <button className="rounded-md bg-[#87CEAB] px-4 py-2 font-semibold text-white hover:bg-[#57BA8A] shadow-sm">
+              Nurse Login
+            </button>
+          </Link>
         </div>
 
         {/* Main Form */}
@@ -109,14 +144,20 @@ const handleNext = ()=>{
             Doctor Login
           </h1>
           <p className="mb-8 text-[#718096]">
-            Don't have an account? <a href="#" className="text-green-500 hover:underline">Sign up here</a>
+            Don't have an account?{" "}
+            <a href="#" className="text-green-500 hover:underline">
+              Sign up here
+            </a>
           </p>
 
           <p className="mb-4 text-sm text-gray-500">Log in with:</p>
 
           {/* SSO Buttons */}
           <div className="w-full gap-3 flex align-items-center justify-center">
-            <GoogleButton onClick={handleGoogleSignIn} style={{backgroundColor:"#87CEAB"}}/>
+            <GoogleButton
+              onClick={handleGoogleSignIn}
+              style={{ backgroundColor: "#87CEAB" }}
+            />
           </div>
 
           {/* Divider */}
@@ -130,33 +171,33 @@ const handleNext = ()=>{
 
           {/* Email Input */}
           <div className="w-full">
-            {!showPassword&&(
+            {!showPassword && (
               <>
-            <label className="mb-1 block text-sm font-medium text-gray-600">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e)=> setEmail(e.target.value)}
-              className={`w-full rounded-md border ${error? "border-red-500": "border-[#E6F5EE]"} px-4 py-2 outline-none focus:border-green-400 focus:ring-1 focus:ring-blue-400`}
-            />
-            </>
+                <label className="mb-1 block text-sm font-medium text-gray-600">
+                  Email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className={`w-full rounded-md border ${error ? "border-red-500" : "border-[#E6F5EE]"} px-4 py-2 outline-none focus:border-green-400 focus:ring-1 focus:ring-blue-400`}
+                />
+              </>
             )}
             {showPassword && (
-  <div data-aos="fade-up" className="mt-6 w-full">
-    <label className="mb-1 block text-sm font-medium text-gray-600">
-      Password <span className="text-red-500">*</span>
-    </label>
+              <div data-aos="fade-left" className="mt-6 w-full">
+                <label className="mb-1 block text-sm font-medium text-gray-600">
+                  Password <span className="text-red-500">*</span>
+                </label>
 
-    <input
-      type="password"
-      value={password}
-      onChange={(e)=>setPassword(e.target.value)}
-      className="w-full rounded-md border border-[#E7F5EE] px-4 py-2 outline-none focus:border-green-400 focus:ring-1 focus:ring-blue-400"
-    />
-  </div>
-)}
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full rounded-md border border-[#E7F5EE] px-4 py-2 outline-none focus:border-green-400 focus:ring-1 focus:ring-blue-400"
+                />
+              </div>
+            )}
             <div className="mt-2 text-right">
               <a href="#" className="text-sm text-gray-500 hover:underline">
                 Forgot your login info?
@@ -169,16 +210,23 @@ const handleNext = ()=>{
           {/* Footer Actions */}
           <div className="flex w-full items-center justify-between">
             <div className="flex gap-2">
-              <div className={`h-3 w-3 rounded-full  ${showPassword ? "bg-gray-200" : "bg-[#86CEAB]"}`}></div>
-              <div className={`h-3 w-3 rounded-full bg-gray-200 ${showPassword ? "bg-[#86CEAB" : "bg-gray-200"}`}></div>
+              <div
+                className={`h-3 w-3 rounded-full  ${showPassword ? "bg-gray-200" : "bg-[#86CEAB]"}`}
+              ></div>
+              <div
+                className={`h-3 w-3 rounded-full bg-gray-200 ${showPassword ? "bg-[#86CEAB" : "bg-gray-200"}`}
+              ></div>
             </div>
-            <button className="rounded-md bg-[#87CEAB] px-6 py-2 font-semibold text-white hover:bg-[#57BA8A] shadow-sm" onClick={showPassword? handleSubmit : handleNext}>
-              {showPassword ? "Login" : "Next"} 
+            <button
+              className="rounded-md bg-[#87CEAB] px-6 py-2 font-semibold text-white hover:bg-[#57BA8A] shadow-sm"
+              onClick={showPassword ? handleSubmit : handleNext}
+            >
+              {showPassword ? "Login" : "Next"}
             </button>
           </div>
-          
         </div>
       </div>
+      <ToastContainer position="bottom-right" />
     </div>
   );
 };
