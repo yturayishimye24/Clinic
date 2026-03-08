@@ -7,12 +7,21 @@ import { useAuth } from '../../context/authContext.jsx';
 import {House} from "lucide-react";
 import {useState} from "react"
 import axios from "axios"
-import {delay} from "../"
+import {delay} from "../../src/utils/Delay.jsx";
+import AOS from "aos";
+import "aos/dist/aos.css";
+import {OrbitProgress} from "react-loading-indicators";
+import {useEffect} from "react"
+import {toast} from "react-toastify";
 
 const LoginPageNurse = () => {
-    const { googleSignIn } = useAuth();
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
+    const {login,googleSignIn} = useAuth();
+  
+    useEffect(()=>{
+     AOS.init();
+    },[])
     const handleGoogleSignIn = async () => {
        try {
         await googleSignIn();
@@ -26,18 +35,32 @@ const LoginPageNurse = () => {
     const [error,setError] = useState(false);
     const [progressing,setProgressing] = useState(false);
 
-
+    useEffect(()=>{
+    AOS.refresh();
+    },[showPassword])
     const handleLogin = async (e) =>{
       e?.preventDefault();
       setProgressing(true);
       try{
         const token = localStorage.getItem("token")
-        const response = await axios.post(`${backendUrl}/api/accounts/login`,{
+        const responsePromise = await axios.post(`${backendUrl}/api/accounts/login`,{
           email,
           password
         },{
           headers:{ Authorization : `Bearer ${token}`},
         })
+        const [response] = await Promise.all([responsePromise, delay(3000)]);
+        if(response.status === 200){
+
+          const {token,user:userData,role} = response.data;
+          localStorage.setItem("token", token);
+          localStorage.setItem("role",role);
+          
+          login(userData);
+          
+          toast.success("Logged in successfully!");
+          navigate("/home");
+        }
       }catch(error){
         console.log("Error loggin in!", error);
       }
@@ -81,6 +104,21 @@ const LoginPageNurse = () => {
       <div className="relative flex flex-1 flex-col bg-white">
         
         {/* Top Navigation */}
+          {progressing && (
+          <div className="absolute top-0 left-0 w-full h-full bg-white bg-opacity-70 flex flex-col items-center justify-center z-50">
+            <OrbitProgress
+              variant="track-disc"
+              dense={false}
+              color={["#FBBC05","#FFBB00","#EA4335","#F65314","#34A853","#7CBB00","#4286F4","#00A1F1"]}
+              size="large"
+              text=""
+              textColor=""
+            />
+            <p className="mt-4 text-gray-600 text-lg font-medium">
+              <i>Logging you in...</i>
+              </p>
+          </div>
+        )}
         <span className="flex absolute mt-6 gap-5 font-poppins text-[#0F9D58] cursor-pointer items-center" onClick={()=>navigate("/")}><House size={30} color={"green"} className="ml-10"/> <h2>Back home</h2></span>
         <div className="absolute right-6 top-6 flex items-center gap-4 text-sm">
           <button className="flex items-center gap-1 text-gray-500 hover:text-gray-700">
@@ -122,8 +160,8 @@ const LoginPageNurse = () => {
             </span>
             <div className="h-px flex-1 bg-gray-200"></div>
           </div>
-
-         {showPassword ? (
+             
+         {!showPassword&&(
           <div className="w-full">
             <label className="mb-1 block text-sm font-medium text-gray-600">
               Email <span className="text-red-500">*</span>
@@ -140,15 +178,16 @@ const LoginPageNurse = () => {
               </a>
             </div>
           </div>
-         ):( 
-          <div className="w-full">
+         )}
+         {showPassword && ( 
+          <div className="w-full" data-aos="fade-left" data-aos-duration="2000">
             <label className="mb-1 block text-sm font-medium text-gray-600">
-              Email <span className="text-red-500">*</span>
+              Password <span className="text-red-500">*</span>
             </label>
             <input
-              value={email}
-              onChange={(e)=>setEmail(e.target.value)}
-              type="email"
+              value={password}
+              onChange={(e)=>setPassword(e.target.value)}
+              type="password"
               className="w-full rounded-md border border-[#E7F5EE] px-4 py-2 outline-none focus:border-green-400 focus:ring-1 focus:ring-blue-400"
             />
             <div className="mt-2 text-right">
