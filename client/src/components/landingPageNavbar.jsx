@@ -30,9 +30,10 @@ const Navbar = () => {
 
      
       <div className="flex items-center gap-4">
-        <button className="hidden sm:block text-[#FB923C] font-medium cursor-pointer hover:text-[#FFF4E1] hover:bg-[#FDBA74] px-4 py-2 rounded transition-all" onClick={()=> useNavigate("/doctorLogin")}>
+        <button className="hidden sm:block text-[#FB923C] font-medium cursor-pointer hover:text-[#FFF4E1] hover:bg-[#FDBA74] px-4 py-2 rounded transition-all" onClick={()=> navigate("/doctorLogin")}>
           Doctor login
         </button>
+    
         <button className="hidden lg:block border border-[#FFF4E1] cursor-pointer hover:border-[#FDBA74] text-[#fb923c] font-medium px-5 py-2 rounded-md hover:bg-[#FFF4E1]">
           Contact us
         </button>

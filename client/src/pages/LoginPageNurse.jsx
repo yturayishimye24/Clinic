@@ -4,7 +4,7 @@ import usFlag from "../../public/images/usFlag.png"
 import RwandaFlag from "../../public/images/RwandaFlag.png"
 import {Link,useNavigate} from "react-router-dom";
 import { useAuth } from '../../context/authContext.jsx';
-import {House} from "lucide-react";
+import {House, Eye, EyeOff} from "lucide-react";
 import {useState} from "react"
 import axios from "axios"
 import {delay} from "../../src/utils/Delay.jsx";
@@ -12,7 +12,7 @@ import AOS from "aos";
 import "aos/dist/aos.css";
 import {OrbitProgress} from "react-loading-indicators";
 import {useEffect} from "react"
-import {toast} from "react-toastify";
+import {toast, ToastContainer} from "react-toastify";
 
 const LoginPageNurse = () => {
     const navigate = useNavigate();
@@ -34,35 +34,54 @@ const LoginPageNurse = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [error,setError] = useState(false);
     const [progressing,setProgressing] = useState(false);
+    const [isVisible,setIvisible] = useState(false);
+
 
     useEffect(()=>{
     AOS.refresh();
     },[showPassword])
-    const handleLogin = async (e) =>{
+    const handleLogin = async (e) => {
       e?.preventDefault();
       setProgressing(true);
       try{
-        const token = localStorage.getItem("token")
+        // Don't send existing token for login - it will cause auth issues
         const responsePromise = await axios.post(`${backendUrl}/api/accounts/login`,{
           email,
           password
-        },{
-          headers:{ Authorization : `Bearer ${token}`},
         })
         const [response] = await Promise.all([responsePromise, delay(3000)]);
-        if(response.status === 200){
-
+        
+        // Check both status and success flag from backend
+        if(!password.trim() && response.data.success){
           const {token,user:userData,role} = response.data;
+          
+          // Verify the role is nurse before allowing login
+          if (role !== "nurse") {
+            toast.error("This login is for nurses only. Please use the correct login page.");
+            setProgressing(false);
+            return;
+          }
+          
           localStorage.setItem("token", token);
           localStorage.setItem("role",role);
           
           login(userData);
           
           toast.success("Logged in successfully!");
-          navigate("/home");
+          navigate("/NewNursePage");
+        } else {
+          toast.error(response.data.message || "Login failed");
         }
       }catch(error){
-        console.log("Error loggin in!", error);
+        console.log("Error logging in!", error);
+        // Show error message from backend or generic error
+        if (error.response?.data?.message) {
+          toast.error(error.response.data.message);
+        } else {
+          toast.error("Failed to login. Please check your credentials.");
+        }
+      } finally {
+        setProgressing(false);
       }
     }
     const handleNext = ()=>{
@@ -100,10 +119,9 @@ const LoginPageNurse = () => {
         </div>
       </div>
 
-      {/* Right Content */}
+ 
       <div className="relative flex flex-1 flex-col bg-white">
         
-        {/* Top Navigation */}
           {progressing && (
           <div className="absolute top-0 left-0 w-full h-full bg-white bg-opacity-70 flex flex-col items-center justify-center z-50">
             <OrbitProgress
@@ -184,12 +202,21 @@ const LoginPageNurse = () => {
             <label className="mb-1 block text-sm font-medium text-gray-600">
               Password <span className="text-red-500">*</span>
             </label>
-            <input
-              value={password}
-              onChange={(e)=>setPassword(e.target.value)}
-              type="password"
-              className="w-full rounded-md border border-[#E7F5EE] px-4 py-2 outline-none focus:border-green-400 focus:ring-1 focus:ring-blue-400"
-            />
+            <div className="relative">
+              <input
+                value={password}
+                onChange={(e)=>setPassword(e.target.value)}
+                type={isVisible ? "text" : "password"}
+                className="w-full rounded-md border border-[#E7F5EE] px-4 py-2 pr-10 outline-none focus:border-green-400 focus:ring-1 focus:ring-blue-400"
+              />
+              <button
+                type="button"
+                onClick={() => setIvisible(!isVisible)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                {isVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
             <div className="mt-2 text-right">
               <a href="#" className="text-sm text-gray-500 hover:underline">
                 Forgot your login info?
@@ -208,13 +235,15 @@ const LoginPageNurse = () => {
               <div className="h-3 w-3 rounded-full bg-[#87CEAB]"></div>
               <div className="h-3 w-3 rounded-full bg-gray-200"></div>
             </div>
-            <button className="rounded-md bg-[#87CEAB] px-6 py-2 font-semibold text-white hover:bg-[#57BA8A] shadow-sm" onClick={showPassword ? handleLogin : handleNext}>
+          <button className="rounded-md bg-[#87CEAB] px-6 py-2 font-semibold text-white hover:bg-[#57BA8A] shadow-sm" onClick={showPassword ? handleLogin : handleNext}>
               {showPassword ? "Login" : "Next"}
             </button>
           </div>
           
         </div>
       </div>
+
+      <ToastContainer position="bottom-right" />
     </div>
   );
 };

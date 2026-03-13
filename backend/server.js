@@ -14,6 +14,8 @@ import emailRouter from "./routes/getEmail.js";
 import router from "./routes/verifyRoute.js";
 import reportRouter from "./routes/reportRoute.js";
 import path from "path";
+import googleRouter from "./routes/googleRoute.js"
+
 // Setting up GraphQL server
 // import { createHandler } from 'graphql-http/lib/use/express';
 // import { buildSchema } from 'graphql';
@@ -58,6 +60,7 @@ app.use("/api/requests", requestRouter);
 app.use("/api/infos",emailRouter)
 app.use("/api/verify",router)
 app.use("/api/report",reportRouter)
+app.use("/api/AuthGoogle",googleRouter);
 
 const server = http.createServer(app);
 export const io = new Server(server, {

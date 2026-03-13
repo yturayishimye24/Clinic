@@ -1,77 +1,89 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, User, Stethoscope, X } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
-import {useEffect} from "react";
 
-
-const LoginSelectionModal = ({ isOpen, isClosed, onSelect }) => {
-  useEffect(()=>{
+const LoginSelectionModal = ({ isOpen, isClosed }) => {
+  useEffect(() => {
     AOS.init();
-  },[])
-  const navigate = useNavigate();
+  }, []);
 
+  const navigate = useNavigate();
 
   if (!isOpen) return null;
 
+  const roles = [
+    {
+      title: "Nurse Portal",
+      description: "Access patient care and ward management",
+      path: "/nurseLogin",
+      icon: <User className="text-slate-600" size={24} />,
+      aos: "fade-up",
+    },
+    {
+      title: "Doctor Portal",
+      description: "Manage diagnoses, prescriptions, and rounds",
+      path: "/doctorLogin",
+      icon: <Stethoscope className="text-slate-600" size={24} />,
+      aos: "fade-up",
+    },
+  ];
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all animate-in fade-in zoom-in duration-300" data-aos="zoom-in-up" data-aos-duration="500">
-        
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md p-4">
+      <div 
+        className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden transform transition-all border border-slate-100"
+        data-aos="zoom-in" 
+        data-aos-duration="400"
+      >
         {/* Modal Header */}
-        <div className="p-8 pb-0 flex justify-between items-start">
-          <div data-aos="fade-down" data-aos-duration="1000">
-            <h2 className="text-2xl font-bold text-gray-900">Get Started</h2>
-            <p className="text-gray-500 mt-1">Please select your role to continue</p>
+        <div className="p-6 flex justify-between items-center border-b border-slate-50">
+          <div>
+            <h2 className="text-xl font-semibold text-slate-800 tracking-tight">System Login</h2>
+            <p className="text-sm text-slate-500 mt-0.5">Select your department to continue</p>
           </div>
           <button 
             onClick={isClosed}
-            className="text-red-300 flex items-center justify-center h-10 w-10 cursor-pointer bg-red-100 hover:bg-[#EA4335] hover:text-gray-600 transition-colors text-2xl font-light rounded-full"
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-colors"
           >
-            &times;
+            <X size={20} />
           </button>
         </div>
 
-        {/* Modal Body / Buttons */}
-        <div className="p-8 space-y-4">
-          
-          {/* Nurse Login Button (The Orange Gradient Style) */}
-          <button
-            onClick={() => navigate("/nurseLogin")}
-            className="group relative w-full flex items-center justify-between px-8 py-4 
-                       bg-gradient-to-r from-[#FFB700] to-[#FF8A00] 
-                       hover:from-[#FFC122] hover:to-[#FF9D22]
-                       text-white font-bold text-lg rounded-full shadow-lg shadow-orange-200 
-                       transition-all duration-300 active:scale-95"
-            data-aos="fade-right" data-aos-duration="500"
-          >
-            <span className="tracking-wide uppercase">Login as Nurse</span>
-            <div className="bg-white/20 rounded-full p-1 group-hover:translate-x-1 transition-transform">
-              <ChevronRight size={24} />
-            </div>
-          </button>
+        {/* Modal Body */}
+        <div className="p-6 space-y-3">
+          {roles.map((role, index) => (
+            <button
+              key={index}
+              onClick={() => navigate(role.path)}
+              data-aos={role.aos}
+              data-aos-delay={index * 100}
+              className="group w-full flex items-center p-4 text-left border border-slate-200 rounded-xl hover:border-indigo-500 hover:bg-indigo-50/30 transition-all duration-200 active:scale-[0.98]"
+            >
+              <div className="h-12 w-12 flex items-center justify-center bg-slate-50 rounded-lg group-hover:bg-indigo-100 transition-colors">
+                {role.icon}
+              </div>
+              
+              <div className="ml-4 flex-1">
+                <h3 className="font-medium text-slate-900 leading-tight group-hover:text-indigo-700 transition-colors">
+                  {role.title}
+                </h3>
+                <p className="text-xs text-slate-500 mt-1">{role.description}</p>
+              </div>
 
-         
-          <button
-            onClick={() => navigate("/doctorLogin")}
-            className="group relative w-full flex items-center justify-between px-8 py-4 
-                       bg-white border-2 border-[#FF8A00] 
-                       text-[#FF8A00] font-bold text-lg rounded-full 
-                       hover:bg-orange-50 transition-all duration-300 active:scale-95"
-            data-aos="fade-left" data-aos-duration="700"
-          >
-            <span className="tracking-wide uppercase">Login as Doctor</span>
-            <div className="bg-[#FF8A00] text-white rounded-full p-1 group-hover:translate-x-1 transition-transform">
-              <ChevronRight size={24} />
-            </div>
-          </button>
-
+              <ChevronRight 
+                size={18} 
+                className="text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-1 transition-all" 
+              />
+            </button>
+          ))}
         </div>
 
-        <div className="bg-gray-50 p-4 text-center">
-          <p className="text-sm text-gray-400">
-            Need help? Contact your administrator
+        {/* Modal Footer */}
+        <div className="bg-slate-50/80 p-4 border-t border-slate-100">
+          <p className="text-xs text-center text-slate-400">
+            Internal Security System • <span className="cursor-pointer hover:underline">Help Desk</span>
           </p>
         </div>
       </div>

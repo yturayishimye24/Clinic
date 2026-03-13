@@ -15,18 +15,26 @@ export const AuthContext = ({ children }) => {
 
    const googleSignIn = async () => {
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const firebaseUser = result.user;
+     const provider = new GoogleAuthProvider();
+     
+     const result = await signInWithPopup(auth, provider);
 
-      // convert Firebase user to your app user
-      const userData = {
-        id: firebaseUser.uid,
-        name: firebaseUser.displayName,
-        email: firebaseUser.email,
-        role: "doctor", // optional
-      };
-      login(userData);
+     const firebaseUser = result.user;
+
+     const Idtoken = await firebaseUser.getIdToken();
+
+     const response = await axios.post(`${backendUrl}/api/AuthGoogle/google-login`, {
+      token: Idtoken,
+     });
+
+     if(response.data.success){
+      const {token,user,role} = response.data;
+      localStorage.setItem("token",token);
+      localStorage.setItem("role",role);
+      setUser(user)
+
+      login(user);
+     }
     } catch(error){
       console.log("Error during Google Sign-In:", error);
     }

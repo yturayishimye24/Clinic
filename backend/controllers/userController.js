@@ -26,9 +26,9 @@ export const loginController = async (req, res) => {
         success: true,
         message: "Login successful!",
         token,
-        username: user.username,
+        user,
         role: user.role,
-        image: user.image,
+        
       });
     } else {
       res.json({ success: false, message: "Incorrect password" });
@@ -78,7 +78,6 @@ export const signupController = async (req, res) => {
       username: user.username,
       password:user.password,
       role: user.role,
-      image: user.image,
     });
   } catch (error) {
     console.log("Error registering", error);

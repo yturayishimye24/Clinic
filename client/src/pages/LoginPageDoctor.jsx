@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import GoogleButton from "react-google-button";
 import { Link, useNavigate } from "react-router-dom";
-import { House } from "lucide-react";
+import { House, Eye, EyeOff } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
 import { toast, ToastContainer } from "react-toastify";
@@ -110,7 +110,7 @@ const LoginPageDoctor = () => {
           Clinic<span className="text-xl font-normal">Auth</span>
         </div>
 
-        <img src="/images/LoginImage.png" width="9000" height="9000"/>
+        <img src="/images/LoginImage.png" width="100%" height="9000"/>
 
       </div>
 

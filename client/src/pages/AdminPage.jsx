@@ -263,7 +263,11 @@ export default function AdminPage() {
       setApproving(false);
     }
   };
-
+  const handleLogout = () =>{
+    localStorage.removeItem("token");
+    toast.success("Logged out successfully");
+    navigate("/doctorLogin")
+  }
   const handleDeleteRequest = async (requestId) => {
     if (!window.confirm("Delete this request?")) return;
     try {
@@ -373,7 +377,7 @@ export default function AdminPage() {
                     <li className="menu-title">
                       <span className="font-bold truncate">{username || "Admin"}</span>
                     </li>
-                    <li><a onClick={() => { localStorage.removeItem("token"); navigate("/"); }}><LogOut className="w-4 h-4"/> Sign Out</a></li>
+                    <li><a onClick={handleLogout}><LogOut className="w-4 h-4"/> Sign Out</a></li>
                 </ul>
               </div>
             </div>

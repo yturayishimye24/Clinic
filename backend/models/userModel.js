@@ -19,7 +19,7 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
+      required: false,
     },
     hireDate:{
       type: Date,
@@ -37,5 +37,5 @@ userSchema.methods.verifyPassword = function(enteredPassword){
 return bcrypt.compare(enteredPassword,this.password)
 
 }
-const Nurse = mongoose.models.Nurse || mongoose.model("User", userSchema);
+const Nurse = mongoose.models.Nurse || mongoose.model("Nurse", userSchema);
 export default Nurse;
