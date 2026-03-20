@@ -70,9 +70,9 @@ const StatCard = ({ title, value, change, icon: Icon, color, bg }) => (
 const SidebarItem = ({ icon: Icon, label, active = false, collapsed }) => (
   <div className={`
     flex items-center gap-4 px-4 py-3 rounded-2xl cursor-pointer transition-all mb-2
-    ${active ? 'bg-[#0a2e28] text-white' : 'text-slate-400 hover:bg-white/5 hover:text-slate-200'}
+    ${active ? 'bg-[#0a2e28] text-white' : 'text-slate-400 hover:bg-[#646b6a] hover:text-slate-200'}
   `}>
-    <Icon className="w-5 h-5 shrink-0" />
+    <Icon className="w-7 h- 7shrink-0" />
     {!collapsed && <span className="text-sm font-semibold whitespace-nowrap">{label}</span>}
   </div>
 );
