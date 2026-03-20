@@ -64,11 +64,11 @@ const LoginPageNurse = () => {
 
           localStorage.setItem("token", token);
           localStorage.setItem("role", role);
-
+          localStorage.setItem("username", userData.username);
           login(userData);
 
           toast.success("Logged in successfully!");
-          navigate("/NewNursePage");
+          navigate("/NewNursePage/patients");
         } else {
           toast.error(response.data.message || "Login failed");
         }

@@ -7,7 +7,7 @@ import CreatePage from "./pages/CreatePage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import { AuthContext } from "../context/authContext.jsx";
-import  StockManager from "./pages/StockManager.jsx"
+import StockManager from "./pages/StockManager.jsx";
 
 import NewNursePage from "./pages/NewNursePage.jsx";
 
@@ -22,41 +22,43 @@ import SettingsPage from "./pages/SettingsPage.jsx";
 
 export const backendUrl = "http://localhost:4000";
 
-
-
 const App = () => {
   return (
-  
-      <AuthContext>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/nurseLogin" element={<LoginPageNurse />} />
-            <Route path="/doctorLogin" element={<LoginPageDoctor />} />
-            <Route path="/home" element={<CreatePage />}>
-              <Route path="patients" element={<PatientList />} />
-              <Route path="requests" element={<RequestList />} />
-              <Route path="reports" element={<ReportList />} />
-              <Route path="settings" element={<SettingsPage />} />
-            </Route>
+    <AuthContext>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/nurseLogin" element={<LoginPageNurse />} />
+          <Route path="/doctorLogin" element={<LoginPageDoctor />} />
+          <Route path="/home" element={<CreatePage />}>
+            <Route path="patients" element={<PatientList />} />
+            <Route path="requests" element={<RequestList />} />
+            <Route path="reports" element={<ReportList />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
 
-            <Route
-              path="/home/admin"
-              element={
-                // // <PrivateRoutes>
-                //   <RoleBasedRoutes requiredRole={["admin"]}>
-                    <AdminPage />
-                //   </RoleBasedRoutes>
-                //       // </PrivateRoutes>
-              }
-            />
-             <Route path={"/NewNursePage"} element={<NewNursePage />} />
-             <Route path={"/stockmanager"} element={<StockManager />} />
-          </Routes>
-         
-          <ToastContainer containerStyle={{ zIndex: 99999 }} />
-        </BrowserRouter>
-      </AuthContext>
+          <Route
+            path="/home/admin"
+            element={
+              // // <PrivateRoutes>
+              //   <RoleBasedRoutes requiredRole={["admin"]}>
+              <AdminPage />
+              //   </RoleBasedRoutes>
+              //       // </PrivateRoutes>
+            }
+          />
+          <Route path={"/NewNursePage"} element={<NewNursePage />}>
+            <Route path="patients" element={<PatientList />} />
+            <Route path="requests" element={<RequestList />} />
+            <Route path="reports" element={<ReportList />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
+          <Route path={"/stockmanager"} element={<StockManager />} />
+        </Routes>
+
+        <ToastContainer containerStyle={{ zIndex: 99999 }} />
+      </BrowserRouter>
+    </AuthContext>
   );
 };
 
