@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import GoogleButton from "react-google-button";
+import GitHubButton from "react-github-btn";
+
 import { Link, useNavigate } from "react-router-dom";
 import { House, Eye, EyeOff } from "lucide-react";
 import AOS from "aos";
@@ -12,7 +14,6 @@ import { delay } from "../utils/Delay.jsx";
 import ValidationError from "../components/ValidationError.jsx";
 
 const LoginPageDoctor = () => {
-
   const navigate = useNavigate();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const { googleSignIn, login } = useAuth();
@@ -60,18 +61,27 @@ const LoginPageDoctor = () => {
     setProgressing(true);
 
     try {
+      const responsePromise = axios.post(`${backendUrl}/api/accounts/login`, {
+        email,
+        password,
+      });
 
-      const responsePromise = axios.post(
-        `${backendUrl}/api/accounts/login`,
-        { email, password }
-      );
+      const [response] = await Promise.all([responsePromise, delay(2000)]);
 
-      const [response] = await Promise.all([
-        responsePromise,
-        delay(2000)
-      ]);
+      if (!response.data.success) {
+        toast.error(response.data.message || "Login failed");
+        setProgressing(false);
+        return;
+      }
 
       const { token, role, user: userData } = response.data;
+
+      // Optional role gate for doctor/admin (adjust based on your data model)
+      if (role !== "admin" && role !== "doctor") {
+        toast.error("This login is for doctors/admins only. Please use the correct account.");
+        setProgressing(false);
+        return;
+      }
 
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
@@ -81,7 +91,6 @@ const LoginPageDoctor = () => {
       toast.success("Login successful!");
 
       navigate("/home/admin");
-
     } catch (err) {
       toast.error("Login failed");
       console.log(err);
@@ -102,37 +111,27 @@ const LoginPageDoctor = () => {
 
   return (
     <div className="flex min-h-screen w-full font-sans text-gray-700">
-
-      
       <div className="hidden w-[400px] flex-col bg-[#FFF4E1] px-10 py-8 lg:flex">
-
         <div className="mb-12 text-3xl font-black text-[#FB923C]">
           Clinic<span className="text-xl font-normal">Auth</span>
         </div>
 
-        <img src="/images/LoginImage.png" width="100%" height="9000"/>
-
+        <img src="/images/LoginImage.png" width="100%" height="9000" />
       </div>
 
       <div className="relative flex flex-1 flex-col bg-white">
-
         {progressing && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/70 z-50">
-
             <OrbitProgress
               variant="track-disc"
               size="large"
-              color={["#FB923C","#F97316","#EA580C","#C2410C"]}
+              color={["#FB923C", "#F97316", "#EA580C", "#C2410C"]}
             />
 
-            <p className="mt-4 text-gray-600 italic">
-              Logging you in...
-            </p>
-
+            <p className="mt-4 text-gray-600 italic">Logging you in...</p>
           </div>
         )}
 
-     
         <span
           onClick={() => navigate("/")}
           className="absolute mt-6 ml-10 flex items-center gap-3 cursor-pointer text-[#FB923C]"
@@ -141,32 +140,29 @@ const LoginPageDoctor = () => {
           Back home
         </span>
 
-        
         <div className="mx-auto mt-32 w-full max-w-[600px] px-8 flex flex-col items-center">
-
-          <h1 className="text-4xl font-semibold mb-2">
-            Doctor Login
-          </h1>
+          <h1 className="text-4xl font-semibold mb-2">Doctor Login</h1>
 
           <p className="mb-8 text-gray-500">
             Don't have an account?{" "}
-            <span className="text-[#FB923C] cursor-pointer">
-              Sign up here
-            </span>
+            <span className="text-[#FB923C] cursor-pointer">Sign up here</span>
           </p>
 
-       
-          <GoogleButton onClick={handleGoogleSignIn} style={{backgroundColor:"#10B981"}}/>
-
+          <GoogleButton
+            onClick={handleGoogleSignIn}
+            style={{ backgroundColor: "#10B985" }}
+          />
+          
           <div className="my-8 flex w-full items-center">
             <div className="flex-1 h-px bg-gray-200"></div>
             <span className="mx-4 text-xs text-gray-400">OR</span>
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
-
+          <GitHubButton data-size="large" className="h-[65px] px-8 text-xl">
+            Sign in with GitHub
+          </GitHubButton>
           {/* FORM */}
           <div className="w-full relative">
-
             {/* validation error */}
             {error && !focused && (
               <ValidationError
@@ -178,9 +174,7 @@ const LoginPageDoctor = () => {
             {/* EMAIL */}
             {!showPassword && (
               <>
-                <label className="text-sm text-gray-600">
-                  Email *
-                </label>
+                <label className="text-sm text-gray-600">Email *</label>
 
                 <input
                   ref={emailRef}
@@ -197,20 +191,16 @@ const LoginPageDoctor = () => {
                     error && !focused
                       ? "border-red-500"
                       : focused
-                      ? "border-[#10B981] ring-2 ring-[#10B981]"
-                      : "border-gray-200"
+                        ? "border-[#10B981] ring-2 ring-[#10B981]"
+                        : "border-gray-200"
                   }`}
                 />
               </>
             )}
 
-         
             {showPassword && (
               <div data-aos="fade-left">
-
-                <label className="text-sm text-gray-600">
-                  Password *
-                </label>
+                <label className="text-sm text-gray-600">Password *</label>
 
                 <input
                   ref={passwordRef}
@@ -219,16 +209,11 @@ const LoginPageDoctor = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full mt-1 rounded-md border border-gray-200 px-4 py-2 outline-none focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981]"
                 />
-
               </div>
             )}
-
           </div>
 
-        
           <div className="flex gap-3 mt-8">
-
-      
             <div
               onClick={() => setShowPassword(false)}
               className={`h-3 w-3 rounded-full cursor-pointer
@@ -247,7 +232,6 @@ const LoginPageDoctor = () => {
               className={`h-3 w-3 rounded-full cursor-pointer
               ${showPassword ? "bg-[#10B981]" : "bg-gray-300"}`}
             />
-
           </div>
 
           {/* BUTTON */}
@@ -257,13 +241,10 @@ const LoginPageDoctor = () => {
           >
             {showPassword ? "Login" : "Next"}
           </button>
-
         </div>
-
       </div>
 
       <ToastContainer position="bottom-right" />
-
     </div>
   );
 };

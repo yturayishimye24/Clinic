@@ -51,22 +51,22 @@ const LoginPageNurse = () => {
         })
         const [response] = await Promise.all([responsePromise, delay(3000)]);
         
-        // Check both status and success flag from backend
-        if(!password.trim() && response.data.success){
-          const {token,user:userData,role} = response.data;
-          
+        // Check success flag from backend
+        if (response.data.success) {
+          const { token, user: userData, role } = response.data;
+
           // Verify the role is nurse before allowing login
           if (role !== "nurse") {
             toast.error("This login is for nurses only. Please use the correct login page.");
             setProgressing(false);
             return;
           }
-          
+
           localStorage.setItem("token", token);
-          localStorage.setItem("role",role);
-          
+          localStorage.setItem("role", role);
+
           login(userData);
-          
+
           toast.success("Logged in successfully!");
           navigate("/NewNursePage");
         } else {
