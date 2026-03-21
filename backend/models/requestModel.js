@@ -5,6 +5,11 @@ const requestSchema = new mongoose.Schema({
     type: String,
     enum: ["pending", "rejected", "approved"],
   },
+  status: {
+  type: String,
+  enum: ["pending", "rejected", "approved"],
+  default: "pending"
+},
   requestType: {
     type: String,
     enum: ["Medicine Request", "Equipment Request", "Supply Request", "Blood Request", "Lab Test Request"],
@@ -36,7 +41,7 @@ const requestSchema = new mongoose.Schema({
   },
   createdBy:{
     type:mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    ref: "Nurse",
   }
 });
 

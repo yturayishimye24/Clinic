@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
-import { Badge } from "flowbite-react";
+import { Badge } from "@/components/ui/badge";
 import { FileInput, Label } from "flowbite-react";
+import { Inbox } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { delay } from "./../utils/Delay.jsx";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import {
+  UserPlus,
   Bell,
   Calendar,
   Users,
@@ -19,6 +25,7 @@ import {
   LogOut,
   Settings,
   User,
+  FileText,
   Edit,
   ActivitySquare,
   AlertCircle,
@@ -32,8 +39,10 @@ import {
   Grid,
   Moon,
   ArrowUpRight,
+  ChevronLeft,
+  ChevronRight,
+  GripVertical,
 } from "lucide-react";
-
 
 // --- CUSTOM STYLES & FONTS ---
 const FontStyles = () => (
@@ -53,44 +62,84 @@ const FontStyles = () => (
         transition: all 0.2s ease-in-out;
       }
 
-     /* Base styling for the layout and shape */
-.sidebar-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 20px;
-  border-radius: 24px; /* Gives it that smooth, rounded box shape */
-  gap: 8px; /* Spacing between the icon and the text */
-  transition: background-color 0.2s ease-in-out;
-  cursor: pointer;
-  width: fit-content; 
-}
-
-/* 1. The Light Gray Background on Hover */
-.sidebar-item:hover {
-  background-color: #f4f5f7; 
-}
-
-/* 2. The Gradient Text on Hover */
-.sidebar-item:hover .menu-text {
-  /* Creates the green-to-teal gradient seen in the image */
-  background: linear-gradient(to right, #65a30d, #06b6d4); 
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 500;
-}
-
-/* (Optional) Keep the icon a solid green on hover if needed */
-.sidebar-item:hover .icon {
-  fill: #65a30d; 
-}
+      /* Sidebar item styling */
+      .sidebar-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 12px 8px;
+        border-radius: 24px;
+        gap: 8px;
+        transition: all 0.2s ease-in-out;
+        cursor: pointer;
+        width: 100%;
+      }
       
-      /* Form Modal Blur */
-      .modal-backdrop-blur {
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
+      .sidebar-item:hover {
+        background-color: #f4f5f7;
+      }
+      
+      .sidebar-item:hover .menu-text {
+        background: linear-gradient(to right, #65a30d, #06b6d4);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 500;
+      }
+      
+      /* Resize handle styling */
+      .resize-handle {
+        position: absolute;
+        right: -6px;
+        top: 0;
+        bottom: 0;
+        width: 12px;
+        cursor: ew-resize;
+        background: transparent;
+        transition: background 0.2s;
+        z-index: 50;
+      }
+      
+      .resize-handle:hover {
+        background: rgba(100, 116, 139, 0.2);
+      }
+      
+      .resize-handle::after {
+        content: '';
+        position: absolute;
+        right: 4px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2px;
+        height: 40px;
+        background: #e2e8f0;
+        border-radius: 2px;
+        transition: all 0.2s;
+      }
+      
+      .resize-handle:hover::after {
+        background: #65a30d;
+        height: 60px;
+      }
+      
+      /* Collapsed sidebar styles */
+      .sidebar-collapsed .sidebar-item {
+        padding: 12px 4px;
+      }
+      
+      .sidebar-collapsed .menu-text {
+        display: none;
+      }
+      
+      .sidebar-collapsed .icon-container {
+        width: 40px;
+        height: 40px;
+      }
+      
+      /* Main content transition */
+      .main-content {
+        transition: margin-left 0.2s ease-in-out;
       }
     `}
   </style>
@@ -100,6 +149,12 @@ export default function NursePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+
+  // --- SIDEBAR STATE ---
+  const [sidebarWidth, setSidebarWidth] = useState(240);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const sidebarRef = useRef(null);
 
   // --- STATES ---
   const [editingPatientId, setEditingPatientId] = useState(null);
@@ -136,6 +191,7 @@ export default function NursePage() {
 
   // UI & Data States
   const [myRequests, setMyRequests] = useState([]);
+  const [loggedInEmail, setLoggedInEmail] = useState("clinicnurse@gmail.com");
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -149,10 +205,74 @@ export default function NursePage() {
   const isOnDashboard =
     location.pathname === "/home" || location.pathname === "/home/";
 
-  // --- FETCHING DATA ---
+  // --- RESIZING LOGIC ---
+  const startResizing = (e) => {
+    e.preventDefault();
+    setIsResizing(true);
+  };
+
+  const stopResizing = () => {
+    setIsResizing(false);
+  };
+
+  const resize = (e) => {
+    if (isResizing) {
+      const newWidth = e.clientX;
+      if (newWidth >= 60 && newWidth <= 400) {
+        setSidebarWidth(newWidth);
+        if (newWidth < 100 && !isCollapsed) {
+          setIsCollapsed(true);
+        } else if (newWidth >= 100 && isCollapsed) {
+          setIsCollapsed(false);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isResizing) {
+      window.addEventListener("mousemove", resize);
+      window.addEventListener("mouseup", stopResizing);
+    }
+    return () => {
+      window.removeEventListener("mousemove", resize);
+      window.removeEventListener("mouseup", stopResizing);
+    };
+  }, [isResizing]);
+
+  // Load saved sidebar width from localStorage
+  useEffect(() => {
+    const savedWidth = localStorage.getItem("sidebarWidth");
+    if (savedWidth) {
+      const width = parseInt(savedWidth);
+      setSidebarWidth(width);
+      if (width < 100) {
+        setIsCollapsed(true);
+      }
+    }
+  }, []);
+
+  // Save sidebar width when changed
+  useEffect(() => {
+    localStorage.setItem("sidebarWidth", sidebarWidth.toString());
+  }, [sidebarWidth]);
+
+  // Toggle collapse
+  const toggleCollapse = () => {
+    if (isCollapsed) {
+      setSidebarWidth(240);
+      setIsCollapsed(false);
+    } else {
+      setSidebarWidth(72);
+      setIsCollapsed(true);
+    }
+  };
+
+  // --- FETCHING DATA (unchanged) ---
   const fetchPatients = async () => {
     try {
       setLoading(true);
+      await delay(2000);
       const token = localStorage.getItem("token");
       const response = await axios.get(
         `${backendUrl}/api/patients/displayPatients`,
@@ -161,9 +281,10 @@ export default function NursePage() {
         },
       );
       const d = response.data;
-      setPatients(Array.isArray(d) ? d : (d.users ?? []));
+      setPatients(d);
     } catch (error) {
-      toast.error("Failed to fetch patients.");
+      console.log("Error fetching patients", error.message);
+      toast.error("Failed to fetch patients.", error.message);
     } finally {
       setLoading(false);
     }
@@ -218,7 +339,7 @@ export default function NursePage() {
     fetchRequests();
   }, [navigate]);
 
-  // --- ACTIONS ---
+  // --- ACTIONS (unchanged) ---
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
@@ -248,19 +369,45 @@ export default function NursePage() {
       setReporting(false);
     }
   };
+
+  const handleGetEmail = async (e) => {
+    e.preventDefault();
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get(`${backendUrl}/api/infos/email`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(response.data.email);
+      if (response.data.success) {
+        setLoggedInEmail(response.data.email);
+      } else {
+        toast.error("Error getting email", error.message);
+      }
+    } catch (error) {
+      console.log("Error fetching email for the user!", error.message);
+    }
+  };
+
+  useEffect(() => {
+    handleGetEmail();
+  }, []);
+
   const displayReports = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.get(
-        `${backendUrl}/api/report/display-report`,
+        `${backendUrl}/api/report/display_report`,
       );
-      if (response.data.success) {
-        setReports(response.data.report);
-      }
+      setReports(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.log("Error displaying reports", error);
     }
   };
+
+  useEffect(() => {
+    displayReports();
+  }, []);
+
   const handleHospitalize = async (patientId) => {
     if (!window.confirm("Hospitalize this patient?")) return;
     try {
@@ -309,7 +456,7 @@ export default function NursePage() {
     }
   };
 
-  // --- FORM HANDLERS ---
+  // --- FORM HANDLERS (unchanged) ---
   const handleEdit = (patient) => {
     setEditingPatientId(patient._id);
     setFirstName(patient.firstName || "");
@@ -343,7 +490,7 @@ export default function NursePage() {
       const patientData = {
         firstName,
         lastName,
-        date: new Date(date),
+        date,
         disease,
         gender,
       };
@@ -374,7 +521,8 @@ export default function NursePage() {
       setShowForm(false);
       resetForm();
     } catch (error) {
-      setFormError("Failed to save patient.");
+      console.log("ERROR:", error.response?.data || error.message);
+      setFormError(error.response?.data?.message || "Failed to save patient.");
     } finally {
       setLoading(false);
     }
@@ -404,7 +552,6 @@ export default function NursePage() {
         toast.success("Request submitted");
         setShowRequestForm(false);
         fetchRequests();
-        // Reset request form
         setItemName("");
         setQuantity("");
         setReason("");
@@ -424,18 +571,28 @@ export default function NursePage() {
   });
 
   // --- SUB COMPONENTS ---
-
-  const SidebarItem = ({ icon: Icon, label, active, onClick }) => (
+  const SidebarItem = ({ icon: Icon, label, active, onClick, collapsed }) => (
     <div
       onClick={onClick}
-      className={`sidebar-item flex flex-col items-center justify-center gap-1.5 p-3 cursor-pointer group w-full ${active ? "text-emerald-600" : "text-gray-400"}`}
+      className={`sidebar-item flex flex-col items-center justify-center gap-1.5 p-3 cursor-pointer group w-full ${
+        active ? "text-emerald-600" : "text-gray-400"
+      }`}
+      title={collapsed ? label : ""}
     >
       <div
-        className={`icon-container w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 ${active ? "bg-emerald-50 text-emerald-600 shadow-sm" : "bg-transparent group-hover:bg-gray-50 text-gray-400"}`}
+        className={`icon-container w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 ${
+          active
+            ? "bg-emerald-50 text-emerald-600 shadow-sm"
+            : "bg-transparent group-hover:bg-gray-50 text-gray-400"
+        }`}
       >
         <Icon className="w-5 h-5" />
       </div>
-      <span className="text-[10px] font-semibold tracking-wide">{label}</span>
+      {!collapsed && (
+        <span className="menu-text text-[10px] font-semibold tracking-wide">
+          {label}
+        </span>
+      )}
     </div>
   );
 
@@ -460,53 +617,119 @@ export default function NursePage() {
     );
   };
 
+  // Dynamic sidebar style
+  const sidebarStyle = {
+    width: isCollapsed ? 72 : sidebarWidth,
+    minWidth: isCollapsed ? 72 : sidebarWidth,
+    transition: isResizing ? "none" : "width 0.2s ease-in-out",
+  };
+
+  const mainContentStyle = {
+    marginLeft: isCollapsed ? 72 : sidebarWidth,
+    transition: isResizing ? "none" : "margin-left 0.2s ease-in-out",
+  };
+
   return (
     <div className="min-h-screen bg-base-200 font-sans flex">
       <FontStyles />
 
-      {/* --- SIDEBAR (Full height from top) --- */}
-      <aside className="fixed left-0 top-0 h-screen w-25 bg-base-100 border-r border-base-300 z-40 flex flex-col items-center py-6 gap-2 overflow-y-auto shadow-lg">
-        <SidebarItem
-          icon={Home}
-          label="Dashboard"
-          active={isOnDashboard}
-          onClick={() => navigate("/home")}
-        />
-        <SidebarItem
-          icon={Users}
-          label="Patients"
-          active={isOnPatients}
-          onClick={() => navigate("/home/patients")}
-        />
-        <SidebarItem
-          icon={ClipboardList}
-          label="Requests"
-          active={isOnRequests}
-          onClick={() => navigate("/home/requests")}
-          count={myRequests.length}
-        />
-        <SidebarItem
-          icon={BarChart3}
-          label="Reports"
-          active={isOnReports}
-          onClick={() => navigate("/home/reports")}
-        />
+      {/* --- ADJUSTABLE SIDEBAR --- */}
+      <aside
+        ref={sidebarRef}
+        style={sidebarStyle}
+        className={`fixed left-0 top-0 h-screen bg-base-100 border-r border-base-300 z-40 flex flex-col items-center py-6 gap-2 overflow-y-auto shadow-lg ${
+          isCollapsed ? "sidebar-collapsed" : ""
+        }`}
+      >
+        {/* Collapse Toggle Button */}
+        <button
+          onClick={toggleCollapse}
+          className="absolute -right-3 top-8 w-6 h-6 rounded-full bg-base-200 border border-base-300 shadow-sm flex items-center justify-center hover:bg-base-300 transition z-50"
+        >
+          {isCollapsed ? (
+            <ChevronRight className="w-3 h-3" />
+          ) : (
+            <ChevronLeft className="w-3 h-3" />
+          )}
+        </button>
 
-        <div className="mt-auto">
+        {/* Resize Handle */}
+        {!isCollapsed && (
+          <div
+            className="resize-handle"
+            onMouseDown={startResizing}
+          />
+        )}
+
+        {/* Logo / Brand (Optional) */}
+        {!isCollapsed && (
+          <div className="mb-6 px-4 w-full">
+            <div className="flex items-center justify-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                <ActivitySquare className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-base-content">Nurse Portal</span>
+            </div>
+          </div>
+        )}
+
+        {isCollapsed && (
+          <div className="mb-6">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+              <ActivitySquare className="w-5 h-5 text-white" />
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Items */}
+        <div className="flex flex-col gap-1 w-full px-2">
+          <SidebarItem
+            icon={Home}
+            label="Dashboard"
+            active={isOnDashboard}
+            onClick={() => navigate("/home")}
+            collapsed={isCollapsed}
+          />
+          <SidebarItem
+            icon={Users}
+            label="Patients"
+            active={isOnPatients}
+            onClick={() => navigate("/home/patients")}
+            collapsed={isCollapsed}
+          />
+          <SidebarItem
+            icon={ClipboardList}
+            label="Requests"
+            active={isOnRequests}
+            onClick={() => navigate("/home/requests")}
+            collapsed={isCollapsed}
+          />
+          <SidebarItem
+            icon={BarChart3}
+            label="Reports"
+            active={isOnReports}
+            onClick={() => navigate("/home/reports")}
+            collapsed={isCollapsed}
+          />
+        </div>
+
+        {/* Bottom Section */}
+        <div className="mt-auto w-full px-2">
           <SidebarItem
             icon={Settings}
             label="Settings"
             active={isOnSettings}
             onClick={() => navigate("/home/settings")}
+            collapsed={isCollapsed}
           />
         </div>
       </aside>
 
-      {/* --- Main Container (Sidebar + Content) --- */}
-      <div className="flex-1 flex flex-col ml-25">
-        {/* --- NAVBAR --- */}
-        <div className="navbar bg-base-200/50 rounded-box p-3 shadow-sm flex justify-between">
-          {/* --- LEFT: Search Bar --- */}
+      {/* --- Main Container --- */}
+      <div className="flex-1 flex flex-col" style={mainContentStyle}>
+        {/* --- NAVBAR (unchanged) --- */}
+        <div className="navbar bg-base-200/50 rounded-box p-3 flex justify-around">
+          {/* LEFT: Search Bar */}
           <div className="flex-1">
             <label className="input flex items-center gap-2 rounded-full bg-base-100 border-none shadow-sm h-11 w-full max-w-xs px-4">
               <svg
@@ -537,43 +760,51 @@ export default function NursePage() {
             </label>
           </div>
 
-          {/* --- RIGHT: Actions & Profile --- */}
+          {/* RIGHT: Actions & Profile */}
           <div className="flex-none flex items-center gap-3">
             {/* Mail Button */}
-            <button className="btn btn-circle bg-base-100 border-none shadow-sm hover:bg-base-200 h-11 w-11 min-h-0">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5 text-base-content/70"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-                />
-              </svg>
-            </button>
+            {loading ? (
+              <Skeleton className="size-10 shrink-0 rounded-full" />
+            ) : (
+              <button className="btn btn-circle bg-base-100 border-none shadow-sm hover:bg-base-200 h-11 w-11 min-h-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5 text-base-content/70"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
+                  />
+                </svg>
+              </button>
+            )}
 
             {/* Notification Button */}
-            <button className="btn btn-circle bg-base-100 border-none shadow-sm hover:bg-base-200 h-11 w-11 min-h-0">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="w-5 h-5 text-base-content/70"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
-                />
-              </svg>
-            </button>
+            {loading ? (
+              <Skeleton className="size-10 shrink-0 rounded-full" />
+            ) : (
+              <button className="btn btn-circle bg-base-100 border-none shadow-sm hover:bg-base-200 h-11 w-11 min-h-0">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="w-5 h-5 text-base-content/70"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
+                  />
+                </svg>
+              </button>
+            )}
 
             {/* Profile Dropdown */}
             <div className="dropdown dropdown-end ml-1">
@@ -582,36 +813,35 @@ export default function NursePage() {
                 role="button"
                 className="btn btn-ghost hover:bg-base-200/50 h-auto min-h-0 py-1 px-2 rounded-full flex items-center gap-3 border-none shadow-none"
               >
-                <div className="avatar">
-                  <div className="w-10 rounded-full bg-rose-200">
-                    <img
-                      alt="User avatar"
-                      src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                    />
+                {loading ? (
+                  <Skeleton className="size-10 shrink-0 rounded-full" />
+                ) : (
+                  <div className="avatar">
+                    <div className="w-10 rounded-full bg-rose-200">
+                      <img alt="User avatar" src="/public/images/user.png" />
+                    </div>
                   </div>
-                </div>
+                )}
 
-                {/* User Info (Hidden on very small screens) */}
-                <div className="hidden sm:flex flex-col items-start text-left pr-2">
-                  <span className="text-sm font-bold text-base-content leading-tight">
-                    Totok Michael
-                  </span>
-                  <span className="text-xs text-base-content/60 font-normal mt-0.5">
-                    tmichael20@mail.com
-                  </span>
-                </div>
+                {!loading && (
+                  <div className="hidden sm:flex flex-col items-start text-left pr-2">
+                    <span className="text-sm font-bold text-base-content leading-tight">
+                      {localStorage.getItem("username")}
+                    </span>
+                    <span className="text-xs text-base-content/60 font-normal mt-0.5">
+                      {localStorage.getItem("email")}
+                      {loggedInEmail}
+                    </span>
+                  </div>
+                )}
               </div>
 
-              {/* Dropdown Menu */}
               <ul
                 tabIndex="-1"
                 className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg border border-base-200"
               >
                 <li>
-                  <a className="justify-between">
-                    Profile
-                    <span className="badge badge-sm badge-primary">New</span>
-                  </a>
+                  <a className="justify-between">Profile</a>
                 </li>
                 <li>
                   <a>Settings</a>
@@ -624,7 +854,7 @@ export default function NursePage() {
           </div>
         </div>
 
-        {/* --- MAIN CONTENT --- */}
+        {/* --- MAIN CONTENT (unchanged) --- */}
         <main className="flex-1 pt-4 px-6 lg:px-10 pb-10 overflow-y-auto">
           {isOnDashboard ? (
             <>
@@ -635,117 +865,179 @@ export default function NursePage() {
                     Overview
                   </h1>
                   <p className="text-base-content/60 mt-1 font-medium">
-                    Welcome back, {username || "Nurse"} 👋
+                    {loading ? (
+                      <Skeleton className="h-4 w-full" />
+                    ) : (
+                      <p>Welcome back, {username || "Nurse"} 👋</p>
+                    )}
                   </p>
                 </div>
                 <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowRequestForm(true)}
-                    className="btn btn-outline btn-sm gap-2"
-                  >
-                    <ClipboardList className="w-4 h-4" /> Request Item
-                  </button>
-                  <button
-                    onClick={() => setShowForm(true)}
-                    className="btn btn-primary btn-sm gap-2"
-                  >
-                    <Plus className="w-4 h-4" /> Add Patient
-                  </button>
+                  {loading ? (
+                    <Skeleton className="w-32 h-8 rounded-md" />
+                  ) : (
+                    <button
+                      onClick={() => setShowRequestForm(true)}
+                      className="btn btn-neutral btn-sm gap-2"
+                    >
+                      <ClipboardList className="w-4 h-4" /> Request Item
+                    </button>
+                  )}
+                  {loading ? (
+                    <Skeleton className="w-32 h-8 rounded-md" />
+                  ) : (
+                    <button
+                      onClick={() => setShowForm(true)}
+                      className="btn btn-primary btn-sm gap-2"
+                    >
+                      <UserPlus className="w-4 h-4" /> Add Patient
+                    </button>
+                  )}
+
                   <button
                     onClick={() => ShowReportForm(true)}
-                    className="btn btn-ghost btn-circle btn-sm"
+                    className="btn btn-accent btn-sm"
                   >
+                    Make report
                     <BarChart3 className="w-5 h-5" />
                   </button>
                 </div>
               </div>
 
-              {/* --- CARDS (Based on Dashboard.png) --- */}
+              {/* --- CARDS --- */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                {/* Card 1: Green Primary */}
-                <div className="bg-[#134e4a] rounded-3xl p-6 relative overflow-hidden group">
-                  <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition"></div>
-                  <div className="relative z-10 flex justify-between items-start">
-                    <span className="text-emerald-100/80 font-medium text-sm">
-                      Total Patients
-                    </span>
-                    <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white">
-                      <ArrowUpRight className="w-4 h-4" />
+                {/* Card 1: Total Patients */}
+                {loading ? (
+                  <Card className="w-full max-w-xs">
+                    <CardHeader>
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="aspect-video w-full" />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="bg-[#134e4a] rounded-3xl p-6 relative overflow-hidden group">
+                    <div className="absolute -right-6 -top-6 w-32 h-32 bg-white/10 rounded-full blur-2xl group-hover:scale-110 transition"></div>
+                    <div className="relative z-10 flex justify-between items-start">
+                      <span className="text-emerald-100/80 font-medium text-sm">
+                        Total Patients
+                      </span>
+                      <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-white">
+                        <ArrowUpRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <h2 className="relative z-10 text-5xl font-bold text-white mt-4">
+                      {patients.length}
+                    </h2>
+                    <div className="relative z-10 mt-4 flex items-center gap-2">
+                      <span className="bg-emerald-500/20 text-emerald-100 text-xs px-2 py-1 rounded-lg border border-emerald-500/30">
+                        +2 New
+                      </span>
                     </div>
                   </div>
-                  <h2 className="relative z-10 text-5xl font-bold text-white mt-4">
-                    {patients.length}
-                  </h2>
-                  <div className="relative z-10 mt-4 flex items-center gap-2">
-                    <span className="bg-emerald-500/20 text-emerald-100 text-xs px-2 py-1 rounded-lg border border-emerald-500/30">
-                      +2 New
-                    </span>
-                  </div>
-                </div>
+                )}
 
                 {/* Card 2: Hospitalized */}
-                <div className="bg-white rounded-3xl p-6 border border-gray-100 cozy-shadow hover:-translate-y-0.5 transition duration-300">
-                  <div className="flex justify-between items-start">
-                    <span className="text-gray-500 font-medium text-sm">
-                      Hospitalized
-                    </span>
-                    <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:text-emerald-600">
-                      <ArrowUpRight className="w-4 h-4" />
+                {loading ? (
+                  <Card className="w-full max-w-xs">
+                    <CardHeader>
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="aspect-video w-full" />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 cozy-shadow hover:-translate-y-0.5 transition duration-300">
+                    <div className="flex justify-between items-start">
+                      <span className="text-gray-500 font-medium text-sm">
+                        Hospitalized
+                      </span>
+                      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 group-hover:text-emerald-600">
+                        <ArrowUpRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <h2 className="text-5xl font-bold text-gray-800 mt-4">
+                      {patients.filter((p) => p.isHospitalized).length}
+                    </h2>
+                    <div className="mt-4 flex items-center gap-2">
+                      <span className="bg-rose-50 text-rose-600 text-xs px-2 py-1 rounded-lg">
+                        Critical Care
+                      </span>
                     </div>
                   </div>
-                  <h2 className="text-5xl font-bold text-gray-800 mt-4">
-                    {patients.filter((p) => p.isHospitalized).length}
-                  </h2>
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="bg-rose-50 text-rose-600 text-xs px-2 py-1 rounded-lg">
-                      Critical Care
-                    </span>
-                  </div>
-                </div>
+                )}
 
                 {/* Card 3: Requests */}
-                <div className="bg-white rounded-3xl p-6 border border-gray-100 cozy-shadow hover:-translate-y-0.5 transition duration-300">
-                  <div className="flex justify-between items-start">
-                    <span className="text-gray-500 font-medium text-sm">
-                      Pending Requests
-                    </span>
-                    <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
-                      <ArrowUpRight className="w-4 h-4" />
+                {loading ? (
+                  <Card className="w-full max-w-xs">
+                    <CardHeader>
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="aspect-video w-full" />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 cozy-shadow hover:-translate-y-0.5 transition duration-300">
+                    <div className="flex justify-between items-start">
+                      <span className="text-gray-500 font-medium text-sm">
+                        Pending Requests
+                      </span>
+                      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                        <ArrowUpRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <h2 className="text-5xl font-bold text-gray-800 mt-4">
+                      {myRequests.filter((r) => r.Status === "pending").length}
+                    </h2>
+                    <div className="mt-4 flex items-center gap-2">
+                      <span className="bg-amber-50 text-amber-600 text-xs px-2 py-1 rounded-lg">
+                        Awaiting Approval
+                      </span>
                     </div>
                   </div>
-                  <h2 className="text-5xl font-bold text-gray-800 mt-4">
-                    {myRequests.filter((r) => r.Status === "pending").length}
-                  </h2>
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="bg-amber-50 text-amber-600 text-xs px-2 py-1 rounded-lg">
-                      Awaiting Approval
-                    </span>
-                  </div>
-                </div>
+                )}
 
                 {/* Card 4: Reports */}
-                <div className="bg-white rounded-3xl p-6 border border-gray-100 cozy-shadow hover:-translate-y-0.5 transition duration-300">
-                  <div className="flex justify-between items-start">
-                    <span className="text-gray-500 font-medium text-sm">
-                      Reports Generated
-                    </span>
-                    <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
-                      <ArrowUpRight className="w-4 h-4" />
+                {loading ? (
+                  <Card className="w-full max-w-xs">
+                    <CardHeader>
+                      <Skeleton className="h-4 w-2/3" />
+                      <Skeleton className="h-4 w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                      <Skeleton className="aspect-video w-full" />
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <div className="bg-white rounded-3xl p-6 border border-gray-100 cozy-shadow hover:-translate-y-0.5 transition duration-300">
+                    <div className="flex justify-between items-start">
+                      <span className="text-gray-500 font-medium text-sm">
+                        Reports Generated
+                      </span>
+                      <div className="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-gray-400">
+                        <ArrowUpRight className="w-4 h-4" />
+                      </div>
+                    </div>
+                    <h2 className="text-5xl font-bold text-gray-800 mt-4">
+                      {reports.length}
+                    </h2>
+                    <div className="mt-4 flex items-center gap-2">
+                      <span className="bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded-lg">
+                        This Month
+                      </span>
                     </div>
                   </div>
-                  <h2 className="text-5xl font-bold text-gray-800 mt-4">
-                    {reports.length}
-                  </h2>
-                  <div className="mt-4 flex items-center gap-2">
-                    <span className="bg-blue-50 text-blue-600 text-px-2 py-1 rounded-lg">
-                      This Month
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-                {/* --- PATIENTS TABLE --- */}
+                {/* PATIENTS TABLE */}
                 <div className="xl:col-span-2 bg-white rounded-3xl border border-gray-100 cozy-shadow overflow-hidden">
                   <div className="p-6 border-b border-gray-50 flex justify-between items-center">
                     <h3 className="font-bold text-lg text-gray-800">
@@ -809,7 +1101,7 @@ export default function NursePage() {
                               <td className="pl-6 py-4">
                                 <div className="flex items-center gap-3">
                                   <img
-                                    src={`${backendUrl}/uploads/${patient.image}`}
+                                    src={"/public/images/examination.png"}
                                     alt=""
                                     className="w-10 h-10 rounded-xl object-cover bg-base-300"
                                   />
@@ -820,9 +1112,7 @@ export default function NursePage() {
                                     <p className="text-xs text-base-content/60">
                                       {patient.gender},{" "}
                                       {new Date().getFullYear() -
-                                        new Date(
-                                          patient.date,
-                                        ).getFullYear()}{" "}
+                                        new Date(patient.date).getFullYear()}{" "}
                                       yrs
                                     </p>
                                   </div>
@@ -832,13 +1122,13 @@ export default function NursePage() {
                                 {patient.disease}
                               </td>
                               <td className="px-4 py-4">
-                                <span
-                                  className={`badge ${patient.isHospitalized ? "badge-error" : "badge-success"}`}
-                                >
-                                  {patient.isHospitalized
-                                    ? "Hospitalized"
-                                    : "Active"}
-                                </span>
+                                {patient.isHospitalized ? (
+                                  <Badge variant="destructive">
+                                    Hospitalized
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="default">In care...</Badge>
+                                )}
                               </td>
                               <td className="pr-6 py-4 text-right">
                                 <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -872,62 +1162,117 @@ export default function NursePage() {
                   </div>
                 </div>
 
-                {/* --- REQUESTS LIST (Based on Requests.png style) --- */}
-                <div className="card bg-base-100 shadow-md flex flex-col h-150">
-                  <div className="card-body p-4 pb-0 border-b border-base-300 flex justify-between items-center flex-row">
-                    <h3 className="card-title text-lg">My Requests</h3>
+                <Card className="w-full max-w-md rounded-2xl shadow-md hover:shadow-lg transition">
+                  <CardContent className="p-5">
+                    <div className="flex justify-between items-center mb-3">
+                      <div>
+                        <h2 className="text-lg font-semibold">John Doe</h2>
+                        <p className="text-xs text-gray-500">
+                          Report ID: #RPT-1023
+                        </p>
+                      </div>
+                      <span className="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-600">
+                        <Clock size={14} /> Pending
+                      </span>
+                    </div>
+                    <div className="mb-3">
+                      <p className="text-sm font-medium text-gray-700">
+                        Diagnosis: <span className="font-normal">Malaria</span>
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Symptoms: Fever, headache, fatigue
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                      <p className="text-xs text-gray-600">
+                        Patient shows mild symptoms but requires monitoring.
+                        Medication started.
+                      </p>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <Button variant="outline" size="sm">
+                        <FileText size={14} className="mr-1" />
+                        View
+                      </Button>
+                      <Button variant="destructive" size="sm">
+                        <AlertCircle size={14} className="mr-1" />
+                        Delete
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* REQUESTS LIST */}
+                <div className="card bg-base-100 shadow-md flex flex-col h-fit">
+                  <div className="flex justify-between items-center px-4 pt-4 pb-2 border-b border-base-300">
+                    <h3 className="text-lg font-semibold">My Requests</h3>
                     <button
                       onClick={fetchRequests}
-                      className="btn btn-ghost btn-sm"
+                      className="btn btn-ghost btn-xs normal-case"
                     >
-                      {" "}
                       Refresh
                     </button>
                   </div>
 
-                  <div className="flex-1 overflow-y-auto p-2">
+                  <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
                     {myRequests.length === 0 ? (
-                      <div className="text-center text-base-content/50 py-10">
-                        No requests
+                      <div className="flex flex-col items-center justify-center py-10 text-gray-500 text-center">
+                        {loading ? (
+                          <Skeleton className="h-12 w-12 rounded-full" />
+                        ) : (
+                          <Inbox
+                            size={55}
+                            strokeWidth={1.5}
+                            className="mb-3 opacity-50"
+                          />
+                        )}
+                        <h2 className="text-base font-semibold">
+                          No Requests Yet
+                        </h2>
+                        <p className="text-xs text-gray-400 mt-1 max-w-[200px]">
+                          Requests you create will appear here.
+                        </p>
                       </div>
                     ) : (
-                      myRequests.map((req) => (
+                      myRequests.slice(0, 4).map((req) => (
                         <div
                           key={req._id}
-                          className="flex items-center justify-between p-4 hover:bg-base-200 rounded-lg transition border border-transparent hover:border-base-300 mb-1 group"
+                          className="flex items-center justify-between p-3 rounded-xl transition hover:bg-base-200 border border-transparent hover:border-base-300 group"
                         >
-                          <div className="flex items-center gap-3">
-                            <div className="badge badge-primary">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="badge badge-accent badge-sm w-6 h-6 rounded-full font-semibold">
                               {req.itemName.substring(0, 2).toUpperCase()}
                             </div>
-                            <div>
-                              <p className="text-sm font-bold text-base-content">
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold truncate">
                                 {req.itemName}
                               </p>
-                              <p className="text-xs text-base-content/60">
+                              <p className="text-xs text-base-content/60 truncate">
                                 {req.requestType} • Qty: {req.quantity}
                               </p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <StatusBadge status={req.Status} />
+                          <div className="flex items-center gap-3">
+                            <StatusBadge status={req.status} />
                             <button
                               onClick={(e) => handleDeleteRequest(req._id, e)}
-                              className="btn btn-ghost btn-xs btn-circle opacity-0 group-hover:opacity-100"
+                              className="btn btn-ghost btn-xs btn-circle opacity-0 group-hover:opacity-100 transition"
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-4 h-4 text-error" />
                             </button>
                           </div>
                         </div>
                       ))
                     )}
                   </div>
-                  <div className="p-4 border-t border-base-300">
+
+                  <div className="p-3 border-t border-base-300">
                     <button
                       onClick={() => setShowRequestForm(true)}
-                      className="btn btn-outline w-full btn-sm"
+                      className="btn btn-neutral w-full btn-sm gap-2"
                     >
-                      <Plus className="w-4 h-4" /> New Request
+                      <Plus className="w-4 h-4" />
+                      New Request
                     </button>
                   </div>
                 </div>
@@ -988,6 +1333,7 @@ export default function NursePage() {
         </main>
       </div>
 
+      {/* Modals (unchanged) */}
       {reportForm && (
         <dialog
           className="modal modal-open"

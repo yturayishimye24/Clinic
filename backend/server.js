@@ -9,7 +9,7 @@ import requestRouter from "./routes/requestRoutes.js";
 import jwt from "jsonwebtoken";
 import http from "http";
 import { Server } from "socket.io";
-import User from "./models/userModel.js";
+import Nurse from "./models/userModel.js";
 import emailRouter from "./routes/getEmail.js";
 import router from "./routes/verifyRoute.js";
 import reportRouter from "./routes/reportRoute.js";
@@ -76,7 +76,7 @@ io.use(async (socket, next) => {
     const token = socket.handshake.auth?.token;
     if (!token) return next(new Error("No token provided"));
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(payload.id).select("-password");
+    const user = await Nurse.findById(payload.id).select("-password");
     if (!user) return next(new Error("No user found"));
     socket.user = user;
     next();

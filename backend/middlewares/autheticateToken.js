@@ -5,6 +5,7 @@ import User from "../models/userModel.js";
 dotenv.config();
 
 export const autheticate = async (req, res, next) => {
+  try{
   const auth = req.headers.authorization;
   if (!auth)
     return res
@@ -20,5 +21,9 @@ export const autheticate = async (req, res, next) => {
       .json({ message: "Ivalid user token", success: false });
   req.user = user;
   next();
+}catch(error){
+  console.log("Auth error",error.message);
+  return res.status(401).json({message:"Authetication error",success:false})
+}
 };
 

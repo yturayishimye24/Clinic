@@ -21,7 +21,6 @@ export const createReport = async(req,res)=>{
 export const displayReport = async(req,res)=>{
     try{
         const report = await Report.find().sort({createdAt:-1}).populate("createdBy","username email").lean();
-        res.status(200).json(report);
         if(report){
             res.status(201).json(report);
         }

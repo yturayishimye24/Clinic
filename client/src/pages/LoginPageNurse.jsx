@@ -68,7 +68,7 @@ const LoginPageNurse = () => {
           login(userData);
 
           toast.success("Logged in successfully!");
-          navigate("/NewNursePage/patients");
+          navigate("/home");
         } else {
           toast.error(response.data.message || "Login failed");
         }

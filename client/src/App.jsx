@@ -9,7 +9,6 @@ import AdminPage from "./pages/AdminPage.jsx";
 import { AuthContext } from "../context/authContext.jsx";
 import StockManager from "./pages/StockManager.jsx";
 
-import NewNursePage from "./pages/NewNursePage.jsx";
 
 import "./index.css";
 import "flowbite";
@@ -47,12 +46,7 @@ const App = () => {
               //       // </PrivateRoutes>
             }
           />
-          <Route path={"/NewNursePage"} element={<NewNursePage />}>
-            <Route path="patients" element={<PatientList />} />
-            <Route path="requests" element={<RequestList />} />
-            <Route path="reports" element={<ReportList />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
+       
           <Route path={"/stockmanager"} element={<StockManager />} />
         </Routes>
 
