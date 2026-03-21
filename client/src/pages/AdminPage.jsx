@@ -96,8 +96,7 @@ export default function AdminPage() {
       const response = await axios.get(`${backendUrl}/api/patients/displayPatients`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      const d = response.data;
-      setPatients(Array.isArray(d) ? d : (d.users ?? []));
+      setPatients(response.data);
     } catch (err) {
       console.error(err);
       toast.error("Error loading patients");

@@ -42,3 +42,34 @@ export const updateReport = async(req,res) =>{
     }
 }
 
+
+export const deleteReport = async(req,res)=>{
+    try{
+        const {id} = req.params;
+        const deletedReport = await Report.findByIdAndDelete(id);
+        if(!deletedReport){
+            res.status(404).json({message:"Report not found"})
+        }else{
+             res.status(201).json(deletedReport);
+        }
+       
+    }catch(error){
+        console.log("Error deleting report",error.message)
+        res.status(500).json({message:"Error deleting report"})
+    }
+}
+
+export const getReport = async(req,res)=>{
+    try{
+        const report = await Report.findById(req.params.id).populate("user","_id username email").lean();
+        if(!report){
+            res.status(404).json({message:"Report not found"})
+        }else{
+             res.status(201).json(report);
+        }
+
+    }catch(error){
+        console.log("Error getting report",error.message)
+        res.status(500).json
+    }
+}

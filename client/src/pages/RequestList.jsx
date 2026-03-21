@@ -97,7 +97,7 @@ const RequestList = () => {
                     </span>
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
-                    {request.requestedBy?.username || 'Unknown'}
+                    {request.createdBy?.username || 'Unknown'}
                   </td>
                   <td className="border border-gray-300 px-4 py-2">
                     {request.createdAt ? new Date(request.createdAt).toLocaleDateString() : 'N/A'}
