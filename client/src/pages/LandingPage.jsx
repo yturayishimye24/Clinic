@@ -1,14 +1,8 @@
 import React, { useRef, useState, useEffect } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
-import {
-  Spinner,
-  Button,
-  Card,
-  Checkbox,
-  Label,
-  TextInput,
-} from "flowbite-react";
-import {useAuth} from "../../context/authContext.jsx";
+import { motion, AnimatePresence } from "framer-motion";
+
+import { useAuth } from "../../context/authContext.jsx";
 
 import {
   Activity,
@@ -21,6 +15,7 @@ import {
   FileText,
   Trash2,
   BarChart3,
+  Download,
   Package,
 } from "lucide-react";
 import axios from "axios";
@@ -44,12 +39,12 @@ import LoginBg from "../../public/images/LoginBg.jpg";
 import GoogleSimilar from "../../public/images/GoogleSimilar.jpg";
 import LandingVid from "../../public/images/LandingVid.mp4";
 import Loading from "../components/Loading.jsx";
-import Navbar from '../components/landingPageNavbar.jsx'
+import Navbar from "../components/landingPageNavbar.jsx";
 import HeroSection from "../components/HeroSection.jsx";
-import LoginSelectionModal  from "../components/SelectionLoginModal.jsx"
-
-
-import {OrbitProgress} from "react-loading-indicators"
+import LoginSelectionModal from "../components/SelectionLoginModal.jsx";
+import Words from "../components/words.jsx";
+import ServicesSection from "../components/services.jsx";
+import { OrbitProgress } from "react-loading-indicators";
 
 import {
   Footer,
@@ -59,8 +54,8 @@ import {
   FooterLink,
   FooterLinkGroup,
 } from "flowbite-react";
-import AOS from "aos"
-import "aos/dist/aos.css"
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 // import { useFirebase } from "../ContextFireBase/contextFire.jsx";
 
@@ -68,16 +63,16 @@ const LandingPage = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [toggleBg, setToggleBg] = useState(false);
-  
+
   //Selecting to login as nurse or as doctor
-  const [selectionOpen,setSelectionOpen] = useState(false);
-  const [loadingSelection,setLoadingSelection] = useState(false);
+  const [selectionOpen, setSelectionOpen] = useState(false);
+  const [loadingSelection, setLoadingSelection] = useState(false);
 
   const teamRef = useRef(null);
   const faqRef = useRef(null);
@@ -106,23 +101,21 @@ const LandingPage = () => {
   const scrollToContactUs = () => {
     contactUsRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-
-  
   useEffect(() => {
+    AOS.init({
+      duration: 1000,
+      once: true,
+    });
+  }, []);
+  (useEffect(() => {
     const sections = [
       { ref: HomeRef, name: "home" },
       { ref: servicesRef, name: "services" },
       { ref: teamRef, name: "team" },
       { ref: contactUsRef, name: "contact" },
     ];
-  }),[]
-  
-  const openLoginModal = () => setShowLoginModal(true);
-  const closeLoginModal = () => {
-    setShowLoginModal(false);
-    setEmail("");
-    setPassword("");
-  };
+  }),
+    []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -171,16 +164,6 @@ const LandingPage = () => {
     }
   };
 
-  useEffect(() => {
-    const handleEscape = (e) => {
-      if (e.key === "Escape" && showLoginModal) {
-        closeLoginModal();
-      }
-    };
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [showLoginModal]);
-
   const services = [
     {
       name: "Recording patients",
@@ -213,27 +196,46 @@ const LandingPage = () => {
       backgroundImageServiceCards: `url(${monPink})`,
     },
   ];
-  
-  
-  {loadingSelection &&(
-    <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white/80 backdrop-blur-md">
-      <OrbitProgress variant="track-disc" speedPlus="1" dense color={["#FBBC05","#FFBB00","#EA4335","#F65314","#34A853","#7CBB00","#4286F4","#00A1F1"]} easing="ease-in-out" size={60} />
-      <p className="mt-4 text-orange-600 font-semibld animate-pulse">
-        Loading login page...
-      </p>
-    </div>
-  )}
- 
+
+  {
+    loadingSelection && (
+      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-white/80 backdrop-blur-md">
+        <OrbitProgress
+          variant="track-disc"
+          speedPlus="1"
+          dense
+          color={[
+            "#FBBC05",
+            "#FFBB00",
+            "#EA4335",
+            "#F65314",
+            "#34A853",
+            "#7CBB00",
+            "#4286F4",
+            "#00A1F1",
+          ]}
+          easing="ease-in-out"
+          size={60}
+        />
+        <p className="mt-4 text-orange-600 font-semibld animate-pulse">
+          Loading login page...
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="font-sans min-h-screen bg-white">
+    <div className="font-sans min-h-screen bg-white" ref={HomeRef}>
       <header className="absolute mb-20 top-0 left-0 w-full z-50 ">
-       <Navbar onGetStarted={()=>setSelectionOpen(true)}/>
+        <Navbar onGetStarted={() => setSelectionOpen(true)} />
       </header>
 
       <main className="min-h-screen">
-
-        <HeroSection onGetStarted={()=>setSelectionOpen(true)}/>
-        <LoginSelectionModal isOpen={selectionOpen} isClosed={()=>setSelectionOpen(false)}/>
+        <HeroSection onGetStarted={() => setSelectionOpen(true)} />
+        <LoginSelectionModal
+          isOpen={selectionOpen}
+          isClosed={() => setSelectionOpen(false)}
+        />
         <div
           className="bg-fixed bg-cover bg-center w-full h-64 sm:h-80 md:h-96 lg:h-[500px] relative shadow-inner flex items-center justify-center"
           style={{ backgroundImage: `url(${techImage})` }}
@@ -251,15 +253,72 @@ const LandingPage = () => {
 
         <div
           ref={whyChooseUsRef}
-          className="py-16 sm:py-24 px-4 sm:px-6 bg-white overflow-hidden"
+          className="py-5 sm:py-2 px-4 sm:px-6 bg-white overflow-hidden"
         >
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end mb-12 gap-6">
-            <div>
-              <h2 className="text-6xl text-black font-poppins tracking-tight mb-4 ml-[450px]">
-                Why Choose Us
-              </h2>
+          <section className="relative max-w-7xl mx-auto px-6 py-20 mt-30 overflow-hidden">
+            <div className="flex flex-col md:flex-row items-center gap-12">
+              {/* Left Content */}
+              <div className="flex-1 z-10">
+                <h2 className="text-5xl md:text-6xl text-slate-900 font-bold tracking-tight leading-tight">
+                  <Words data-aos="fade-right" duration="2000" /> <br />
+                </h2>
+                <p
+                  className="text-lg text-slate-600 max-w-md mb-8"
+                  data-aos="fade-up"
+                  duration="2500"
+                >
+                  From patient scheduling to digital prescriptions, find
+                  everything you need to streamline your medical practice in one
+                  dashboard.
+                </p>
+                <button className="px-8 py-3 bg-blue-50 text-blue-600 rounded-full font-semibold hover:bg-blue-100 transition-all flex items-center gap-2">
+                  Explore features <span className="text-xl">↗</span>
+                </button>
+              </div>
+
+              <div className="flex-1 relative">
+                <div
+                  className="relative z-10 rounded-2xl shadow-2xl overflow-hidden border border-slate-200"
+                  data-aos="fade-left"
+                  duration="1000"
+                >
+                  <img
+                    src="/images/dashboard.png"
+                    alt="Clinic Dashboard"
+                    className="w-full object-cover"
+                  />
+                </div>
+
+                <div
+                  className="absolute -left-8 top-1/4 w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center shadow-lg z-20  transition-all duration-1000"
+                  data-aos="fade-down"
+                >
+                  <div className="w-8 h-8 bg-blue-500 rounded-sm opacity-50" />
+                </div>
+
+                <div
+                  className="absolute -right-4 -bottom-4 w-20 h-20 bg-green-200 rounded-full flex items-center justify-center shadow-lg z-20"
+                  data-aos="fade-up"
+                >
+                  <div className="w-10 h-10 bg-[#4CAF50] rounded-full opacity-70" />
+                </div>
+
+                <div
+                  className="absolute left-1/4 -bottom-10 w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center shadow-lg z-20"
+                  data-aos="zoom-in-down"
+                >
+                  <div className="w-12 h-12 bg-orange-400 rounded-full opacity-60" />
+                </div>
+
+                <div
+                  className="absolute -right-6 -top-10 w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center shadow-xl z-20 border border-gray-100"
+                  data-aos="zoom-in-up"
+                >
+                  <div className="w-12 h-12 border-4 border-gray-800 rounded-md" />
+                </div>
+              </div>
             </div>
-          </div>
+          </section>
 
           <div className="max-w-7xl mx-auto">
             <div className="flex overflow-x-auto gap-6 pb-12 pt-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -278,7 +337,7 @@ const LandingPage = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-8 text-blue-600 font-medium cursor-pointer w-max group/btn">
-                  <span onClick={() => setShowLoginModal(true)}>
+                  <span>
                     <button className="relative flex items-center px-6 py-3 overflow-hidden font-medium transition-all bg-indigo-500 rounded-md group">
                       <span className="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-indigo-700 rounded group-hover:-mr-4 group-hover:-mt-4">
                         <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
@@ -314,7 +373,7 @@ const LandingPage = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-8 text-emerald-600 font-medium cursor-pointer w-max group/btn">
-                  <span onClick={() => setShowLoginModal(true)}>
+                  <span>
                     <button className="relative flex items-center px-6 py-3 overflow-hidden font-medium transition-all bg-indigo-500 rounded-md group">
                       <span className="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-indigo-700 rounded group-hover:-mr-4 group-hover:-mt-4">
                         <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
@@ -350,7 +409,7 @@ const LandingPage = () => {
                   </p>
                 </div>
                 <div className="flex items-center gap-2 mt-8 text-purple-600 font-medium cursor-pointer w-max group/btn">
-                  <span onClick={() => setShowLoginModal(true)}>
+                  <span>
                     <button className="relative flex items-center px-6 py-3 overflow-hidden font-medium transition-all bg-indigo-500 rounded-md group">
                       <span className="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-indigo-700 rounded group-hover:-mr-4 group-hover:-mt-4">
                         <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
@@ -375,99 +434,34 @@ const LandingPage = () => {
         </div>
 
         {/* Our Services Section */}
-     
-        <div
-          ref={servicesRef}
-          className="py-16 sm:py-24 px-4 sm:px-6 bg-gray-50/50 overflow-hidden"
-          style={{
-            backgroundImage: `url(${monGradient})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-          }}
-        >
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-start sm:items-end mb-12 gap-6">
-            <div className="max-w-2xl">
-              <h2 className="text-4xl sm:text-5xl font-medium text-gray-900 tracking-tight mb-4">
-                Explore our services
+        <ServicesSection services={services} />
+        <div className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6 bg-[#E8F5E9] text-center" data-aos="zoom-out-down">
+          <div className="max-w-6xl mx-auto bg-[#4CAF50] rounded-[2.5rem] p-10 sm:p-20 shadow-2xl relative overflow-hidden">
+            {/* Subtle glow effect for depth */}
+            <div className="absolute top-0 left-0 w-full h-full bg-white opacity-[0.03] pointer-events-none"></div>
+
+            <div className="relative z-10 flex flex-col items-center">
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white tracking-tight leading-tight" data-aos="zoom-out-up" duration="3000">
+                Your Clinic, <br className="hidden sm:block" /> Streamlined.
               </h2>
-              <p className="text-lg text-gray-600 leading-relaxed">
-                Everything you need to manage your clinic efficiently in one
-                centralized, secure location.
+
+              <p className="text-[#E8F5E9] text-lg sm:text-xl md:text-2xl max-w-3xl mb-10 opacity-90 leading-relaxed font-light" data-aos="fade-right" duration="2000">
+                Manage patient records, appointments, and billing in one secure
+                place. Focus on care while we handle the complexity.
               </p>
-            </div>
-            <button className="hidden sm:block border-2 border-gray-200 text-gray-900 px-6 py-3 rounded-full font-medium hover:border-gray-900 hover:bg-gray-900 hover:text-white transition-all duration-300">
-              Explore all services
-            </button>
-          </div>
 
-          <div className="w-full">
-            <div className="flex overflow-x-auto gap-6 pb-12 pt-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {services.map((service, index) => (
-                <div
-                  key={index}
-                  // Added 3d Transform / Scale Scroll Animation
-                  className="animate-on-scroll opacity-0 [transform:translate3d(-200px,0,0)_scale(0.6)] transition-all duration-[600ms] delay-[300ms] [&.is-visible]:opacity-100 [&.is-visible]:[transform:translate3d(0,0,0)_scale(1)] bg-white rounded-[2rem] p-8 border border-gray-200/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 flex flex-col justify-between min-h-[320px] w-[85vw] sm:w-[400px] flex-shrink-0 snap-center group"
-                  style={{
-                    backgroundImage: service.backgroundImageServiceCards,
-                  }}
-                >
-                  <div>
-                    <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-8 group-hover:scale-110 transition-transform duration-300">
-                      <service.icon className="text-gray-900" size={26} />
-                    </div>
-                    <h3 className="text-2xl font-medium text-gray-900 mb-3">
-                      {service.name}
-                    </h3>
-                    <p className="text-base text-gray-600 leading-relaxed">
-                      Simplify and manage {service.name.toLowerCase()}{" "}
-                      efficiently in one location. Built for speed and accuracy.
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 mt-8 text-gray-900 font-medium cursor-pointer w-max group/btn">
-                    <span onClick={() => setShowLoginModal(true)}>
-                      Learn more
-                    </span>
-                    <ArrowRight
-                      size={18}
-                      className="transform group-hover/btn:translate-x-1 transition-transform"
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button className="px-10 py-4 bg-white text-[#388E3C] text-lg font-bold rounded-full shadow-lg hover:bg-[#E8F5E9] hover:scale-105 transition-all duration-300" data-aos="fade-up-right">
+                  Get Started
+                </button>
 
-          <div className="max-w-7xl mx-auto mt-2 sm:hidden">
-            <button className="w-full border-2 border-gray-200 text-gray-900 px-6 py-3 rounded-full font-medium hover:bg-gray-900 hover:text-white hover:border-gray-900 transition-all duration-300">
-              Explore all services
-            </button>
-          </div>
-        </div>
-
-        <div className="py-12 sm:py-16 lg:py-20 px-4 sm:px-6 bg-white text-center">
-          <div className="max-w-4xl mx-auto bg-gradient-to-br from-gray-900 via-gray-800 to-black rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-blue-500/10"></div>
-            <div className="relative z-10">
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-6 text-white">
-                Ready to Transform Your Healthcare Management?
-              </h2>
-              <p className="text-gray-300 text-sm sm:text-base md:text-lg mb-6 sm:mb-8">
-                Join hundreds of healthcare professionals who trust our platform
-              </p>
-              <button
-                onClick={openLoginModal}
-                className="group relative px-6 sm:px-8 py-3 sm:py-4 bg-white text-black text-base sm:text-lg font-semibold rounded-xl shadow-lg flex items-center gap-3 mx-auto hover:bg-gray-100 transition-all overflow-hidden"
-              >
-                <span className="relative z-10">Start Your Journey</span>
-                <ArrowRight
-                  size={20}
-                  className="relative z-10 transform rotate-[-45deg] group-hover:translate-x-1 group-hover:translate-y-[-3px] transition-transform duration-300"
-                />
-              </button>
+                <button className="px-10 py-4 bg-transparent border-2 border-[#E8F5E9] text-[#E8F5E9] text-lg font-medium rounded-full hover:bg-white/10 transition-all duration-300" data-aos="fade-up-left">
+                  Explore Features
+                </button>
+              </div>
             </div>
           </div>
         </div>
-
         <div className="bg-white shadow-lg rounded-full py-4 px-6 max-w-2xl mx-auto flex justify-center items-center gap-8 text-gray-600 text-sm mt-10 mb-10 sticky top-3 z-40 border border-gray-200">
           <ul className="flex items-center justify-center gap-8">
             <li
@@ -503,127 +497,6 @@ const LandingPage = () => {
         </div>
       </main>
       {loading && <Loading />}
-      {showLoginModal && (
-        <div className="fixed inset-0 z-[9999] flex justify-center items-center">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-            onClick={closeLoginModal}
-          ></div>
-
-          <div
-            className="relative flex flex-col z-[10000] rounded-md shadow-[0_24px_38px_3px_rgba(0,0,0,0.14),0_9px_46px_8px_rgba(0,0,0,0.12),0_11px_15px_-7px_rgba(0,0,0,0.2)] max-w-[450px] w-full mx-4 animate-modalSlideIn overflow-hidden p-10"
-            style={{
-              backgroundImage: `url(${LoginBg})`,
-              backgroundSize: "cover",
-              backgroundPosition: "center",
-            }}
-          >
-            <button
-              onClick={closeLoginModal}
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 hover:bg-red-100 p-2 rounded-md transition-colors"
-            >
-              <X size={24} strokeWidth={1.5} />
-            </button>
-
-            <div className="text-center mb-10 mt-2">
-              <div className="w-12 h-12 bg-[#f0f4f9] rounded-full flex items-center justify-center mx-auto mb-4">
-                <Activity className="text-[#33cc82]" size={24} />
-              </div>
-              <h2 className="text-[32px] font-normal text-gray-900 mb-2">
-                Sign in
-              </h2>
-              <p className="text-[16px] text-gray-600 font-poppins">
-                to continue to Clinic Workspace
-              </p>
-            </div>
-
-            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-              <div className="relative mt-2">
-                <input
-                  type="email"
-                  id="email1"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block px-4 pb-3.5 pt-4 w-full text-[16px] text-gray-900 bg-transparent rounded-md border border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-2 focus:border-[#1bc247] peer"
-                  placeholder=" "
-                  required
-                />
-                <label
-                  htmlFor="email1"
-                  className="absolute text-[16px] text-gray-500 bg-white px-1 duration-200 transform -translate-y-5 scale-75 top-2 z-10 origin-[0] left-3 peer-focus:text-[#1bc247] peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-5 cursor-text"
-                >
-                  Email Address
-                </label>
-              </div>
-
-              <div className="relative mt-2">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password1"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block px-4 pb-3.5 pt-4 w-full text-[16px] text-gray-900 bg-transparent rounded-md border border-gray-400 appearance-none focus:outline-none focus:ring-0 focus:border-2 focus:border-[#1bc24s7] peer pr-12"
-                  placeholder=" "
-                  required
-                />
-                <label
-                  htmlFor="password1"
-                  className="absolute text-[16px] text-gray-500 bg-white px-1 duration-200 transform -translate-y-5 scale-75 top-2 z-10 origin-[0] left-3 peer-focus:text-[#33cc82] peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:border-[#33cc82] peer-focus:-translate-y-5 cursor-text"
-                >
-                  Password
-                </label>
-
-                <button
-                  type="button"
-                  className="absolute top-1/2 right-2 -translate-y-1/2 text-gray-500 hover:text-gray-800 p-2 rounded-full hover:bg-gray-100 transition-colors"
-                  onClick={handleShowPassword}
-                >
-                  {showPassword ? <FiEye size={20} /> : <FiEyeOff size={20} />}
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between mt-2 px-1">
-                <div className="flex items-center gap-3">
-                  <input
-                    id="remember"
-                    type="checkbox"
-                    className="w-4 h-4 text-[#33cc82] bg-white border-gray-400 rounded focus:ring-[#33cc82] focus:ring-2 cursor-pointer transition-all"
-                  />
-                  <label
-                    htmlFor="remember"
-                    className="text-[14px] text-gray-700 cursor-pointer font-medium"
-                  >
-                    Remember me
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center mt-8">
-                <button
-                  type="button"
-                  className="text-[#33cc82] text-[14px] font-medium hover:bg-green-50 px-4 py-2 rounded-full transition-colors"
-                >
-                  Forgot password?
-                </button>
-                <button
-                  type="submit"
-                  className="bg-[#33cc82] hover:bg-[#33cc82] text-white font-medium text-[14px] px-6 py-2.5 rounded-full disabled:opacity-50 disabled:cursor-not-allowed transition-colors tracking-wide"
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <div className="flex items-center gap-2">
-                      <ClipLoader color="white" size={16} />
-                      <span>Signing in...</span>
-                    </div>
-                  ) : (
-                    "Next"
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       <ToastContainer position="bottom-right" />
       <ContactUs ref={contactUsRef} />

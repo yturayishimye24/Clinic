@@ -65,7 +65,7 @@ const ContactUs =forwardRef((props, ref) =>{
           </div>
 
           <button className="bg-black text-white py-4 px-8 rounded flex items-center justify-between w-full hover:scale-[1.02] transition-transform">
-            <span className="text-lg">Request Account</span>
+            <span className="text-lg text-white text-center font-light flex items-center justify-center">Request Account</span>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="5" y1="12" x2="19" y2="12"></line>
               <polyline points="12 5 19 12 12 19"></polyline>

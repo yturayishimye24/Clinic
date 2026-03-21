@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import LoginSelectionModal from "../components/SelectionLoginModal.jsx";
 import {useState} from "react"
+// import {scrollToTeam,scrollToServices,scrollToFaqs,scrollToWhyChooseUs} from "../pages/LandingPage.jsx"
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -22,10 +23,10 @@ const Navbar = () => {
 
       <div className="hidden md:flex items-center gap-8 text-gray-600 text-[15px] font-medium">
         <a  className="hover:text-black cursor-pointer">Home</a>
-        <a className="hover:text-black cursor-pointer">Team</a>
-        <a  className="hover:text-black cursor-pointer">Services</a>
+        <a className="hover:text-black cursor-pointer" >Team</a>
+        <a  className="hover:text-black cursor-pointer" >Services</a>
         <a className="hover:text-black cursor-pointer" >FAqs</a>
-        <a  className="hover:text-black cursor-pointer">Why Choose Us</a>
+        <a  className="hover:text-black cursor-pointer" >Why Choose Us</a>
       </div>
 
      

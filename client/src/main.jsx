@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { AuthContext } from "../context/authContext.jsx";
 import { ThemeProvider } from "./context/themeContext.jsx";
 import "./index.css";
+import 'antd/dist/reset.css';
 import "flowbite";
 
 

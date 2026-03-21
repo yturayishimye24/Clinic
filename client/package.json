@@ -20,6 +20,7 @@
     "@radix-ui/react-slot": "^1.2.4",
     "@radix-ui/react-tooltip": "^1.2.8",
     "@tailwindcss/vite": "^4.1.18",
+    "antd": "^6.3.3",
     "aos": "^2.3.4",
     "axios": "^1.13.2",
     "chart.js": "^4.5.1",

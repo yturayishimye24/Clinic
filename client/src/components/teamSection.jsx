@@ -3,14 +3,20 @@ import BlueCench from "../../public/images/BlueCench.png";
 import RedCench from "../../public/images/RedCench.jpeg";
 import patients from "../../public/images/patients.png";
 import drake from "../../public/images/drake.png";
-
+import aos from "aos"
+import "aos/dist/aos.css"
+import { useEffect } from "react";
 
 import { forwardRef } from "react";
 import { Card, Dropdown, DropdownItem } from "flowbite-react";
 import { differenceInCalendarISOWeekYears } from "date-fns";
 
 const TeamSection = forwardRef((props, ref) => {
+  useEffect(() =>{
+    aos.init();
+  })
   return (
+
     <section className="max-w-6xl mx-auto px-4 py-16" ref={ref}>
       <h2 className="text-3xl font-bold mb-12 text-center mb-30 text-gray-400">
         Meet Our Team
@@ -31,7 +37,7 @@ const TeamSection = forwardRef((props, ref) => {
   sm:pt-10
 "
       >
-        <Card className="sm:w-full md:w-full lg:w-1/3">
+        <Card className="sm:w-full md:w-full lg:w-1/3" data-aos="zoom-in-left" duration="2000">
           <div className="flex justify-end px-4 pt-4">
             <Dropdown inline label="">
               <DropdownItem>
@@ -87,7 +93,7 @@ const TeamSection = forwardRef((props, ref) => {
             </div>
           </div>
         </Card>
-        <Card className="sm:w-full md:w-full lg:w-1/3">
+        <Card className="sm:w-full md:w-full lg:w-1/3" data-aos="fade-up" duration="3000">
           <div className="flex justify-end px-4 pt-4">
             <Dropdown inline label="">
               <DropdownItem>
@@ -143,7 +149,7 @@ const TeamSection = forwardRef((props, ref) => {
             </div>
           </div>
         </Card>
-        <Card className="sm:w-full md:w-full lg:w-1/3">
+        <Card className="sm:w-full md:w-full lg:w-1/3" data-aos="fade-down" duration="4000">
           <div className="flex justify-end px-4 pt-4">
             <Dropdown inline label="">
               <DropdownItem>
