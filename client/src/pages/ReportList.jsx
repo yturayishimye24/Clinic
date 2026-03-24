@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {OrbitProgress} from "react-loading-indicators"
+import {X} from "lucide-react"
 const ReportList = () => {
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null); // For the Modal
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const [close,setClose] = useState(false)
 
   useEffect(() => {
     fetchReports();
@@ -148,7 +150,8 @@ const ReportList = () => {
 
       {/* --- BIG VIEW MODAL --- */}
       {selectedReport && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div className={`${close? "hidden" : "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"} `}>
+          <X onClick={()=>setClose(true)}/>
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-slate-800">

@@ -4,7 +4,7 @@ import LoginSelectionModal from "../components/SelectionLoginModal.jsx";
 import {useState} from "react"
 // import {scrollToTeam,scrollToServices,scrollToFaqs,scrollToWhyChooseUs} from "../pages/LandingPage.jsx"
 
-const Navbar = () => {
+const Navbar = ({scrollToTeam,scrollToServices,scrollToFaqs,goToHome,scrollToWhyUs,scrollToContactUs}) => {
   const navigate = useNavigate();
   const [selectionOpen,setSelectionOpen] = useState(false);
 
@@ -22,11 +22,11 @@ const Navbar = () => {
       </div>
 
       <div className="hidden md:flex items-center gap-8 text-gray-600 text-[15px] font-medium">
-        <a  className="hover:text-black cursor-pointer">Home</a>
-        <a className="hover:text-black cursor-pointer" >Team</a>
-        <a  className="hover:text-black cursor-pointer" >Services</a>
-        <a className="hover:text-black cursor-pointer" >FAqs</a>
-        <a  className="hover:text-black cursor-pointer" >Why Choose Us</a>
+        <a  className="hover:text-black cursor-pointer" onClick={goToHome}>Home</a>
+        <a className="hover:text-black cursor-pointer" onClick={scrollToTeam}>Team</a>
+        <a  className="hover:text-black cursor-pointer" onClick={scrollToServices}>Services</a>
+        <a className="hover:text-black cursor-pointer" onClick={scrollToFaqs}>FAqs</a>
+        <a  className="hover:text-black cursor-pointer" onClick={scrollToWhyUs} >Why Choose Us</a>
       </div>
 
      
@@ -35,7 +35,7 @@ const Navbar = () => {
           Doctor login
         </button>
     
-        <button className="hidden lg:block border border-[#FFF4E1] cursor-pointer hover:border-[#FDBA74] text-[#fb923c] font-medium px-5 py-2 rounded-md hover:bg-[#FFF4E1]">
+        <button className="hidden lg:block border border-[#FFF4E1] cursor-pointer hover:border-[#FDBA74] text-[#fb923c] font-medium px-5 py-2 rounded-md hover:bg-[#FFF4E1]" onClick={scrollToContactUs}>
           Contact us
         </button>
         <button 

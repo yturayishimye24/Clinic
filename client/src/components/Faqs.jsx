@@ -11,6 +11,7 @@ const FAQ = forwardRef((props, ref) => {
     <Accordion
       collapseAll
       ref={ref}
+      id="faq-section"
       className="
         w-full
         max-w-sm

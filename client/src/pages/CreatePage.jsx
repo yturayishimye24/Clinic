@@ -7,6 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { FileInput, Label } from "flowbite-react";
 import { Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UserOutlined } from "@ant-design/icons";
+import { Avatar, Space } from "antd";
+
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { delay } from "./../utils/Delay.jsx";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -39,7 +43,7 @@ import {
   Grid,
   Moon,
   ArrowUpRight,
-  ArrowRight
+  ArrowRight,
 } from "lucide-react";
 
 // --- CUSTOM STYLES & FONTS ---
@@ -67,16 +71,17 @@ const FontStyles = () => (
   align-items: center;
   justify-content: center;
   padding: 16px 20px;
-  border-radius: 24px; /* Gives it that smooth, rounded box shape */
+  border-left: 4px solid transparent;
   gap: 8px; /* Spacing between the icon and the text */
   transition: background-color 0.2s ease-in-out;
   cursor: pointer;
-  width: fit-content; 
+  width: 100%; 
 }
 
 /* 1. The Light Gray Background on Hover */
 .sidebar-item:hover {
   background-color: #f4f5f7; 
+  border-left: 4px solid #06b6d4; /* Adds a subtle border on the left side */
 }
 
 /* 2. The Gradient Text on Hover */
@@ -158,7 +163,6 @@ export default function NursePage() {
     location.pathname === "/home" || location.pathname === "/home/";
 
   //Lasts reports
- 
 
   const fetchPatients = async () => {
     try {
@@ -239,32 +243,31 @@ export default function NursePage() {
   };
 
   const Report = async (e) => {
-  e.preventDefault();
-  setReporting(true);
-  try {
-    const token = localStorage.getItem("token");
-    const response = await axios.post(
-      `${backendUrl}/api/report/create_report`,
-      { title: reportTitle, body, conclusion },
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
+    e.preventDefault();
+    setReporting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${backendUrl}/api/report/create_report`,
+        { title: reportTitle, body, conclusion },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
 
-    displayReports(); 
-    
-    toast.success("Report generated!");
-    ShowReportForm(false);
-    setReportTitle("");
-    setConclusion("");
-    setBody('')
-  } catch (error) {
-    toast.error("Failed to generate report.");
-  } finally {
-    setReporting(false);
-  }
-};
+      displayReports();
+
+      toast.success("Report generated!");
+      ShowReportForm(false);
+      setReportTitle("");
+      setConclusion("");
+      setBody("");
+    } catch (error) {
+      toast.error("Failed to generate report.");
+    } finally {
+      setReporting(false);
+    }
+  };
   const handleGetEmail = async () => {
-    
-    const token= localStorage.getItem("token")
+    const token = localStorage.getItem("token");
     try {
       const response = await axios.get(`${backendUrl}/api/infos/email`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -284,15 +287,15 @@ export default function NursePage() {
   }, []);
 
   const displayReports = async () => {
-   
     try {
-      const token= localStorage.getItem("token")
+      const token = localStorage.getItem("token");
       const response = await axios.get(
-        `${backendUrl}/api/report/display_report`,{
-          headers:{Authorization:`Bearer ${token}`}
+        `${backendUrl}/api/report/display_report`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
-      console.log("Reports displayed successfully",response)
+      console.log("Reports displayed successfully", response);
       setReports(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
       console.log("Error displaying reports", error);
@@ -463,13 +466,13 @@ export default function NursePage() {
       patient.disease.toLowerCase().includes(searchTerm.toLowerCase())
     );
   });
-//latest reports
- const latestReport =
-  reports && reports.length > 0
-    ? [...reports].sort(
-        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-      )[0]
-    : null;
+  //latest reports
+  const latestReport =
+    reports && reports.length > 0
+      ? [...reports].sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
+        )[0]
+      : null;
 
   // --- SUB COMPONENTS ---
 
@@ -479,11 +482,11 @@ export default function NursePage() {
       className={`sidebar-item flex flex-col items-center justify-center gap-1.5 p-3 cursor-pointer group w-full ${active ? "text-emerald-600" : "text-gray-400"}`}
     >
       <div
-        className={`icon-container w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 ${active ? "bg-emerald-50 text-emerald-600 shadow-sm" : "bg-transparent group-hover:bg-gray-50 text-gray-400"}`}
+        className={`icon-container w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 ${active ? "bg-green-50 text-emerald-600 shadow-sm" : "bg-transparent group-hover:bg-gray-50 text-gray-400"}`}
       >
-        <Icon className="w-5 h-5" />
+        <Icon size={50} />
       </div>
-      <span className="text-[10px] font-semibold tracking-wide">{label}</span>
+      <span className="text-[15px] font-semibold tracking-wide">{label}</span>
     </div>
   );
 
@@ -556,33 +559,21 @@ export default function NursePage() {
         <div className="navbar bg-base-200/50 rounded-box p-3 flex justify-around">
           {/* --- LEFT: Search Bar --- */}
           <div className="flex-1">
-            <label className="input flex items-center gap-2 rounded-full bg-base-100 border-none shadow-sm h-11 w-full max-w-xs px-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-                className="w-5 h-5 opacity-50"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M9.965 11.026a5 5 0 1 1 1.06-1.06l2.755 2.754a.75.75 0 1 1-1.06 1.06l-2.755-2.754ZM10.5 7a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-              <input
-                type="text"
-                className="grow text-sm placeholder:text-base-content/40"
-                placeholder="Search task"
-              />
-              <div className="flex gap-1">
-                <kbd className="kbd kbd-sm bg-base-200/70 border-none text-base-content/60 font-sans">
-                  ⌘
-                </kbd>
-                <kbd className="kbd kbd-sm bg-base-200/70 border-none text-base-content/60 font-sans">
-                  F
-                </kbd>
-              </div>
-            </label>
+            <label className="input">
+  <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <g
+      strokeLinejoin="round"
+      strokeLinecap="round"
+      strokeWidth="2.5"
+      fill="none"
+      stroke="currentColor"
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.3-4.3"></path>
+    </g>
+  </svg>
+  <input type="search" required placeholder="Search" />
+</label>
           </div>
 
           {/* --- RIGHT: Actions & Profile --- */}
@@ -699,13 +690,13 @@ export default function NursePage() {
                     Overview
                   </h1>
 
-                  
-                    {loading ? (
-                      <Skeleton className="h-4 w-full" />
-                    ) : (
-                      <p className="text-base-content/60 mt-1 font-medium">Welcome back, {username || "Nurse"} 👋</p>
-                    )}
-                  
+                  {loading ? (
+                    <Skeleton className="h-4 w-full" />
+                  ) : (
+                    <p className="text-base-content/60 mt-1 font-medium">
+                      Welcome back, {username || "Nurse"} 👋
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-3">
                   {loading ? (
@@ -713,7 +704,7 @@ export default function NursePage() {
                   ) : (
                     <button
                       onClick={() => setShowRequestForm(true)}
-                      className="btn btn-neutral btn-sm gap-2"
+                      className="btn btn-sm gap-2"
                     >
                       <ClipboardList className="w-4 h-4" /> Request Item
                     </button>
@@ -723,19 +714,22 @@ export default function NursePage() {
                   ) : (
                     <button
                       onClick={() => setShowForm(true)}
-                      className="btn btn-primary btn-sm gap-2"
+                      className="btn btn-sm gap-2"
                     >
                       <UserPlus className="w-4 h-4" /> Add Patient
                     </button>
                   )}
-
-                  <button
-                    onClick={() => ShowReportForm(true)}
-                    className="btn btn-accent  btn-sm "
-                  >
-                    Make report
-                    <BarChart3 className="w-5 h-5" />
-                  </button>
+                  {loading ? (
+                    <Skeleton className="w-32 h-8 rounded-md" />
+                  ) : (
+                    <button
+                      onClick={() => ShowReportForm(true)}
+                      className="btn  btn-sm "
+                    >
+                      Make report
+                      <BarChart3 className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -1013,71 +1007,64 @@ export default function NursePage() {
                   </div>
 
                   {/* Aesthetic Card Inspired by Image */}
-                  {latestReport?(
+                  {latestReport ? (
                     <div className="relative group bg-[#F8F9FD] rounded-[32px] p-6 shadow-xl shadow-blue-900/5 border border-white max-w-sm">
-                    {/* User Profile Section */}
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="relative">
-                        <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-lg overflow-hidden">
-                          {/* Replace with <img> if you have report.createdBy.avatar */}
-                          <User size={28} />
+                      {/* User Profile Section */}
+                      <div className="flex items-center gap-4 mb-6">
+                        <div className="relative">
+                          <Space wrap size={16}>
+                            <Avatar size={64} icon={<UserOutlined />} />
+                            
+                          </Space>
                         </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-slate-900 leading-tight">
+                            {latestReport.createdBy?.username || "Researcher"}
+                          </h3>
+                          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
+                            {new Date(
+                              latestReport.createdAt,
+                            ).toLocaleDateString(undefined, {
+                              month: "long",
+                              day: "numeric",
+                            })}
+                          </p>
+                        </div>
+                       
                       </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-slate-900 leading-tight">
-                          {latestReport.createdBy?.username || "Researcher"}
-                        </h3>
-                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                          {new Date(latestReport.createdAt).toLocaleDateString(
-                            undefined,
-                            { month: "long", day: "numeric" },
-                          )}
+
+                      
+
+                      {/* Content Section */}
+                      <div className="space-y-3 mb-6">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-indigo-100 text-indigo-600 text-[10px] font-black px-2 py-1 rounded-md uppercase">
+                            Title
+                          </span>
+                          <span className="text-sm font-bold text-slate-700 truncate">
+                            {latestReport.title}
+                          </span>
+                        </div>
+
+                        <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 italic">
+                          "{latestReport.body}"
                         </p>
                       </div>
+
+                      {/* Action Button */}
+                      <button
+                        onClick={() => navigate("/home/reports")}
+                        className="w-full btn btn-sm  text-slate-700 font-bold text-sm transition-all flex items-center justify-center gap-2"
+                      >
+                        <FileText size={16} className="text-blue-500" />
+                        Open Full Report
+                      </button>
                     </div>
-
-                    {/* Progress Style Status Bar (Aesthetic choice from image) */}
-                    <div className="mb-6">
-                      <div className="flex justify-between text-[11px] font-bold text-slate-500 mb-1.5 px-1">
-                        <span>REPORT STATUS</span>
-                        <span className="text-blue-600 text-xs">Completed</span>
-                      </div>
-                      <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                        <div className="h-full w-full bg-blue-500 rounded-full" />
-                      </div>
-                    </div>
-
-                    {/* Content Section */}
-                    <div className="space-y-3 mb-6">
-                      <div className="flex items-center gap-2">
-                        <span className="bg-indigo-100 text-indigo-600 text-[10px] font-black px-2 py-1 rounded-md uppercase">
-                          Title
-                        </span>
-                        <span className="text-sm font-bold text-slate-700 truncate">
-                          {latestReport.title}
-                        </span>
-                      </div>
-
-                      <p className="text-sm text-slate-500 leading-relaxed line-clamp-2 italic">
-                        "{latestReport.body}"
-                      </p>
-                    </div>
-
-                    {/* Action Button */}
-                    <button
-                      onClick={()=>navigate("/home/reports")}
-                      className="w-full bg-white py-3 rounded-2xl shadow-sm border border-slate-100 text-slate-700 font-bold text-sm hover:bg-slate-50 hover:shadow-md transition-all flex items-center justify-center gap-2"
-                    >
-                      <FileText size={16} className="text-blue-500" />
-                      Open Full Report
-                    </button>
-                  </div>
-                  
-                  ):(
+                  ) : (
                     <p>No reports</p>
                   )}
-                  </div>
-                
+                </div>
+
                 {/* --- REQUESTS LIST (Based on Requests.png style) --- */}
                 <div className="card bg-base-100 shadow-md flex flex-col h-fit">
                   {/* Header */}
@@ -1162,7 +1149,7 @@ export default function NursePage() {
                   <div className="p-3 border-t border-base-300">
                     <button
                       onClick={() => setShowRequestForm(true)}
-                      className="btn btn-neutral w-full btn-sm gap-2"
+                      className="btn w-full btn-sm gap-2"
                     >
                       <Plus className="w-4 h-4" />
                       New Request
@@ -1391,11 +1378,7 @@ export default function NursePage() {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="btn btn-primary"
-                >
+                <button type="submit" disabled={loading} className="btn btn-sm">
                   {loading ? (
                     <Loader2 className="animate-spin w-4 h-4" />
                   ) : (

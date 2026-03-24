@@ -227,7 +227,15 @@ const LandingPage = () => {
   return (
     <div className="font-sans min-h-screen bg-white" ref={HomeRef}>
       <header className="absolute mb-20 top-0 left-0 w-full z-50 ">
-        <Navbar onGetStarted={() => setSelectionOpen(true)} />
+        <Navbar
+          onGetStarted={() => setSelectionOpen(true)}
+          scrollToFaqs={scrollToFaqs}
+          scrollToTeam={scrollToTeam}
+          scrollToServices={scrollToServices}
+          goToHome={goToHome}
+          scrollToWhyUs={scrollToWhyUs}
+          scrollToContactUs={scrollToContactUs}
+        />
       </header>
 
       <main className="min-h-screen">
@@ -271,7 +279,7 @@ const LandingPage = () => {
                   everything you need to streamline your medical practice in one
                   dashboard.
                 </p>
-                <button className="px-8 py-3 bg-blue-50 text-blue-600 rounded-full font-semibold hover:bg-blue-100 transition-all flex items-center gap-2">
+                <button className="px-8 py-3 bg-blue-50 text-blue-600 rounded-full font-semibold hover:bg-blue-100 transition-all flex items-center gap-2" onClick={()=>setSelectionOpen(true)}>
                   Explore features <span className="text-xl">↗</span>
                 </button>
               </div>
@@ -434,28 +442,47 @@ const LandingPage = () => {
         </div>
 
         {/* Our Services Section */}
-        <ServicesSection services={services} />
-        <div className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6 bg-[#E8F5E9] text-center" data-aos="zoom-out-down">
+        <ServicesSection services={services} ref={servicesRef} />
+        <div
+          className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6 bg-[#E8F5E9] text-center"
+          data-aos="zoom-out-down"
+        >
           <div className="max-w-6xl mx-auto bg-[#4CAF50] rounded-[2.5rem] p-10 sm:p-20 shadow-2xl relative overflow-hidden">
             {/* Subtle glow effect for depth */}
             <div className="absolute top-0 left-0 w-full h-full bg-white opacity-[0.03] pointer-events-none"></div>
 
             <div className="relative z-10 flex flex-col items-center">
-              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white tracking-tight leading-tight" data-aos="zoom-out-up" duration="3000">
+              <h2
+                className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white tracking-tight leading-tight"
+                data-aos="zoom-out-up"
+                duration="3000"
+              >
                 Your Clinic, <br className="hidden sm:block" /> Streamlined.
               </h2>
 
-              <p className="text-[#E8F5E9] text-lg sm:text-xl md:text-2xl max-w-3xl mb-10 opacity-90 leading-relaxed font-light" data-aos="fade-right" duration="2000">
+              <p
+                className="text-[#E8F5E9] text-lg sm:text-xl md:text-2xl max-w-3xl mb-10 opacity-90 leading-relaxed font-light"
+                data-aos="fade-right"
+                duration="2000"
+              >
                 Manage patient records, appointments, and billing in one secure
                 place. Focus on care while we handle the complexity.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <button className="px-10 py-4 bg-white text-[#388E3C] text-lg font-bold rounded-full shadow-lg hover:bg-[#E8F5E9] hover:scale-105 transition-all duration-300" data-aos="fade-up-right">
+                <button
+                  className="px-10 py-4 bg-white text-[#388E3C] text-lg font-bold rounded-full shadow-lg hover:bg-[#E8F5E9] hover:scale-105 transition-all duration-300"
+                  data-aos="fade-up-right"
+                  onClick={()=>setSelectionOpen(true)}
+                >
                   Get Started
                 </button>
 
-                <button className="px-10 py-4 bg-transparent border-2 border-[#E8F5E9] text-[#E8F5E9] text-lg font-medium rounded-full hover:bg-white/10 transition-all duration-300" data-aos="fade-up-left">
+                <button
+                  className="px-10 py-4 bg-transparent border-2 border-[#E8F5E9] text-[#E8F5E9] text-lg font-medium rounded-full hover:bg-white/10 transition-all duration-300"
+                  data-aos="fade-up-left"
+                  onClick={()=>setSelectionOpen(true)}
+                >
                   Explore Features
                 </button>
               </div>
@@ -499,7 +526,7 @@ const LandingPage = () => {
       {loading && <Loading />}
 
       <ToastContainer position="bottom-right" />
-      <ContactUs ref={contactUsRef} />
+      <ContactUs ref={contactUsRef}/>
       <Footer container className="mt-20 bg-white text-white">
         <div className="w-full text-center">
           <div className="w-full justify-between sm:flex sm:items-center sm:justify-between">

@@ -25,6 +25,7 @@ const App = () => {
   return (
     <AuthContext>
       <BrowserRouter>
+      <div data-theme="forest">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/nurseLogin" element={<LoginPageNurse />} />
@@ -49,7 +50,7 @@ const App = () => {
        
           <Route path={"/stockmanager"} element={<StockManager />} />
         </Routes>
-
+      </div>
         <ToastContainer containerStyle={{ zIndex: 99999 }} />
       </BrowserRouter>
     </AuthContext>
