@@ -9,8 +9,8 @@ import { Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { UserOutlined } from "@ant-design/icons";
 import { Avatar, Space } from "antd";
-
-
+import Sidebar from "../components/sidebar.jsx";
+import { SidebarItem } from "../components/sidebar.jsx";
 import { Skeleton } from "@/components/ui/skeleton";
 import { delay } from "./../utils/Delay.jsx";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -47,66 +47,6 @@ import {
 } from "lucide-react";
 
 // --- CUSTOM STYLES & FONTS ---
-const FontStyles = () => (
-  <style>
-    {`
-      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
-      
-      body, .font-sans {
-        font-family: 'Plus Jakarta Sans', sans-serif;
-      }
-      
-      .cozy-shadow {
-        box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.03);
-      }
-      
-      .cozy-transition {
-        transition: all 0.2s ease-in-out;
-      }
-
-     /* Base styling for the layout and shape */
-.sidebar-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 20px;
-  border-left: 4px solid transparent;
-  gap: 8px; /* Spacing between the icon and the text */
-  transition: background-color 0.2s ease-in-out;
-  cursor: pointer;
-  width: 100%; 
-}
-
-/* 1. The Light Gray Background on Hover */
-.sidebar-item:hover {
-  background-color: #f4f5f7; 
-  border-left: 4px solid #06b6d4; /* Adds a subtle border on the left side */
-}
-
-/* 2. The Gradient Text on Hover */
-.sidebar-item:hover .menu-text {
-  /* Creates the green-to-teal gradient seen in the image */
-  background: linear-gradient(to right, #65a30d, #06b6d4); 
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 500;
-}
-
-/* (Optional) Keep the icon a solid green on hover if needed */
-.sidebar-item:hover .icon {
-  fill: #65a30d; 
-}
-      
-      /* Form Modal Blur */
-      .modal-backdrop-blur {
-        backdrop-filter: blur(8px);
-        -webkit-backdrop-filter: blur(8px);
-      }
-    `}
-  </style>
-);
 
 export default function NursePage() {
   const navigate = useNavigate();
@@ -119,7 +59,7 @@ export default function NursePage() {
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [expanded,setExpanded] = useState(true)
   // Patient Form States
   const [firstName, setFirstName] = useState("");
   const [gender, setGender] = useState("");
@@ -474,22 +414,6 @@ export default function NursePage() {
         )[0]
       : null;
 
-  // --- SUB COMPONENTS ---
-
-  const SidebarItem = ({ icon: Icon, label, active, onClick }) => (
-    <div
-      onClick={onClick}
-      className={`sidebar-item flex flex-col items-center justify-center gap-1.5 p-3 cursor-pointer group w-full ${active ? "text-emerald-600" : "text-gray-400"}`}
-    >
-      <div
-        className={`icon-container w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-300 ${active ? "bg-green-50 text-emerald-600 shadow-sm" : "bg-transparent group-hover:bg-gray-50 text-gray-400"}`}
-      >
-        <Icon size={50} />
-      </div>
-      <span className="text-[15px] font-semibold tracking-wide">{label}</span>
-    </div>
-  );
-
   const StatusBadge = ({ status }) => {
     const s = status?.toLowerCase() || "";
     if (s === "approved" || s === "active")
@@ -512,68 +436,43 @@ export default function NursePage() {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 font-sans flex">
-      <FontStyles />
+    <div className="min-h-screen bg-base-200 font-sans">
+      <Sidebar>
+        <SidebarItem icon={<Home />} onClick={()=>navigate("/home")} text="Dashboard" active />
+        <SidebarItem icon={<Users />} onClick={()=>navigate("/home/patients")}text="Patients" />
+        <SidebarItem icon={<ClipboardList />} text="Requests" />
+        <SidebarItem icon={<BarChart3 />} text="Reports" />
+        <SidebarItem icon={<Settings />} text="Settings" />
+      </Sidebar>
 
-      {/* --- SIDEBAR (Full height from top) --- */}
-      <aside className="fixed left-0 top-0 h-screen w-60 bg-base-100 border-r border-base-300 z-40 flex flex-col items-center py-6 gap-2 overflow-y-auto shadow-lg">
-        <SidebarItem
-          icon={Home}
-          label="Dashboard"
-          active={isOnDashboard}
-          onClick={() => navigate("/home")}
-        />
-        <SidebarItem
-          icon={Users}
-          label="Patients"
-          active={isOnPatients}
-          onClick={() => navigate("/home/patients")}
-        />
-        <SidebarItem
-          icon={ClipboardList}
-          label="Requests"
-          active={isOnRequests}
-          onClick={() => navigate("/home/requests")}
-          count={myRequests.length}
-        />
-        <SidebarItem
-          icon={BarChart3}
-          label="Reports"
-          active={isOnReports}
-          onClick={() => navigate("/home/reports")}
-        />
-
-        <div className="mt-auto">
-          <SidebarItem
-            icon={Settings}
-            label="Settings"
-            active={isOnSettings}
-            onClick={() => navigate("/home/settings")}
-          />
-        </div>
-      </aside>
-
-      {/* --- Main Container (Sidebar + Content) --- */}
-      <div className="flex-1 flex flex-col ml-60">
+      <div
+        className={`flex flex-col transition-all duration-300 ${
+          expanded ? "ml-64" : "ml-20"
+        }`}
+      >
         {/* --- NAVBAR --- */}
         <div className="navbar bg-base-200/50 rounded-box p-3 flex justify-around">
           {/* --- LEFT: Search Bar --- */}
           <div className="flex-1">
             <label className="input">
-  <svg className="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-    <g
-      strokeLinejoin="round"
-      strokeLinecap="round"
-      strokeWidth="2.5"
-      fill="none"
-      stroke="currentColor"
-    >
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="m21 21-4.3-4.3"></path>
-    </g>
-  </svg>
-  <input type="search" required placeholder="Search" />
-</label>
+              <svg
+                className="h-[1em] opacity-50"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+              >
+                <g
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                  strokeWidth="2.5"
+                  fill="none"
+                  stroke="currentColor"
+                >
+                  <circle cx="11" cy="11" r="8"></circle>
+                  <path d="m21 21-4.3-4.3"></path>
+                </g>
+              </svg>
+              <input type="search" required placeholder="Search" />
+            </label>
           </div>
 
           {/* --- RIGHT: Actions & Profile --- */}
@@ -1014,7 +913,6 @@ export default function NursePage() {
                         <div className="relative">
                           <Space wrap size={16}>
                             <Avatar size={64} icon={<UserOutlined />} />
-                            
                           </Space>
                         </div>
                         <div>
@@ -1030,10 +928,7 @@ export default function NursePage() {
                             })}
                           </p>
                         </div>
-                       
                       </div>
-
-                      
 
                       {/* Content Section */}
                       <div className="space-y-3 mb-6">

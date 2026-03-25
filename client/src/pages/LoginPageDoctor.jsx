@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import GoogleButton from "react-google-button";
-import GitHubButton from "react-github-btn";
+
 
 import { Link, useNavigate } from "react-router-dom";
 import { House, Eye, EyeOff } from "lucide-react";
@@ -158,9 +158,7 @@ const LoginPageDoctor = () => {
             <span className="mx-4 text-xs text-gray-400">OR</span>
             <div className="flex-1 h-px bg-gray-200"></div>
           </div>
-          <GitHubButton data-size="large" className="h-[65px] px-8 text-xl">
-            Sign in with GitHub
-          </GitHubButton>
+          
           {/* FORM */}
           <div className="w-full relative">
             {/* validation error */}
@@ -237,7 +235,7 @@ const LoginPageDoctor = () => {
           {/* BUTTON */}
           <button
             onClick={showPassword ? handleSubmit : handleNext}
-            className="mt-6 rounded-md bg-[#FB923C] px-6 py-2 text-white font-semibold hover:bg-[#F97316]"
+            className="mt-[20px] rounded-md bg-[#FB923C] px-6 py-2 text-white font-semibold hover:bg-[#F97316]"
           >
             {showPassword ? "Login" : "Next"}
           </button>
