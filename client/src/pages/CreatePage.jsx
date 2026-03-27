@@ -16,6 +16,7 @@ import { delay } from "./../utils/Delay.jsx";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import {
+  ChevronDown,
   UserPlus,
   Bell,
   Calendar,
@@ -59,7 +60,7 @@ export default function NursePage() {
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [expanded,setExpanded] = useState(true)
+  const [expanded, setExpanded] = useState(true);
   // Patient Form States
   const [firstName, setFirstName] = useState("");
   const [gender, setGender] = useState("");
@@ -437,9 +438,18 @@ export default function NursePage() {
 
   return (
     <div className="min-h-screen bg-base-200 font-sans">
-      <Sidebar>
-        <SidebarItem icon={<Home />} onClick={()=>navigate("/home")} text="Dashboard" active />
-        <SidebarItem icon={<Users />} onClick={()=>navigate("/home/patients")}text="Patients" />
+      <Sidebar expanded={expanded} setExpanded={setExpanded}>
+        <SidebarItem
+          icon={<Home />}
+          onClick={() => navigate("/home")}
+          text="Dashboard"
+          active
+        />
+        <SidebarItem
+          icon={<Users />}
+          onClick={() => navigate("/home/patients")}
+          text="Patients"
+        />
         <SidebarItem icon={<ClipboardList />} text="Requests" />
         <SidebarItem icon={<BarChart3 />} text="Reports" />
         <SidebarItem icon={<Settings />} text="Settings" />
@@ -552,7 +562,6 @@ export default function NursePage() {
                       {localStorage.getItem("username")}
                     </span>
                     <span className="text-xs text-base-content/60 font-normal mt-0.5">
-                      {localStorage.getItem("email")}
                       {loggedInEmail}
                     </span>
                   </div>
@@ -597,38 +606,50 @@ export default function NursePage() {
                     </p>
                   )}
                 </div>
-                <div className="flex gap-3">
-                  {loading ? (
-                    <Skeleton className="w-32 h-8 rounded-md" />
-                  ) : (
-                    <button
-                      onClick={() => setShowRequestForm(true)}
-                      className="btn btn-sm gap-2"
-                    >
-                      <ClipboardList className="w-4 h-4" /> Request Item
-                    </button>
-                  )}
-                  {loading ? (
-                    <Skeleton className="w-32 h-8 rounded-md" />
-                  ) : (
-                    <button
-                      onClick={() => setShowForm(true)}
-                      className="btn btn-sm gap-2"
-                    >
-                      <UserPlus className="w-4 h-4" /> Add Patient
-                    </button>
-                  )}
-                  {loading ? (
-                    <Skeleton className="w-32 h-8 rounded-md" />
-                  ) : (
-                    <button
-                      onClick={() => ShowReportForm(true)}
-                      className="btn  btn-sm "
-                    >
-                      Make report
-                      <BarChart3 className="w-5 h-5" />
-                    </button>
-                  )}
+                <div className="dropdown dropdown-bottom dropdown-end">
+                  {/* The "Input-style" Trigger */}
+                  <div
+                    tabIndex={0}
+                    role="button"
+                    className="flex items-center justify-between w-64 px-5 py-3 bg-white border-2 border-[#134e4a] rounded-sm text-slate-700 font-medium transition-all active:scale-95 shadow-sm"
+                  >
+                    <span>Select Action</span>
+                    <ChevronDown className="w-5 h-5 text-[#134e4a]" />
+                  </div>
+
+                  {/* The Menu (Matches the uploaded image) */}
+                  <ul
+                    tabIndex={0}
+                    className="dropdown-content z-[100] menu p-2 mt-2 shadow-xl border border-blue-200 bg-white rounded-2xl w-64 text-slate-600 gap-1"
+                  >
+                    <li>
+                      <button
+                        onClick={() => setShowForm(true)}
+                        className="flex items-center gap-3 py-3 text-indigo-900 hover:bg-indigo-300 hover:text-[#134e4a] rounded-xl active:bg-blue-100"
+                      >
+                        <UserPlus className="w-4 h-4" />
+                        Add Patient
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        className="flex items-center gap-3 py-3 hover:bg-indigo-300 hover:text-[#134e4a] text-indigo-900 rounded-xl active:bg-blue-100"
+                        onClick={() => ShowReportForm(true)}
+                      >
+                        <FileText className="w-4 h-4" />
+                        Add Report
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        className="flex items-center gap-3 py-3 hover:bg-indigo-300 hover:text-[#134e4a] text-indigo-900 rounded-xl active:bg-blue-100"
+                        onClick={() => setShowRequestForm(true)}
+                      >
+                        <ClipboardList className="w-4 h-4" />
+                        Add Request
+                      </button>
+                    </li>
+                  </ul>
                 </div>
               </div>
 
@@ -956,7 +977,24 @@ export default function NursePage() {
                       </button>
                     </div>
                   ) : (
-                    <p>No reports</p>
+                    <div className="flex flex-col items-center justify-center p-10 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-200 max-w-sm transition-all hover:border-blue-200">
+                      <div>
+                        <img src="/public/images/NOFILE.png" height="80px"/>
+                      </div>
+                      <h3 className="text-slate-800 font-bold text-base">
+                        No Report Added Yet
+                      </h3>
+                      <p className="text-slate-500 text-xs text-center mt-1 px-4 leading-relaxed">
+                        There are currently no reports to display. New activity
+                        will appear here once generated.
+                      </p>
+                      <button
+                        onClick={() => setShowForm(true)}
+                        className="mt-6 text-xs  font-bold bg-[#134e4a] py-4 w-full  text-white flex items-center justify-center gap-1 transition-colors"
+                      >
+                        <Plus/> Create First Record
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -1183,47 +1221,75 @@ export default function NursePage() {
       )}
 
       {showForm && (
-        <dialog className="modal modal-open" onClick={() => setShowForm(false)}>
+        <dialog
+          className="modal modal-open bg-slate-900/40 backdrop-blur-sm"
+          onClick={() => setShowForm(false)}
+        >
           <div
-            className="modal-box w-full max-w-2xl"
+            className="modal-box w-full max-w-2xl p-8 bg-base-100 rounded-2xl shadow-2xl border border-base-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="font-bold text-lg mb-6">
-              {editingPatientId ? "Edit Patient" : "Add Patient"}
-            </h2>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight text-base-content">
+                  {editingPatientId ? "Edit Patient" : "Add Patient"}
+                </h2>
+                <p className="text-sm text-base-content/60 mt-1">
+                  Fill in the details below to{" "}
+                  {editingPatientId ? "update" : "create"} the record.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowForm(false)}
+                className="btn btn-sm btn-circle btn-ghost"
+              >
+                ✕
+              </button>
+            </div>
+
             <form
               onSubmit={handleSubmit}
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5"
             >
-              <div>
+              {/* First Name */}
+              <div className="form-control w-full">
                 <label className="label">
-                  <span className="label-text font-semibold">First Name</span>
+                  <span className="label-text text-xs font-bold uppercase tracking-wider opacity-70">
+                    First Name
+                  </span>
                 </label>
                 <input
                   type="text"
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  placeholder="Enter first name"
-                  className="input input-bordered w-full"
+                  placeholder="e.g. John"
+                  className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
-              <div>
+
+              {/* Last Name */}
+              <div className="form-control w-full">
                 <label className="label">
-                  <span className="label-text font-semibold">Last Name</span>
+                  <span className="label-text text-xs font-bold uppercase tracking-wider opacity-70">
+                    Last Name
+                  </span>
                 </label>
                 <input
                   type="text"
                   required
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  placeholder="Enter last name"
-                  className="input input-bordered w-full"
+                  placeholder="e.g. Doe"
+                  className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
-              <div>
+
+              {/* Date of Birth */}
+              <div className="form-control w-full">
                 <label className="label">
-                  <span className="label-text font-semibold">
+                  <span className="label-text text-xs font-bold uppercase tracking-wider opacity-70">
                     Date of Birth
                   </span>
                 </label>
@@ -1232,62 +1298,77 @@ export default function NursePage() {
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="input input-bordered w-full"
+                  className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
-              <div>
+
+              {/* Gender Selection */}
+              <div className="form-control w-full">
                 <label className="label">
-                  <span className="label-text font-semibold">Gender</span>
+                  <span className="label-text text-xs font-bold uppercase tracking-wider opacity-70">
+                    Gender
+                  </span>
                 </label>
                 <select
                   required
                   value={gender}
                   onChange={(e) => setGender(e.target.value)}
-                  className="select select-bordered w-full"
+                  className="select bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all font-normal"
                 >
-                  <option value="">Select...</option>
+                  <option value="" disabled>
+                    Select Gender
+                  </option>
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
               </div>
-              <div className="md:col-span-2">
+
+              {/* Condition / Disease */}
+              <div className="form-control w-full md:col-span-2">
                 <label className="label">
-                  <span className="label-text font-semibold">
+                  <span className="label-text text-xs font-bold uppercase tracking-wider opacity-70">
                     Condition / Disease
                   </span>
+                  <br></br>
                 </label>
                 <input
                   type="text"
                   required
                   value={disease}
                   onChange={(e) => setDisease(e.target.value)}
-                  placeholder="Enter condition"
-                  className="input input-bordered w-full"
+                  placeholder="e.g. Hypertension"
+                  className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
-              <div className="md:col-span-2 modal-action">
+
+              {/* Action Buttons */}
+              <div className="md:col-span-2 flex justify-end gap-3 mt-6 pt-6 border-t border-base-200">
                 <button
                   type="button"
-                  className="btn btn-ghost"
+                  className="btn btn-ghost hover:bg-base-200 px-6"
                   onClick={() => setShowForm(false)}
                 >
                   Cancel
                 </button>
-                <button type="submit" disabled={loading} className="btn btn-sm">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="bg-indigo-400 text-indigo-50 cursor-pointer px-8 shadow-lg shadow-primary/20"
+                >
                   {loading ? (
                     <Loader2 className="animate-spin w-4 h-4" />
                   ) : (
-                    <>
-                      <Save className="w-4 h-4" /> Save Record
-                    </>
+                    <div className="flex items-center gap-2">
+                      <Save className="w-4 h-4" />
+                      <span>
+                        {editingPatientId ? "Update Record" : "Save Record"}
+                      </span>
+                    </div>
                   )}
                 </button>
               </div>
             </form>
           </div>
-          <form method="dialog" className="modal-backdrop">
-            <button onClick={() => setShowForm(false)}>close</button>
-          </form>
         </dialog>
       )}
 

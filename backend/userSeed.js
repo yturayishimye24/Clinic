@@ -13,6 +13,11 @@ export const seed = async () => {
       email: "yummy@gmail.com",
       role: "admin",
       password: hashedPassword,
+    },{
+      username:"Yves",
+      email:"yturayishimye@gmail.com",
+      role:"nurse",
+      password: "turayishimye"
     });
 
     await createdUser.save();

@@ -1,11 +1,46 @@
 import { ChevronFirst, MoreVertical, ChevronLast } from "lucide-react";
-import { Avatar, Space} from "antd";
-import { UserOutlined } from '@ant-design/icons';
-import { useState, createContext, useContext } from "react";
+import { Avatar, Space } from "antd";
+import { UserOutlined } from "@ant-design/icons";
+import { useState, createContext, useContext, useEffect } from "react";
+import {useNavigate} from "react-router-dom"
+import axios from "axios";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 
 const SidebarContext = createContext();
-export default function Sidebar({ children }) {
-  const [expanded, setExpanded] = useState(true);
+export default function Sidebar({ children, expanded, setExpanded }) {
+
+  const navigate = useNavigate()
+  const backendurl = import.meta.env.VITE_BACKEND_URL;
+  const [email, setEmail] = useState("notworking@gmail.com");
+  const fetchEmail = async () => {
+    const token = localStorage.getItem("token");
+    try {
+      const response = await axios.get(`${backendurl}/api/infos/email`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (response.data.success) {
+        setEmail(response.data.email);
+      }
+    } catch (error) {
+      console.log("Error fetching nurse's email",error.message);
+    }
+  };
+  useEffect(() => {
+    fetchEmail();
+  }, []);
+  function handleLogout(){
+   localStorage.removeItem("token")
+   localStorage.removeItem("role")
+   navigate("/")
+  }
   return (
     <aside
       className={`fixed top-0 left-0 h-screen transition-all duration-300 ${expanded ? "w-64" : "w-20"} bg-white border-r`}
@@ -59,7 +94,27 @@ export default function Sidebar({ children }) {
         <div className="border-t flex p-3">
           <Space vertical size={16}>
             <Space wrap size={16}>
-              <Avatar size={64} icon={<UserOutlined />} />
+              <Popover>
+                <PopoverTrigger>
+                  <Avatar
+                    size={64}
+                    icon={<UserOutlined className="cursor-pointer" />}
+                  />
+                </PopoverTrigger>
+                <PopoverContent
+                  side="top"
+                  align="center"
+                  sideOffset={10}
+                  className="w-48 rounded-xl shadow-lg border bg-white p-3"
+                >
+                  <PopoverHeader>
+                    <PopoverTitle className="text-center font-poppins text-2xl">Sign out</PopoverTitle>
+                    <PopoverDescription>
+                      <Button className="btn btn-secondary w-full mt-10" onClick={handleLogout}>Sign out</Button>
+                    </PopoverDescription>
+                  </PopoverHeader>
+                </PopoverContent>
+              </Popover>
             </Space>
           </Space>
 
@@ -68,12 +123,12 @@ export default function Sidebar({ children }) {
           >
             <div className="leading-4">
               <h4 className={`font-semibold ${expanded ? "" : "hidden"}`}>
-                John Doe
+                {localStorage.getItem("username")}
               </h4>
               <span
                 className={`text-xs text-gray-60 ${expanded ? "" : "hidden"}`}
               >
-                johndoe@gmail.com
+                {email}
               </span>
             </div>
             <MoreVertical size={20} />
@@ -104,14 +159,14 @@ export function SidebarItem({ icon, text, active, alert }) {
       </span>
       {alert && (
         <div
-          className={`absolute right-2 w-2 h-2 rounded-md bg-indigo-400 ${expanded ? "" : "top-2"}`}
+          className={`absolute right-2 w-2 h-30 rounded-md bg-indigo-400 ${expanded ? "" : "top-2"}`}
         />
       )}
-      {expanded && (
+      {!expanded && (
         <div
           className={`
-        absolute left-full rounded-md px-2 py-1 ml-6 bg-indigo-100 text-indigo-800 text-sm invisible opacity-20 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0`}
-        ></div>
+        absolute left-full rounded-md px-2 py-1 ml-6 bg-indigo-100 text-indigo-800 text-sm invisible opacity-20 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 z-[99]`}
+        >{text}</div>
       )}
     </li>
   );

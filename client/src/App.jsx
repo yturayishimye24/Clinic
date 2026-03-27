@@ -25,7 +25,7 @@ const App = () => {
   return (
     <AuthContext>
       <BrowserRouter>
-      <div data-theme="forest">
+      <div data-theme="cupcake">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/nurseLogin" element={<LoginPageNurse />} />

@@ -47,11 +47,11 @@ export default function AdminPage() {
   const [formRole, setFormRole] = useState("");
   const [adding, setAdding] = useState(false);
   const [approving, setApproving] = useState(false);
-
+   
   // UI States
   const [searchTerm, setSearchTerm] = useState("");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-
+  const [expanded,setExpanded] = useState(true);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   // --- DATA FETCHING ---
@@ -196,6 +196,7 @@ export default function AdminPage() {
         password,
         role: formRole,
       });
+      localStorage.setItem("email",em)
       if (response.data.success) {
         toast.success("Account created successfully");
         fetchNurses();
@@ -313,7 +314,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-base-200 font-sans flex">
-      <Sidebar>
+      <Sidebar expanded={expanded} setExpanded={setExpanded}>
         <SidebarItem
           icon={<Home />}
           onClick={() => navigate("/home")}
@@ -331,7 +332,7 @@ export default function AdminPage() {
       </Sidebar>
 
       {/* --- Main Container (Sidebar + Content) --- */}
-      <div className="flex-1 flex flex-col ml-[250px]">
+      <div className={`flex-1 flex flex-col ${expanded?"ml-[250px]":"ml-[90px]"} transition-all`}>
        
         {/* --- MAIN CONTENT --- */}
         <main className="flex-1 pt-4 px-6 lg:px-10 pb-10 overflow-y-auto">
@@ -561,6 +562,7 @@ export default function AdminPage() {
                             <td className="pr-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-3">
                                 {req.Status === "pending" && (
+                                  
                                   <button
                                     onClick={(e) => {
                                       e.preventDefault();
