@@ -4,17 +4,24 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
-import { FileInput, Label } from "flowbite-react";
 import { Inbox } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { UserOutlined } from "@ant-design/icons";
-import { Avatar, Space } from "antd";
+import { Space } from "antd";
 import Sidebar from "../components/sidebar.jsx";
 import { SidebarItem } from "../components/sidebar.jsx";
 import { Skeleton } from "@/components/ui/skeleton";
 import { delay } from "./../utils/Delay.jsx";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
+import { OrbitProgress } from "react-loading-indicators";
+import {Avatar} from "@heroui/react";
+import {Form} from '@heroui/react';
+import {
+  FloppyDisk,
+  FolderOpen,
+  SquarePlus,
+  TrashBin,
+} from "@gravity-ui/icons";
+import { Button, Description, Dropdown, Kbd, Label } from "@heroui/react";
 import {
   ChevronDown,
   UserPlus,
@@ -47,7 +54,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-// --- CUSTOM STYLES & FONTS ---
 
 export default function NursePage() {
   const navigate = useNavigate();
@@ -61,6 +67,7 @@ export default function NursePage() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  const [active,setActive] = useState(false)
   // Patient Form States
   const [firstName, setFirstName] = useState("");
   const [gender, setGender] = useState("");
@@ -438,7 +445,7 @@ export default function NursePage() {
 
   return (
     <div className="min-h-screen bg-base-200 font-sans">
-      <Sidebar expanded={expanded} setExpanded={setExpanded}>
+      <Sidebar expanded={expanded} setExpanded={setExpanded} >
         <SidebarItem
           icon={<Home />}
           onClick={() => navigate("/home")}
@@ -450,143 +457,29 @@ export default function NursePage() {
           onClick={() => navigate("/home/patients")}
           text="Patients"
         />
-        <SidebarItem icon={<ClipboardList />} text="Requests" />
-        <SidebarItem icon={<BarChart3 />} text="Reports" />
-        <SidebarItem icon={<Settings />} text="Settings" />
+        <SidebarItem
+          icon={<ClipboardList />}
+          text="Requests"
+          onClick={() => navigate("/home/requests")}
+        />
+        <SidebarItem
+          icon={<BarChart3 />}
+          text="Reports"
+          onClick={() => navigate("/home/reports")}
+        />
+        <SidebarItem
+          icon={<Settings />}
+          text="Settings"
+          onClick={() => navigate("/home/settings")}
+        />
       </Sidebar>
-
+      <div className="flex-1 p-4">{/* <Outlet /> */}</div>
       <div
         className={`flex flex-col transition-all duration-300 ${
           expanded ? "ml-64" : "ml-20"
         }`}
       >
-        {/* --- NAVBAR --- */}
-        <div className="navbar bg-base-200/50 rounded-box p-3 flex justify-around">
-          {/* --- LEFT: Search Bar --- */}
-          <div className="flex-1">
-            <label className="input">
-              <svg
-                className="h-[1em] opacity-50"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-              >
-                <g
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  strokeWidth="2.5"
-                  fill="none"
-                  stroke="currentColor"
-                >
-                  <circle cx="11" cy="11" r="8"></circle>
-                  <path d="m21 21-4.3-4.3"></path>
-                </g>
-              </svg>
-              <input type="search" required placeholder="Search" />
-            </label>
-          </div>
-
-          {/* --- RIGHT: Actions & Profile --- */}
-          <div className="flex-none flex items-center gap-3">
-            {/* Mail Button */}
-            {loading ? (
-              <Skeleton className="size-10 shrink-0 rounded-full" />
-            ) : (
-              <button className="btn btn-circle bg-base-100 border-none shadow-sm hover:bg-base-200 h-11 w-11 min-h-0">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5 text-base-content/70"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75"
-                  />
-                </svg>
-              </button>
-            )}
-
-            {/* Notification Button */}
-            {loading ? (
-              <Skeleton className="size-10 shrink-0 rounded-full" />
-            ) : (
-              <button className="btn btn-circle bg-base-100 border-none shadow-sm hover:bg-base-200 h-11 w-11 min-h-0">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-5 h-5 text-base-content/70"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0"
-                  />
-                </svg>
-              </button>
-            )}
-
-            {/* Profile Dropdown */}
-            <div className="dropdown dropdown-end ml-1">
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost hover:bg-base-200/50 h-auto min-h-0 py-1 px-2 rounded-full flex items-center gap-3 border-none shadow-none"
-              >
-                {loading ? (
-                  <Skeleton className="size-10 shrink-0 rounded-full" />
-                ) : (
-                  <div className="avatar">
-                    <div className="w-10 rounded-full bg-rose-200">
-                      <img alt="User avatar" src="/public/images/user.png" />
-                    </div>
-                  </div>
-                )}
-
-                {/* User Info (Hidden on very small screens) */}
-                {loading ? (
-                  <div className="flex w-fit items-center gap-4">
-                    <div className="grid gap-2">
-                      <Skeleton className="h-4 w-[150px]" />
-                      <Skeleton className="h-4 w-[100px]" />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="hidden sm:flex flex-col items-start text-left pr-2">
-                    <span className="text-sm font-bold text-base-content leading-tight">
-                      {localStorage.getItem("username")}
-                    </span>
-                    <span className="text-xs text-base-content/60 font-normal mt-0.5">
-                      {loggedInEmail}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              {/* Dropdown Menu */}
-              <ul
-                tabIndex="-1"
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[1] mt-3 w-52 p-2 shadow-lg border border-base-200"
-              >
-                <li>
-                  <a className="justify-between">Profile</a>
-                </li>
-                <li>
-                  <a>Settings</a>
-                </li>
-                <li className="text-error" onClick={() => handleLogout()}>
-                  <a>Logout</a>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
+       
         {/* --- MAIN CONTENT --- */}
         <main className="flex-1 pt-4 px-6 lg:px-10 pb-10 overflow-y-auto">
           {isOnDashboard ? (
@@ -606,51 +499,41 @@ export default function NursePage() {
                     </p>
                   )}
                 </div>
-                <div className="dropdown dropdown-bottom dropdown-end">
-                  {/* The "Input-style" Trigger */}
-                  <div
-                    tabIndex={0}
-                    role="button"
-                    className="flex items-center justify-between w-64 px-5 py-3 bg-white border-2 border-[#134e4a] rounded-sm text-slate-700 font-medium transition-all active:scale-95 shadow-sm"
-                  >
-                    <span>Select Action</span>
-                    <ChevronDown className="w-5 h-5 text-[#134e4a]" />
-                  </div>
-
-                  {/* The Menu (Matches the uploaded image) */}
-                  <ul
-                    tabIndex={0}
-                    className="dropdown-content z-[100] menu p-2 mt-2 shadow-xl border border-blue-200 bg-white rounded-2xl w-64 text-slate-600 gap-1"
-                  >
-                    <li>
-                      <button
-                        onClick={() => setShowForm(true)}
-                        className="flex items-center gap-3 py-3 text-indigo-900 hover:bg-indigo-300 hover:text-[#134e4a] rounded-xl active:bg-blue-100"
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        Add Patient
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        className="flex items-center gap-3 py-3 hover:bg-indigo-300 hover:text-[#134e4a] text-indigo-900 rounded-xl active:bg-blue-100"
-                        onClick={() => ShowReportForm(true)}
-                      >
-                        <FileText className="w-4 h-4" />
-                        Add Report
-                      </button>
-                    </li>
-                    <li>
-                      <button
-                        className="flex items-center gap-3 py-3 hover:bg-indigo-300 hover:text-[#134e4a] text-indigo-900 rounded-xl active:bg-blue-100"
-                        onClick={() => setShowRequestForm(true)}
-                      >
-                        <ClipboardList className="w-4 h-4" />
-                        Add Request
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+                <Dropdown>
+                  <Button aria-label="Menu" variant="secondary">
+                    Quick Actions
+                  </Button>
+                  <Dropdown.Popover>
+                    <Dropdown.Menu
+                      onAction={(key) => console.log(`Selected: ${key}`)}
+                    >
+                      <Dropdown.Item id="new-file" textValue="New file">
+                        <div className="flex h-8 items-start justify-center pt-px">
+                          <SquarePlus className="size-4 shrink-0" />
+                        </div>
+                        <div className="flex flex-col">
+                          <Label onClick={()=>setShowForm(true)}>Add patient</Label>
+                        </div>
+                      </Dropdown.Item>
+                      <Dropdown.Item id="open-file" textValue="Open file">
+                        <div className="flex h-8 items-start justify-center pt-px">
+                          <FolderOpen className="size-4 shrink-0" />
+                        </div>
+                        <div className="flex flex-col">
+                          <Label>Create request</Label>
+                        </div>
+                      </Dropdown.Item>
+                      <Dropdown.Item id="save-file" textValue="Save file">
+                        <div className="flex h-8 items-start justify-center pt-px">
+                          <FloppyDisk className="size-4 shrink-0" />
+                        </div>
+                        <div className="flex flex-col">
+                          <Label>Make report</Label>
+                        </div>
+                      </Dropdown.Item>
+                    </Dropdown.Menu>
+                  </Dropdown.Popover>
+                </Dropdown>
               </div>
 
               {/* --- CARDS (Based on Dashboard.png) --- */}
@@ -849,11 +732,13 @@ export default function NursePage() {
                             >
                               <td className="pl-6 py-4">
                                 <div className="flex items-center gap-3">
-                                  <img
-                                    src={"/public/images/examination.png"}
-                                    alt=""
-                                    className="w-10 h-10 rounded-xl object-cover bg-base-300"
-                                  />
+                                  <Avatar size="lg">
+                                    <Avatar.Image
+                                      alt="Large Avatar"
+                                      src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg"
+                                    />
+                                    <Avatar.Fallback>LG</Avatar.Fallback>
+                                  </Avatar>
                                   <div>
                                     <p className="font-bold text-sm text-base-content">
                                       {patient.firstName} {patient.lastName}
@@ -968,18 +853,18 @@ export default function NursePage() {
                       </div>
 
                       {/* Action Button */}
-                      <button
+                      <Button
+                        aria-label="Menu"
+                        variant="secondary"
                         onClick={() => navigate("/home/reports")}
-                        className="w-full btn btn-sm  text-slate-700 font-bold text-sm transition-all flex items-center justify-center gap-2"
                       >
-                        <FileText size={16} className="text-blue-500" />
-                        Open Full Report
-                      </button>
+                        Open report
+                      </Button>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center p-10 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-200 max-w-sm transition-all hover:border-blue-200">
                       <div>
-                        <img src="/public/images/NOFILE.png" height="80px"/>
+                        <i class="fa-solid fa-file fa-5x"></i>
                       </div>
                       <h3 className="text-slate-800 font-bold text-base">
                         No Report Added Yet
@@ -990,9 +875,16 @@ export default function NursePage() {
                       </p>
                       <button
                         onClick={() => setShowForm(true)}
-                        className="mt-6 text-xs  font-bold bg-[#134e4a] py-4 w-full  text-white flex items-center justify-center gap-1 transition-colors"
+                        className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-gray-800 text-sm font-medium border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"
                       >
-                        <Plus/> Create First Record
+                        {reporting ? (
+                          <OrbitProgress />
+                        ) : (
+                          <>
+                            <Plus className="w-4 h-4" />
+                            <span>Create Report</span>
+                          </>
+                        )}
                       </button>
                     </div>
                   )}
@@ -1082,7 +974,7 @@ export default function NursePage() {
                   <div className="p-3 border-t border-base-300">
                     <button
                       onClick={() => setShowRequestForm(true)}
-                      className="btn w-full btn-sm gap-2"
+                      className="w-full mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-gray-800 text-sm font-medium border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"
                     >
                       <Plus className="w-4 h-4" />
                       New Request

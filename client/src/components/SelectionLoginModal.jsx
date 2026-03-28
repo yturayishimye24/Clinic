@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { ChevronRight, User, Stethoscope, X } from "lucide-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
+import NurseLogin from "../../public/images/NurseLogin.png"
+import DoctorLogin from "../../public/images/DoctorLogin.png"
 
 const LoginSelectionModal = ({ isOpen, isClosed }) => {
   useEffect(() => {
@@ -15,17 +17,17 @@ const LoginSelectionModal = ({ isOpen, isClosed }) => {
 
   const roles = [
     {
-      title: "Nurse Portal",
+      title: "Login as Nurse",
       description: "Access patient care and ward management",
       path: "/nurseLogin",
-      icon: <User className="text-slate-600" size={24} />,
+      icon: <img src="./public/images/NurseLogin.png"/>,
       aos: "fade-up",
     },
     {
-      title: "Doctor Portal",
+      title: "Login as Doctor",
       description: "Manage diagnoses, prescriptions, and rounds",
       path: "/doctorLogin",
-      icon: <Stethoscope className="text-slate-600" size={24} />,
+      icon: <img src="./public/images/DoctorLogin.png"/>,
       aos: "fade-up",
     },
   ];
@@ -42,6 +44,7 @@ const LoginSelectionModal = ({ isOpen, isClosed }) => {
           <div>
             <h2 className="text-xl font-semibold text-slate-800 tracking-tight">System Login</h2>
             <p className="text-sm text-slate-500 mt-0.5">Select your department to continue</p>
+           
           </div>
           <button 
             onClick={isClosed}
@@ -52,7 +55,7 @@ const LoginSelectionModal = ({ isOpen, isClosed }) => {
         </div>
 
         {/* Modal Body */}
-        <div className="p-6 space-y-3">
+        <div className="p-6 space-y-5 flex flex-col gap-4 items-center">
           {roles.map((role, index) => (
             <button
               key={index}
@@ -66,7 +69,7 @@ const LoginSelectionModal = ({ isOpen, isClosed }) => {
               </div>
               
               <div className="ml-4 flex-1">
-                <h3 className="font-medium text-slate-900 leading-tight group-hover:text-indigo-700 transition-colors">
+                <h3 className="font-medium text-slate-900 leading-tight group-hover:text-indigo-700  transition-colors">
                   {role.title}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">{role.description}</p>

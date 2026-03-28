@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {OrbitProgress} from "react-loading-indicators"
-import {X} from "lucide-react"
+import {X,Plus} from "lucide-react"
 const ReportList = () => {
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null); // For the Modal
@@ -71,8 +71,10 @@ const ReportList = () => {
           </div>
         ) : reports.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
-            <p className="text-gray-400 text-lg">
+            <p className="text-gray-400 text-lg flex flex-col items-center gap-3">
+              <i class="fa-solid fa-file-circle-xmark fa-5x"></i>
               No reports found in the archive.
+              <button className="mt-6 cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-gray-800 text-sm font-medium border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"><Plus/>Create new report</button>
             </p>
           </div>
         ) : (

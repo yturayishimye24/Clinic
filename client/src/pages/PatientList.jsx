@@ -3,6 +3,8 @@ import axios from "axios";
 import { Badge } from "@/components/ui/badge";
 import { UserPlus } from "lucide-react";
 import { Search, Edit, ActivitySquare, Trash2 } from "lucide-react";
+import {Envelope, Globe, Plus, TrashBin} from "@gravity-ui/icons";
+import {Button} from "@heroui/react";
 const PatientList = () => {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,10 +58,10 @@ const PatientList = () => {
   return (
     <>
     <div className="mt-10">
-      <button className="btn btn-sm">
-        <UserPlus />
-        Make consultation
-      </button>
+      <Button variant="secondary">
+        <Plus />
+        Add Member
+      </Button>
       </div>
       <div className="xl:col-span-2 bg-white rounded-3xl border border-gray-100 cozy-shadow mt-5 overflow-hidden">
         <div className="p-6 border-b border-gray-50 flex justify-between items-center">

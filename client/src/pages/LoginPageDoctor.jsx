@@ -211,7 +211,7 @@ const LoginPageDoctor = () => {
             )}
           </div>
 
-          <div className="flex gap-3 mt-8">
+          <div className="flex gap-3 mt-8 mb-5">
             <div
               onClick={() => setShowPassword(false)}
               className={`h-3 w-3 rounded-full cursor-pointer
@@ -232,10 +232,9 @@ const LoginPageDoctor = () => {
             />
           </div>
 
-          {/* BUTTON */}
           <button
             onClick={showPassword ? handleSubmit : handleNext}
-            className="mt-[20px] rounded-md bg-[#FB923C] px-6 py-2 text-white font-semibold hover:bg-[#F97316]"
+            className="mt-[20px] rounded-md bg-[#FB923C] px-8 py-2 text-white font-semibold hover:bg-[#F97316] w-full rounded-sm"
           >
             {showPassword ? "Login" : "Next"}
           </button>

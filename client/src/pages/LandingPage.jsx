@@ -471,7 +471,7 @@ const LandingPage = () => {
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
-                  className="px-10 py-4 bg-white text-[#388E3C] text-lg font-bold rounded-full shadow-lg hover:bg-[#E8F5E9] hover:scale-105 transition-all duration-300"
+                  className="px-10 py-4 bg-white text-[#388E3C] text-lg font-bold rounded-sm shadow-lg hover:bg-[#E8F5E9] hover:scale-105 transition-all duration-300"
                   data-aos="fade-up-right"
                   onClick={()=>setSelectionOpen(true)}
                 >

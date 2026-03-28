@@ -6,7 +6,7 @@ import {uploadPatientImage} from "../middlewares/upload.js";
 
 const addRouter = express.Router();
 
-addRouter.get("/displayPatients", autheticate, requireRole("nurse"), getAllPatients);
+addRouter.get("/displayPatients", getAllPatients);
 addRouter.get("/:id",autheticate,requireRole("nurse"),getOnePatient);
 addRouter.post("/create",autheticate,requireRole("nurse"),createPatient);
 addRouter.put("/:id",autheticate,requireRole("nurse"),updatePatient);

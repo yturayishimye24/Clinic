@@ -5,7 +5,7 @@ import { autheticate } from "../middlewares/autheticateToken.js"
 const reportRouter = express.Router();
 
 reportRouter.post("/create_report",autheticate,createReport)
-reportRouter.get("/display_report",autheticate,displayReport)
+reportRouter.get("/display_report",displayReport)
 reportRouter.put("/update_report/:id",autheticate,updateReport)
 reportRouter.delete("/delete_report/:id",autheticate,deleteReport)
 

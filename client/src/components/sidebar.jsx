@@ -2,8 +2,23 @@ import { ChevronFirst, MoreVertical, ChevronLast } from "lucide-react";
 import { Avatar, Space } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { useState, createContext, useContext, useEffect } from "react";
-import {useNavigate} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+import {
+  EllipsisVertical,
+  Pencil,
+  SquarePlus,
+  TrashBin,
+} from "@gravity-ui/icons";
+import {
+  Description,
+  Dropdown,
+  Header,
+  Kbd,
+  Label,
+  Separator,
+} from "@heroui/react";
 import {
   Popover,
   PopoverContent,
@@ -16,8 +31,7 @@ import { Button } from "@/components/ui/button";
 
 const SidebarContext = createContext();
 export default function Sidebar({ children, expanded, setExpanded }) {
-
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   const backendurl = import.meta.env.VITE_BACKEND_URL;
   const [email, setEmail] = useState("notworking@gmail.com");
   const fetchEmail = async () => {
@@ -30,16 +44,16 @@ export default function Sidebar({ children, expanded, setExpanded }) {
         setEmail(response.data.email);
       }
     } catch (error) {
-      console.log("Error fetching nurse's email",error.message);
+      console.log("Error fetching nurse's email", error.message);
     }
   };
   useEffect(() => {
     fetchEmail();
   }, []);
-  function handleLogout(){
-   localStorage.removeItem("token")
-   localStorage.removeItem("role")
-   navigate("/")
+  function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/");
   }
   return (
     <aside
@@ -108,9 +122,16 @@ export default function Sidebar({ children, expanded, setExpanded }) {
                   className="w-48 rounded-xl shadow-lg border bg-white p-3"
                 >
                   <PopoverHeader>
-                    <PopoverTitle className="text-center font-poppins text-2xl">Sign out</PopoverTitle>
+                    <PopoverTitle className="text-center font-poppins text-2xl">
+                      Sign out
+                    </PopoverTitle>
                     <PopoverDescription>
-                      <Button className="btn btn-secondary w-full mt-10" onClick={handleLogout}>Sign out</Button>
+                      <Button
+                        className="btn btn-secondary w-full mt-10"
+                        onClick={handleLogout}
+                      >
+                        Sign out
+                      </Button>
                     </PopoverDescription>
                   </PopoverHeader>
                 </PopoverContent>
@@ -131,7 +152,71 @@ export default function Sidebar({ children, expanded, setExpanded }) {
                 {email}
               </span>
             </div>
-            <MoreVertical size={20} />
+            <Dropdown>
+              <Dropdown.Trigger
+                aria-label="Menu"
+                className="button button-md button--secondary button--icon-only data-[focus-visible=true]:status-focused"
+              >
+                <EllipsisVertical className="outline-none" />
+              </Dropdown.Trigger>
+              <Dropdown.Popover>
+                <Dropdown.Menu
+                  onAction={(key) => console.log(`Selected: ${key}`)}
+                >
+                  <Dropdown.Section>
+                    <Header>Actions</Header>
+                    <Dropdown.Item id="new-file" textValue="New file">
+                      <div className="flex h-8 items-start justify-center pt-px">
+                        <SquarePlus className="size-4 shrink-0 text-muted" />
+                      </div>
+                      <div className="flex flex-col">
+                        <Label>New file</Label>
+                        <Description>Create a new file</Description>
+                      </div>
+                      <Kbd className="ms-auto" slot="keyboard" variant="light">
+                        <Kbd.Abbr keyValue="command" />
+                        <Kbd.Content>N</Kbd.Content>
+                      </Kbd>
+                    </Dropdown.Item>
+                    <Dropdown.Item id="edit-file" textValue="Edit file">
+                      <div className="flex h-8 items-start justify-center pt-px">
+                        <Pencil className="size-4 shrink-0 text-muted" />
+                      </div>
+                      <div className="flex flex-col">
+                        <Label>Edit file</Label>
+                        <Description>Make changes</Description>
+                      </div>
+                      <Kbd className="ms-auto" slot="keyboard" variant="light">
+                        <Kbd.Abbr keyValue="command" />
+                        <Kbd.Content>E</Kbd.Content>
+                      </Kbd>
+                    </Dropdown.Item>
+                  </Dropdown.Section>
+                  <Separator />
+                  <Dropdown.Section>
+                    <Header>Danger zone</Header>
+                    <Dropdown.Item
+                      id="delete-file"
+                      textValue="Delete file"
+                      variant="danger"
+                    >
+                      <div className="flex h-8 items-start justify-center pt-px">
+                        <TrashBin className="size-4 shrink-0 text-danger" />
+                      </div>
+                      <div className="flex flex-col">
+                        <Label>Delete file</Label>
+                        <Description>Move to trash</Description>
+                      </div>
+                      <Kbd className="ms-auto" slot="keyboard" variant="light">
+                        <Kbd.Abbr keyValue="command" />
+                        <Kbd.Abbr keyValue="shift" />
+                        <Kbd.Content>D</Kbd.Content>
+                      </Kbd>
+                    </Dropdown.Item>
+                  </Dropdown.Section>
+                </Dropdown.Menu>
+              </Dropdown.Popover>
+            </Dropdown>
           </div>
         </div>
       </nav>
@@ -139,10 +224,11 @@ export default function Sidebar({ children, expanded, setExpanded }) {
   );
 }
 
-export function SidebarItem({ icon, text, active, alert }) {
+export function SidebarItem({ icon, text, active, alert, onClick }) {
   const { expanded } = useContext(SidebarContext);
   return (
     <li
+      onClick={onClick}
       className={`
         relative flex items-center py-2 px-3 my-1 font-medium rounded-md cursor-pointer transition-colors group ${
           active
@@ -166,7 +252,9 @@ export function SidebarItem({ icon, text, active, alert }) {
         <div
           className={`
         absolute left-full rounded-md px-2 py-1 ml-6 bg-indigo-100 text-indigo-800 text-sm invisible opacity-20 -translate-x-3 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0 z-[99]`}
-        >{text}</div>
+        >
+          {text}
+        </div>
       )}
     </li>
   );

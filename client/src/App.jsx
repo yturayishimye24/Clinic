@@ -9,7 +9,6 @@ import AdminPage from "./pages/AdminPage.jsx";
 import { AuthContext } from "../context/authContext.jsx";
 import StockManager from "./pages/StockManager.jsx";
 
-
 import "./index.css";
 import "flowbite";
 // import PrivateRoutes from "./utils/PrivateRoutes.jsx";
@@ -25,32 +24,28 @@ const App = () => {
   return (
     <AuthContext>
       <BrowserRouter>
-      <div data-theme="cupcake">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/nurseLogin" element={<LoginPageNurse />} />
-          <Route path="/doctorLogin" element={<LoginPageDoctor />} />
-          <Route path="/home" element={<CreatePage />}>
-            <Route path="patients" element={<PatientList />} />
-            <Route path="requests" element={<RequestList />} />
-            <Route path="reports" element={<ReportList />} />
-            <Route path="settings" element={<SettingsPage />} />
-          </Route>
+        <div data-theme="cupcake">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/nurseLogin" element={<LoginPageNurse />} />
+            <Route path="/doctorLogin" element={<LoginPageDoctor />} />
+            <Route path="/home" element={<CreatePage />}>
+              <Route path="patients" element={<PatientList />} />
+              <Route path="requests" element={<RequestList />} />
+              <Route path="reports" element={<ReportList />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
 
-          <Route
-            path="/home/admin"
-            element={
-              // // <PrivateRoutes>
-              //   <RoleBasedRoutes requiredRole={["admin"]}>
-              <AdminPage />
-              //   </RoleBasedRoutes>
-              //       // </PrivateRoutes>
-            }
-          />
-       
-          <Route path={"/stockmanager"} element={<StockManager />} />
-        </Routes>
-      </div>
+            <Route path="/home/admin" element={<AdminPage />}>
+              <Route path="patients" element={<PatientList />} />
+              <Route path="requests" element={<RequestList />} />
+              <Route path="reports" element={<ReportList />} />
+              <Route path="settings" element={<SettingsPage />} />
+            </Route>
+
+            <Route path={"/stockmanager"} element={<StockManager />} />
+          </Routes>
+        </div>
         <ToastContainer containerStyle={{ zIndex: 99999 }} />
       </BrowserRouter>
     </AuthContext>
