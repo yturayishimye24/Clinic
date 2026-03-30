@@ -13,15 +13,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { delay } from "./../utils/Delay.jsx";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { OrbitProgress } from "react-loading-indicators";
-import {Avatar} from "@heroui/react";
-import {Form} from '@heroui/react';
+import { Avatar } from "@heroui/react";
+import { Form } from "@heroui/react";
+
 import {
   FloppyDisk,
   FolderOpen,
   SquarePlus,
   TrashBin,
 } from "@gravity-ui/icons";
-import { Button, Description, Dropdown, Kbd, Label } from "@heroui/react";
+import { Button,Dropdown, Label,Input } from "@heroui/react";
 import {
   ChevronDown,
   UserPlus,
@@ -54,7 +55,6 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-
 export default function NursePage() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -67,7 +67,7 @@ export default function NursePage() {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expanded, setExpanded] = useState(true);
-  const [active,setActive] = useState(false)
+  const [active, setActive] = useState(false);
   // Patient Form States
   const [firstName, setFirstName] = useState("");
   const [gender, setGender] = useState("");
@@ -445,7 +445,7 @@ export default function NursePage() {
 
   return (
     <div className="min-h-screen bg-base-200 font-sans">
-      <Sidebar expanded={expanded} setExpanded={setExpanded} >
+      <Sidebar expanded={expanded} setExpanded={setExpanded}>
         <SidebarItem
           icon={<Home />}
           onClick={() => navigate("/home")}
@@ -479,7 +479,6 @@ export default function NursePage() {
           expanded ? "ml-64" : "ml-20"
         }`}
       >
-       
         {/* --- MAIN CONTENT --- */}
         <main className="flex-1 pt-4 px-6 lg:px-10 pb-10 overflow-y-auto">
           {isOnDashboard ? (
@@ -512,10 +511,16 @@ export default function NursePage() {
                           <SquarePlus className="size-4 shrink-0" />
                         </div>
                         <div className="flex flex-col">
-                          <Label onClick={()=>setShowForm(true)}>Add patient</Label>
+                          <Label onClick={() => setShowForm(true)}>
+                            Add patient
+                          </Label>
                         </div>
                       </Dropdown.Item>
-                      <Dropdown.Item id="open-file" textValue="Open file">
+                      <Dropdown.Item
+                        id="open-file"
+                        textValue="Open file"
+                        onClick={() => setShowRequestForm(true)}
+                      >
                         <div className="flex h-8 items-start justify-center pt-px">
                           <FolderOpen className="size-4 shrink-0" />
                         </div>
@@ -523,7 +528,11 @@ export default function NursePage() {
                           <Label>Create request</Label>
                         </div>
                       </Dropdown.Item>
-                      <Dropdown.Item id="save-file" textValue="Save file">
+                      <Dropdown.Item
+                        id="save-file"
+                        textValue="Save file"
+                        onClick={() => ShowReportForm(true)}
+                      >
                         <div className="flex h-8 items-start justify-center pt-px">
                           <FloppyDisk className="size-4 shrink-0" />
                         </div>
@@ -1266,11 +1275,11 @@ export default function NursePage() {
 
       {showRequestForm && (
         <dialog
-          className="modal modal-open"
+          className="modal modal-open bg-gray-900/40 backdrop-blur-sm"
           onClick={() => setShowRequestForm(false)}
         >
           <div
-            className="modal-box w-full max-w-lg"
+            className="modal-box w-full max-w-lg bg-base-200"
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-bold text-lg mb-6">New Request</h2>
@@ -1289,19 +1298,22 @@ export default function NursePage() {
                   <option>Supply Request</option>
                 </select>
               </div>
-              <div>
-                <label className="label">
-                  <span className="label-text font-semibold">Item Name</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={itemName}
-                  onChange={(e) => setItemName(e.target.value)}
-                  placeholder="Enter item name"
-                  className="input input-bordered w-full"
-                />
-              </div>
+        
+                <div className="flex w-80 flex-col gap-4">
+                  <div className="flex flex-col gap-1">
+                    <Label htmlFor="input-type-email">Item name</Label>
+                    <Input
+                      required
+                      value={itemName}
+                      onChange={(e)=>setItemName(e.target.value)}
+                      id="input-type-email"
+                      placeholder="jane@example.com"
+                      type="text"
+                    />
+                  </div>
+                </div>
+              
+           
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="label">
