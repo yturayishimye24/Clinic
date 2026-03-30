@@ -15,7 +15,7 @@ import router from "./routes/verifyRoute.js";
 import reportRouter from "./routes/reportRoute.js";
 import path from "path";
 import googleRouter from "./routes/googleRoute.js";
-
+import requestAccountRouter from "./routes/requestAccountRoute.js";
 dotenv.config();
 
 const port = process.env.PORT || 4000;
@@ -44,6 +44,7 @@ app.use("/api/infos", emailRouter);
 app.use("/api/verify", router);
 app.use("/api/report", reportRouter);
 app.use("/api/AuthGoogle", googleRouter);
+app.use("/api/request-account", requestAccountRouter);
 
 const server = http.createServer(app);
 export const io = new Server(server, {
