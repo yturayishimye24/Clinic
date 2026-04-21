@@ -6,7 +6,13 @@ const RequestDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [formData, setFormData] = useState({ title: "", content: "" });
+  const [type,setType] = useState("");
+  const [quantity,setQuantity] = useState(1);
+  const [itemName,setItemName] = useState("");
+  const [reason,setReason] = useState("");
+  const [urgency,setUrgency] = useState("low");
+
+
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   useEffect(() => {
@@ -127,45 +133,60 @@ const RequestDashboard = () => {
             <form onSubmit={handlePost} className="space-y-6">
               <div>
                 <label className="block text-gray-500 text-sm font-medium mb-2">
-                  Title
+                  Type
+                </label>
+                
+                <select
+                  className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
+                  value={type}
+                  onChange={(e) => setType(e.target.value)}
+                >
+                  <option value="">Select Request Type</option>
+                  <option value="Medicine Request">Medicine Request</option>
+                  <option value="Equipment Request">Equipment Request</option>
+                  <option value="Supply Request">Supply Request</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-500 text-sm font-medium mb-2">
+                  Quantity
                 </label>
                 <input
+                  type="number"
+                  className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
+                  value={quantity}
+                  onChange={(e)=> setQuantity(parseInt(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="block text-gray-500 text-sm font-medium mb-2">
+                  Item Name
+                </label>
+                <input
+
                   type="text"
                   className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
-                  value={formData.title}
+                  value={itemName}
                   onChange={(e) =>
-                    setFormData({ ...formData, title: e.target.value })
+                    setItemName(e.target.value)
                   }
                 />
               </div>
               <div>
                 <label className="block text-gray-500 text-sm font-medium mb-2">
-                  Body
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
-                  value={formData.body}
-                  onChange={(e) =>
-                    setFormData({ ...formData, body: e.target.value })
-                  }
-                />
-              </div>
-              <div>
-                <label className="block text-gray-500 text-sm font-medium mb-2">
-                  Content
+                  Reason
                 </label>
                 <textarea
                   rows="5"
                   placeholder="Empty"
                   className="w-full p-4 rounded-[2rem] border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100 resize-none"
-                  value={formData.content}
+                  value={reason}
                   onChange={(e) =>
-                    setFormData({ ...formData, content: e.target.value })
+                    setReason(e.target.value)
                   }
                 />
               </div>
-             <Button onClick={()=>Report} type="submit">
+             <Button onClick={()=>handlePost} type="submit">
                Request
              </Button>
             </form>

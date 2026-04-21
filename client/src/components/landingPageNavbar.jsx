@@ -4,7 +4,7 @@ import LoginSelectionModal from "../components/SelectionLoginModal.jsx";
 import {useState} from "react"
 // import {scrollToTeam,scrollToServices,scrollToFaqs,scrollToWhyChooseUs} from "../pages/LandingPage.jsx"
 
-const Navbar = ({scrollToTeam,scrollToServices,scrollToFaqs,goToHome,scrollToWhyUs,scrollToContactUs}) => {
+const Navbar = ({scrollToTeam,scrollToFaqs,goToHome,scrollToWhyUs,scrollToContactUs}) => {
   const navigate = useNavigate();
   const [selectionOpen,setSelectionOpen] = useState(false);
 
@@ -52,7 +52,7 @@ const Navbar = ({scrollToTeam,scrollToServices,scrollToFaqs,goToHome,scrollToWhy
       <div className="hidden md:flex items-center gap-8 text-gray-600 text-[15px] font-medium">
         <a  className="hover:text-black cursor-pointer" onClick={goToHome}>Home</a>
         <a className="hover:text-black cursor-pointer" onClick={scrollToTeam}>Team</a>
-        <a  className="hover:text-black cursor-pointer" onClick={scrollToServices}>Services</a>
+       
         <a className="hover:text-black cursor-pointer" onClick={scrollToFaqs}>FAqs</a>
         <a  className="hover:text-black cursor-pointer" onClick={scrollToWhyUs} >Why Choose Us</a>
       </div>

@@ -43,7 +43,6 @@ import Navbar from "../components/landingPageNavbar.jsx";
 import HeroSection from "../components/HeroSection.jsx";
 import LoginSelectionModal from "../components/SelectionLoginModal.jsx";
 import Words from "../components/words.jsx";
-import ServicesSection from "../components/services.jsx";
 import { OrbitProgress } from "react-loading-indicators";
 
 import {
@@ -442,7 +441,7 @@ const LandingPage = () => {
         </div>
 
         {/* Our Services Section */}
-        <ServicesSection services={services} ref={servicesRef} />
+        
         <div
           className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6 bg-[#E8F5E9] text-center"
           data-aos="zoom-out-down"
