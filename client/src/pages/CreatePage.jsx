@@ -22,7 +22,7 @@ import {
   SquarePlus,
   TrashBin,
 } from "@gravity-ui/icons";
-import { Button,Dropdown, Label,Input } from "@heroui/react";
+import { Button, Dropdown, Label, Input } from "@heroui/react";
 import {
   ChevronDown,
   UserPlus,
@@ -56,8 +56,8 @@ import {
 } from "lucide-react";
 
 export default function NursePage() {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
   // --- STATES ---
@@ -450,30 +450,34 @@ export default function NursePage() {
           icon={<Home />}
           onClick={() => navigate("/home")}
           text="Dashboard"
-          active
+          active={location.pathname === "/home"}
         />
         <SidebarItem
           icon={<Users />}
           onClick={() => navigate("/home/patients")}
           text="Patients"
+          active={location.pathname === "/home/patients"}
         />
         <SidebarItem
           icon={<ClipboardList />}
           text="Requests"
           onClick={() => navigate("/home/requests")}
+          active={location.pathname === "/home/requests"}
         />
         <SidebarItem
           icon={<BarChart3 />}
           text="Reports"
           onClick={() => navigate("/home/reports")}
+          active={location.pathname === "/home/reports"}
         />
         <SidebarItem
           icon={<Settings />}
           text="Settings"
           onClick={() => navigate("/home/settings")}
+          active={location.pathname === "/home/settings"}
         />
       </Sidebar>
-      <div className="flex-1 p-4">{/* <Outlet /> */}</div>
+      <div className="flex-1 p-4"></div>
       <div
         className={`flex flex-col transition-all duration-300 ${
           expanded ? "ml-64" : "ml-20"
@@ -503,9 +507,7 @@ export default function NursePage() {
                     Quick Actions
                   </Button>
                   <Dropdown.Popover>
-                    <Dropdown.Menu
-                      onAction={(key) => console.log(`Selected: ${key}`)}
-                    >
+                    <Dropdown.Menu>
                       <Dropdown.Item id="new-file" textValue="New file">
                         <div className="flex h-8 items-start justify-center pt-px">
                           <SquarePlus className="size-4 shrink-0" />
@@ -715,93 +717,114 @@ export default function NursePage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-base-300">
-                        {loading ? (
-                          <tr>
-                            <td colSpan="4" className="p-6">
-                              {[...Array(5)].map((_, i) => (
-                                <div
-                                  key={i}
-                                  className="flex items-center gap-4 mb-4 p-4 rounded-lg bg-base-100"
-                                >
-                                  <div className="skeleton h-10 w-10 rounded-full shrink-0"></div>
-                                  <div className="flex-1">
-                                    <div className="skeleton h-4 w-32 mb-2"></div>
-                                    <div className="skeleton h-3 w-24"></div>
-                                  </div>
-                                  <div className="skeleton h-8 w-16"></div>
-                                </div>
-                              ))}
-                            </td>
-                          </tr>
-                        ) : (
-                          filteredPatients.slice(0, 8).map((patient) => (
-                            <tr
-                              key={patient._id}
-                              className="hover:bg-base-200 transition group"
-                            >
-                              <td className="pl-6 py-4">
-                                <div className="flex items-center gap-3">
-                                  <Avatar size="lg">
-                                    <Avatar.Image
-                                      alt="Large Avatar"
-                                      src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg"
-                                    />
-                                    <Avatar.Fallback>LG</Avatar.Fallback>
-                                  </Avatar>
-                                  <div>
-                                    <p className="font-bold text-sm text-base-content">
-                                      {patient.firstName} {patient.lastName}
-                                    </p>
-                                    <p className="text-xs text-base-content/60">
-                                      {patient.gender},{" "}
-                                      {new Date().getFullYear() -
-                                        new Date(
-                                          patient.date,
-                                        ).getFullYear()}{" "}
-                                      yrs
-                                    </p>
-                                  </div>
-                                </div>
-                              </td>
-                              <td className="px-4 py-4 text-sm text-base-content/80 font-medium">
-                                {patient.disease}
-                              </td>
-                              <td className="px-4 py-4">
-                                {patient.isHospitalized ? (
-                                  <Badge variant="destructive">
-                                    Hospitalized
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="default">In care...</Badge>
-                                )}
-                              </td>
-                              <td className="pr-6 py-4 text-right">
-                                <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                  <button
-                                    onClick={() => handleEdit(patient)}
-                                    className="btn btn-ghost btn-xs btn-circle"
-                                  >
-                                    <Edit className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() =>
-                                      handleHospitalize(patient._id)
-                                    }
-                                    className="btn btn-warning btn-xs btn-circle"
-                                  >
-                                    <ActivitySquare className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => handleDelete(patient._id)}
-                                    className="btn btn-error btn-xs btn-circle"
-                                  >
-                                    <Trash2 className="w-4 h-4" />
-                                  </button>
+                        {
+                          // I want that if patients.length is equal to zero, I want to display icon showing thtat there are no patients and a button to add one and I want ai
+                          filteredPatients.length === 0 ? (
+                            <tr>
+                              <td colSpan="4" className="p-6 text-center">
+                                <div className="flex flex-col items-center justify-center gap-4">
+                                  <img
+                                    src="/public/images/bed-solid-full.svg"
+                                    alt="No patients"
+                                    className="w-16 h-16 opacity-50"
+                                  />
+                                  <p className="text-gray-500">
+                                    No patients assigned
+                                  </p>
+                                  <Button onClick={() => setShowForm(true)}>
+                                    Add Patient
+                                  </Button>
                                 </div>
                               </td>
                             </tr>
-                          ))
-                        )}
+                          ) : loading ? (
+                            <tr>
+                              <td colSpan="4" className="p-6">
+                                {[...Array(5)].map((_, i) => (
+                                  <div
+                                    key={i}
+                                    className="flex items-center gap-4 mb-4 p-4 rounded-lg bg-base-100"
+                                  >
+                                    <div className="skeleton h-10 w-10 rounded-full shrink-0"></div>
+                                    <div className="flex-1">
+                                      <div className="skeleton h-4 w-32 mb-2"></div>
+                                      <div className="skeleton h-3 w-24"></div>
+                                    </div>
+                                    <div className="skeleton h-8 w-16"></div>
+                                  </div>
+                                ))}
+                              </td>
+                            </tr>
+                          ) : (
+                            filteredPatients.slice(0, 8).map((patient) => (
+                              <tr
+                                key={patient._id}
+                                className="hover:bg-base-200 transition group"
+                              >
+                                <td className="pl-6 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <Avatar size="lg">
+                                      <Avatar.Image
+                                        alt="Large Avatar"
+                                        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg"
+                                      />
+                                      <Avatar.Fallback>LG</Avatar.Fallback>
+                                    </Avatar>
+                                    <div>
+                                      <p className="font-bold text-sm text-base-content">
+                                        {patient.firstName} {patient.lastName}
+                                      </p>
+                                      <p className="text-xs text-base-content/60">
+                                        {patient.gender},{" "}
+                                        {new Date().getFullYear() -
+                                          new Date(
+                                            patient.date,
+                                          ).getFullYear()}{" "}
+                                        yrs
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+                                <td className="px-4 py-4 text-sm text-base-content/80 font-medium">
+                                  {patient.disease}
+                                </td>
+                                <td className="px-4 py-4">
+                                  {patient.isHospitalized ? (
+                                    <Badge variant="destructive">
+                                      Hospitalized
+                                    </Badge>
+                                  ) : (
+                                    <Badge variant="default">In care...</Badge>
+                                  )}
+                                </td>
+                                <td className="pr-6 py-4 text-right">
+                                  <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button
+                                      onClick={() => handleEdit(patient)}
+                                      className="btn btn-ghost btn-xs btn-circle"
+                                    >
+                                      <Edit className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() =>
+                                        handleHospitalize(patient._id)
+                                      }
+                                      className="btn btn-warning btn-xs btn-circle"
+                                    >
+                                      <ActivitySquare className="w-4 h-4" />
+                                    </button>
+                                    <button
+                                      onClick={() => handleDelete(patient._id)}
+                                      className="btn btn-error btn-xs btn-circle"
+                                    >
+                                      <Trash2 className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )
+                        }
                       </tbody>
                     </table>
                   </div>
@@ -826,9 +849,13 @@ export default function NursePage() {
                       {/* User Profile Section */}
                       <div className="flex items-center gap-4 mb-6">
                         <div className="relative">
-                          <Space wrap size={16}>
-                            <Avatar size={64} icon={<UserOutlined />} />
-                          </Space>
+                          <Avatar>
+                            <Avatar.Image
+                              alt="Blue"
+                              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+                            />
+                            <Avatar.Fallback>B</Avatar.Fallback>
+                          </Avatar>
                         </div>
                         <div>
                           <h3 className="text-lg font-bold text-slate-900 leading-tight">
@@ -1049,7 +1076,7 @@ export default function NursePage() {
 
       {reportForm && (
         <dialog
-          className="modal modal-open"
+          className="modal modal-open bg-slate-900/40 backdrop-blur-sm"
           onClick={() => ShowReportForm(false)}
         >
           <div
@@ -1057,61 +1084,69 @@ export default function NursePage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="font-bold text-lg mb-6">Generate Report</h2>
+            <br></br>
+            <br></br>
             <form onSubmit={Report} className="space-y-4">
               <div>
                 <label className="label">
                   <span className="label-text font-semibold">Title</span>
                 </label>
+                <br></br>
+                <br></br>
                 <input
                   type="text"
                   required
                   value={reportTitle}
                   onChange={(e) => setReportTitle(e.target.value)}
                   placeholder="Enter report title"
-                  className="input input-bordered w-full"
+                  className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                 />
               </div>
               <div>
                 <label className="label">
                   <span className="label-text font-semibold">Observations</span>
                 </label>
+                <br></br>
+                <br></br>
                 <textarea
                   required
                   rows={4}
                   value={body}
                   onChange={(e) => setBody(e.target.value)}
                   placeholder="Enter observations"
-                  className="textarea textarea-bordered w-full"
+                  className="textarea textarea-bordered w-full bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                 ></textarea>
               </div>
               <div>
                 <label className="label">
                   <span className="label-text font-semibold">Conclusion</span>
                 </label>
+                <br></br>
+                <br></br>
                 <textarea
                   required
                   rows={2}
                   value={conclusion}
                   onChange={(e) => setConclusion(e.target.value)}
                   placeholder="Enter conclusion"
-                  className="textarea textarea-bordered w-full"
+                  className="textarea textarea-bordered w-full bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                 ></textarea>
               </div>
               <div className="modal-action">
-                <button
+                <Button
+                  variant="danger"
                   type="button"
-                  className="btn btn-ghost"
                   onClick={() => ShowReportForm(false)}
                 >
                   Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
+                </Button>
+                <Button type="submit">
                   {reporting ? (
                     <Loader2 className="animate-spin w-4 h-4" />
                   ) : (
                     "Submit Report"
                   )}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -1230,8 +1265,9 @@ export default function NursePage() {
                   <span className="label-text text-xs font-bold uppercase tracking-wider opacity-70">
                     Condition / Disease
                   </span>
-                  <br></br>
                 </label>
+                <br />
+                <br />
                 <input
                   type="text"
                   required
@@ -1251,11 +1287,7 @@ export default function NursePage() {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="bg-indigo-400 text-indigo-50 cursor-pointer px-8 shadow-lg shadow-primary/20"
-                >
+                <Button type="submit" disabled={loading}>
                   {loading ? (
                     <Loader2 className="animate-spin w-4 h-4" />
                   ) : (
@@ -1266,7 +1298,7 @@ export default function NursePage() {
                       </span>
                     </div>
                   )}
-                </button>
+                </Button>
               </div>
             </form>
           </div>
@@ -1275,45 +1307,44 @@ export default function NursePage() {
 
       {showRequestForm && (
         <dialog
-          className="modal modal-open bg-gray-900/40 backdrop-blur-sm"
+          className="modal modal-open bg-slate-900/40 backdrop-blur-sm"
           onClick={() => setShowRequestForm(false)}
         >
           <div
-            className="modal-box w-full max-w-lg bg-base-200"
+            className="modal-box w-full max-w-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="font-bold text-lg mb-6">New Request</h2>
+            <h2 className="font-bold text-lg mb-6">New Request</h2><br></br><br></br>
             <form onSubmit={handleRequestSubmit} className="space-y-4">
-              <div>
-                <label className="label">
-                  <span className="label-text font-semibold">Type</span>
-                </label>
-                <select
-                  value={requestType}
-                  onChange={(e) => setRequestType(e.target.value)}
-                  className="select select-bordered w-full"
-                >
-                  <option>Medicine Request</option>
-                  <option>Equipment Request</option>
-                  <option>Supply Request</option>
-                </select>
-              </div>
-        
-                <div className="flex w-80 flex-col gap-4">
-                  <div className="flex flex-col gap-1">
-                    <Label htmlFor="input-type-email">Item name</Label>
-                    <Input
-                      required
-                      value={itemName}
-                      onChange={(e)=>setItemName(e.target.value)}
-                      id="input-type-email"
-                      placeholder="jane@example.com"
-                      type="text"
-                    />
-                  </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text font-semibold">Type</span>
+                  </label>
+                  <select
+                    value={requestType}
+                    onChange={(e) => setRequestType(e.target.value)}
+                    className=" input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  >
+                    <option>Medicine Request</option>
+                    <option>Equipment Request</option>
+                    <option>Supply Request</option>
+                  </select>
                 </div>
-              
-           
+
+                <div className="flex flex-col gap-1">
+                  <Label htmlFor="input-type-email">Item name</Label>
+                  <Input
+                    required
+                    value={itemName}
+                    onChange={(e) => setItemName(e.target.value)}
+                    id="input-type-email"
+                    placeholder="e.g. Paracetamol"
+                    type="text"
+                    className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="label">
@@ -1325,7 +1356,7 @@ export default function NursePage() {
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
                     placeholder="0"
-                    className="input input-bordered w-full"
+                    className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                   />
                 </div>
                 <div>
@@ -1335,7 +1366,7 @@ export default function NursePage() {
                   <select
                     value={urgency}
                     onChange={(e) => setUrgency(e.target.value)}
-                    className="select select-bordered w-full"
+                    className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -1346,27 +1377,28 @@ export default function NursePage() {
               <div>
                 <label className="label">
                   <span className="label-text font-semibold">Reason</span>
-                </label>
+                </label><br></br><br></br>
                 <textarea
                   required
                   rows={2}
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                   placeholder="Enter reason"
-                  className="textarea textarea-bordered w-full"
+                  className="textarea bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all w-full"
                 ></textarea>
               </div>
               <div className="modal-action">
-                <button
+                <Button
+                  variant="danger"
                   type="button"
                   className="btn btn-ghost"
                   onClick={() => setShowRequestForm(false)}
                 >
                   Cancel
-                </button>
-                <button type="submit" className="btn btn-primary">
+                </Button>
+                <Button type="submit" disabled={loading}>
                   Submit Request
-                </button>
+                </Button>
               </div>
             </form>
           </div>

@@ -5,6 +5,9 @@ import { UserPlus } from "lucide-react";
 import { Search, Edit, ActivitySquare, Trash2 } from "lucide-react";
 import {Envelope, Globe, Plus, TrashBin} from "@gravity-ui/icons";
 import {Button} from "@heroui/react";
+import {Avatar} from "@heroui/react";
+
+
 const PatientList = () => {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -97,7 +100,17 @@ const PatientList = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-base-300">
-              {loading ? (
+              {
+              filteredPatients.length === 0 && !loading ? (
+                <div className="flex items-center justify-center flex-col py-10 text-center ml-[200px]">
+                  <img src="/public/images/bed-solid-full.svg" alt="No patients" className="w-24 h-24 mx-auto mb-4 text-gray-400" />
+                  <p colSpan="4" className="p-6 text-gray-500">
+                    No patients assigned yet. Click the button below to add a new patient.
+                  </p>
+                    <Button onClick={() => setShowForm(true)}>Add New Patient</Button>
+                  
+                </div>
+              ) : loading ? (
                 <tr>
                   <td colSpan="4" className="p-6">
                     {[...Array(5)].map((_, i) => (

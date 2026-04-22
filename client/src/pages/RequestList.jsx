@@ -6,12 +6,12 @@ const RequestDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [type,setType] = useState("");
-  const [quantity,setQuantity] = useState(1);
-  const [itemName,setItemName] = useState("");
-  const [reason,setReason] = useState("");
-  const [urgency,setUrgency] = useState("low");
-
+  const [type, setType] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [itemName, setItemName] = useState("");
+  const [reason, setReason] = useState("");
+  const [urgency, setUrgency] = useState("low");
+  const [patientCount, setPatientCount] = useState(1);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -46,13 +46,25 @@ const RequestDashboard = () => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.post(`${backendUrl}/api/requests/create`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await axios.post(
+        `${backendUrl}/api/requests/createRequests`,
+        {
+          requestType: type,
+          quantity,
+          itemName,
+          reason,
+          urgency,
+          patientCount,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
       setFormData({ title: "", content: "" });
       fetchRequests();
     } catch (err) {
-      alert("Failed to post request");
+      alert("Failed to post request", err.message);
+      console.log("error posting request", err.reponse);
     }
   };
 
@@ -135,16 +147,18 @@ const RequestDashboard = () => {
                 <label className="block text-gray-500 text-sm font-medium mb-2">
                   Type
                 </label>
-                
+
                 <select
                   className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                 >
                   <option value="">Select Request Type</option>
-                  <option value="Medicine Request">Medicine Request</option>
-                  <option value="Equipment Request">Equipment Request</option>
-                  <option value="Supply Request">Supply Request</option>
+                  <option value="Medicine">Medicine Request</option>
+                  <option value="Equipment">Equipment Request</option>
+                  <option value="Supply">Supply Request</option>
+                  <option value="Lab">Lab Request</option>
+                  <option value="Blood">Blood Request</option>
                 </select>
               </div>
               <div>
@@ -155,7 +169,30 @@ const RequestDashboard = () => {
                   type="number"
                   className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={quantity}
-                  onChange={(e)=> setQuantity(parseInt(e.target.value))}
+                  onChange={(e) => setQuantity(parseInt(e.target.value))}
+                />
+              </div>
+              <div>
+                <label>
+                  <span>Urgency</span>
+                </label>
+                <select
+                  value={urgency}
+                  onChange={(e) => setUrgency(e.target.value)}
+                >
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </div>
+              <label>
+                <span>Patient Count</span>
+              </label>
+              <div>
+                <input
+                  type="number"
+                  value={patientCount}
+                  onChange={(e) => setPatientCount(parseInt(e.target.value))}
                 />
               </div>
               <div>
@@ -163,13 +200,10 @@ const RequestDashboard = () => {
                   Item Name
                 </label>
                 <input
-
                   type="text"
                   className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
                   value={itemName}
-                  onChange={(e) =>
-                    setItemName(e.target.value)
-                  }
+                  onChange={(e) => setItemName(e.target.value)}
                 />
               </div>
               <div>
@@ -181,14 +215,12 @@ const RequestDashboard = () => {
                   placeholder="Empty"
                   className="w-full p-4 rounded-[2rem] border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100 resize-none"
                   value={reason}
-                  onChange={(e) =>
-                    setReason(e.target.value)
-                  }
+                  onChange={(e) => setReason(e.target.value)}
                 />
               </div>
-             <Button onClick={()=>handlePost} type="submit">
-               Request
-             </Button>
+              <Button onSubmit={handlePost} type="submit">
+                Request
+              </Button>
             </form>
           </div>
         </div>

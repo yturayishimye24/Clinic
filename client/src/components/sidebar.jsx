@@ -157,7 +157,7 @@ export default function Sidebar({ children, expanded, setExpanded }) {
                 aria-label="Menu"
                 className="button button-md button--secondary button--icon-only data-[focus-visible=true]:status-focused"
               >
-                <EllipsisVertical className="outline-none" />
+                <EllipsisVertical className={`outline-none ${expanded ? "w-4 h-4" : "w-0 h-0"}`} />
               </Dropdown.Trigger>
               <Dropdown.Popover>
                 <Dropdown.Menu

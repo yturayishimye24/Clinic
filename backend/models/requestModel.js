@@ -12,7 +12,7 @@ const requestSchema = new mongoose.Schema({
 },
   requestType: {
     type: String,
-    enum: ["Medicine Request", "Equipment Request", "Supply Request", "Blood Request", "Lab Test Request"],
+    enum: ["Medicine", "Equipment", "Supply", "Blood", "Lab"],
     required: true,
   },
   quantity: {
