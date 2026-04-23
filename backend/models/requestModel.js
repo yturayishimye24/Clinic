@@ -1,10 +1,7 @@
 import mongoose from "mongoose";
 
 const requestSchema = new mongoose.Schema({
-  Status: {
-    type: String,
-    enum: ["pending", "rejected", "approved"],
-  },
+  
   status: {
   type: String,
   enum: ["pending", "rejected", "approved"],
@@ -23,10 +20,10 @@ const requestSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  patientCount: {
-    type: Number,
-    required: true,
-  },
+  // patientCount: {
+  //   type: Number,
+  //   required: true,
+  // },
   reason: {
     type: String,
     required: true,

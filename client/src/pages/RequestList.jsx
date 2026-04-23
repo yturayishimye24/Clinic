@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Envelope, Globe, Plus, TrashBin } from "@gravity-ui/icons";
-import { Button } from "@heroui/react";
+import { Button, Input, Label } from "@heroui/react";
+import { OrbitProgress } from "react-loading-indicators";
+
 const RequestDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [type, setType] = useState("");
+  const [requestType, setRequestType] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [itemName, setItemName] = useState("");
   const [reason, setReason] = useState("");
   const [urgency, setUrgency] = useState("low");
-  const [patientCount, setPatientCount] = useState(1);
+  const [showRequestForm, setShowRequestForm] = useState(false);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -42,35 +44,50 @@ const RequestDashboard = () => {
     }
   };
 
-  const handlePost = async (e) => {
+  const handleRequestSubmit = async (e) => {
     e.preventDefault();
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
+      const requestData = {
+        requestType,
+        itemName,
+        quantity,
+        urgency,
+        reason,
+      };
+      const response = await axios.post(
         `${backendUrl}/api/requests/createRequests`,
-        {
-          requestType: type,
-          quantity,
-          itemName,
-          reason,
-          urgency,
-          patientCount,
-        },
+        requestData,
         {
           headers: { Authorization: `Bearer ${token}` },
         },
       );
-      setFormData({ title: "", content: "" });
-      fetchRequests();
-    } catch (err) {
-      alert("Failed to post request", err.message);
-      console.log("error posting request", err.reponse);
+      if (response.data.success) {
+        alert("Request submitted successfully");
+        setShowRequestForm(false);
+        fetchRequests();
+        // Reset request form
+        setItemName("");
+        setQuantity("");
+        setReason("");
+      }
+    } catch (error) {
+      console.error(error.response?.data || error.message);
+      alert(error.response?.data?.message || "Failed to submit request");
     }
   };
 
   if (loading)
     return (
-      <div className="p-6 text-center text-gray-500">Loading Dashboard...</div>
+      <>
+        <OrbitProgress
+          size={60}
+          color={["#32cd32", "#327fcd", "#cd32cd", "#cd8032"]}
+        />
+        <div className="p-6 text-center text-gray-500">
+          Loading Dashboard...
+        </div>
+      </>
     );
 
   return (
@@ -141,88 +158,133 @@ const RequestDashboard = () => {
         {/* Right Side: Quick Post Form */}
         <div className="w-full lg:w-[400px]">
           <h2 className="text-xl font-bold text-gray-700 mb-6">Quick Post</h2>
-          <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-gray-100">
-            <form onSubmit={handlePost} className="space-y-6">
-              <div>
-                <label className="block text-gray-500 text-sm font-medium mb-2">
-                  Type
-                </label>
+          <br></br>
+          <br></br>
+          {showRequestForm ? (
+            <>
+              <dialog
+                className="modal modal-open bg-slate-900/40 backdrop-blur-sm"
+                onClick={() => setShowRequestForm(false)}
+              >
+                <div
+                  className="modal-box w-full max-w-lg"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <h2 className="font-bold text-lg mb-6">New Request</h2>
+                  <br></br>
+                  <br></br>
+                  <form onSubmit={handleRequestSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-semibold">Type</span>
+                        </label>
+                        <select
+                          value={requestType}
+                          onChange={(e) => setRequestType(e.target.value)}
+                          className=" input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                        >
+                          <option value="Medicine">Medicine Request</option>
+                          <option value="Equipment">Equipment Request</option>
+                          <option value="Supply">Supply Request</option>
+                        </select>
+                      </div>
 
-                <select
-                  className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
-                  value={type}
-                  onChange={(e) => setType(e.target.value)}
-                >
-                  <option value="">Select Request Type</option>
-                  <option value="Medicine">Medicine Request</option>
-                  <option value="Equipment">Equipment Request</option>
-                  <option value="Supply">Supply Request</option>
-                  <option value="Lab">Lab Request</option>
-                  <option value="Blood">Blood Request</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-gray-500 text-sm font-medium mb-2">
-                  Quantity
-                </label>
-                <input
-                  type="number"
-                  className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
-                  value={quantity}
-                  onChange={(e) => setQuantity(parseInt(e.target.value))}
-                />
-              </div>
-              <div>
-                <label>
-                  <span>Urgency</span>
-                </label>
-                <select
-                  value={urgency}
-                  onChange={(e) => setUrgency(e.target.value)}
-                >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
-                </select>
-              </div>
-              <label>
-                <span>Patient Count</span>
-              </label>
-              <div>
-                <input
-                  type="number"
-                  value={patientCount}
-                  onChange={(e) => setPatientCount(parseInt(e.target.value))}
-                />
-              </div>
-              <div>
-                <label className="block text-gray-500 text-sm font-medium mb-2">
-                  Item Name
-                </label>
-                <input
-                  type="text"
-                  className="w-full p-3 rounded-full border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100"
-                  value={itemName}
-                  onChange={(e) => setItemName(e.target.value)}
-                />
-              </div>
-              <div>
-                <label className="block text-gray-500 text-sm font-medium mb-2">
-                  Reason
-                </label>
-                <textarea
-                  rows="5"
-                  placeholder="Empty"
-                  className="w-full p-4 rounded-[2rem] border border-gray-200 bg-gray-50 focus:outline-none focus:ring-2 focus:ring-purple-100 resize-none"
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                />
-              </div>
-              <Button onSubmit={handlePost} type="submit">
-                Request
+                      <div className="flex flex-col gap-1">
+                        <Label htmlFor="input-type-email">Item name</Label>
+                        <Input
+                          required
+                          value={itemName}
+                          onChange={(e) => setItemName(e.target.value)}
+                          id="input-type-email"
+                          placeholder="e.g. Paracetamol"
+                          type="text"
+                          className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-semibold">
+                            Quantity
+                          </span>
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          value={quantity}
+                          onChange={(e) => setQuantity(e.target.value)}
+                          placeholder="0"
+                          className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                        />
+                      </div>
+                      <div>
+                        <label className="label">
+                          <span className="label-text font-semibold">
+                            Urgency
+                          </span>
+                        </label>
+                        <select
+                          value={urgency}
+                          onChange={(e) => setUrgency(e.target.value)}
+                          className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                        >
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="label">
+                        <span className="label-text font-semibold">Reason</span>
+                      </label>
+                      <br></br>
+                      <br></br>
+                      <textarea
+                        required
+                        rows={2}
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
+                        placeholder="Enter reason"
+                        className="textarea bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all w-full"
+                      ></textarea>
+                    </div>
+                    <div className="modal-action">
+                      <Button
+                        variant="danger"
+                        type="button"
+                        className="btn btn-ghost"
+                        onClick={() => setShowRequestForm(false)}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" disabled={loading}>
+                        Submit Request
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+                <form method="dialog" className="modal-backdrop">
+                  <button onClick={() => setShowRequestForm(false)}>
+                    close
+                  </button>
+                </form>
+              </dialog>
+            </>
+          ) : (
+            <>
+              <Button
+                fullWidth
+                color="primary"
+                onClick={() => setShowRequestForm(true)}
+              >
+                <Plus />
+                Make a Request
               </Button>
-            </form>
-          </div>
+            </>
+          )}
         </div>
       </div>
     </div>

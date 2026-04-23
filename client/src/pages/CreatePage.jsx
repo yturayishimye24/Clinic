@@ -87,7 +87,7 @@ export default function NursePage() {
   const [reportForm, ShowReportForm] = useState(false);
 
   // Request Form States
-  const [requestType, setRequestType] = useState("Medicine Request");
+  const [requestType, setRequestType] = useState("Medicine");
   const [itemName, setItemName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [urgency, setUrgency] = useState("medium");
@@ -377,12 +377,12 @@ export default function NursePage() {
     try {
       const token = localStorage.getItem("token");
       const requestData = {
-        Status: "pending",
+       
         requestType,
         itemName,
         quantity,
         urgency,
-        patientCount,
+       
         reason,
       };
       const response = await axios.post(
@@ -402,7 +402,8 @@ export default function NursePage() {
         setReason("");
       }
     } catch (error) {
-      toast.error("Failed to submit request");
+      console.error("Error submitting request:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Failed to submit request");
     }
   };
 
@@ -1326,9 +1327,9 @@ export default function NursePage() {
                     onChange={(e) => setRequestType(e.target.value)}
                     className=" input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
                   >
-                    <option>Medicine Request</option>
-                    <option>Equipment Request</option>
-                    <option>Supply Request</option>
+                    <option value="Medicine">Medicine Request</option>
+                    <option value="Equipment">Equipment Request</option>
+                    <option value="Supply">Supply Request</option>
                   </select>
                 </div>
 

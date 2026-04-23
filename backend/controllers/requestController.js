@@ -1,9 +1,12 @@
 import request from "../models/requestModel.js";
-import {io} from "../server.js"
+import { io } from "../server.js";
 
 export const getRequests = async (req, res) => {
   try {
-    const requests = await request.find().sort({ createdAt: -1 }).populate("createdBy","username");
+    const requests = await request
+      .find()
+      .sort({ createdAt: -1 })
+      .populate("createdBy", "username");
     if (!requests || requests.length === 0) {
       return res.status(200).json({ success: true, requests: [] });
     }
@@ -27,21 +30,13 @@ export const createRequests = async (req, res) => {
     const {
       requestType,
       itemName,
-      patientCount,
+
       reason,
       urgency,
-      Status,
+
       quantity,
     } = req.body;
-    if (
-      !requestType ||
-      !itemName ||
-      patientCount === null ||
-      patientCount === undefined ||
-      !reason ||
-      !urgency ||
-      !quantity
-    ) {
+    if (!requestType || !itemName || !reason || !urgency || !quantity) {
       return res
         .status(403)
         .json({ message: "You have to fill all fields.", success: false });
@@ -49,24 +44,24 @@ export const createRequests = async (req, res) => {
     const createdRequest = await new request({
       requestType,
       itemName,
-      patientCount,
       quantity,
       reason,
       urgency,
-      Status: Status || "pending",
-      status: Status || "pending",
-      createdBy: req.user.id,
+      createdBy: req.user._id,
     });
     const savedRequest = await createdRequest.save();
     // emit normalized object
-    const payload = savedRequest.toObject ? savedRequest.toObject() : savedRequest;
+    const payload = savedRequest.toObject
+      ? savedRequest.toObject()
+      : savedRequest;
     payload.status = payload.status || payload.Status || "pending";
     io.to("admins").emit("requestCreated", payload);
     res.status(201).json({ success: true, request: payload });
   } catch (error) {
+    console.log("Error creating request:", error.message);
     res
-      .status(501)
-      .json({ success: false, message: "Server error in creating requests" });
+      .status(500)
+      .json({ success: false, message: error.message || "Server error in creating requests" });
   }
 };
 
@@ -75,10 +70,14 @@ export const removeRequests = async (req, res) => {
     const { id } = req.params;
     const deletedRequest = await request.findByIdAndDelete(id);
     if (!deletedRequest) {
-      res.status(501).json({ success:false, message: "Deleting user throwing error" });
+      res
+        .status(501)
+        .json({ success: false, message: "Deleting user throwing error" });
     } else {
-      io.to("admins").emit("requestDeleted",id);
-      res.status(200).json({ success:true, message: "Request deletion successfull!" });
+      io.to("admins").emit("requestDeleted", id);
+      res
+        .status(200)
+        .json({ success: true, message: "Request deletion successfull!" });
     }
   } catch (error) {
     console.log("Error getting requests", error.message);
@@ -101,15 +100,23 @@ export const changeRequests = async (req, res) => {
         status: Status,
         urgency,
       },
-      { new: true }
+      { new: true },
     );
     if (!changedRequest) {
       res.status(501).json({ message: "Failed to change Request" });
     } else {
-      const payload = changedRequest.toObject ? changedRequest.toObject() : changedRequest;
+      const payload = changedRequest.toObject
+        ? changedRequest.toObject()
+        : changedRequest;
       payload.status = payload.status || payload.Status || "pending";
       io.to("admins").emit("requestChanged", payload);
-      res.status(200).json({ success: true, message: "Request Updated successfully!", request: payload });
+      res
+        .status(200)
+        .json({
+          success: true,
+          message: "Request Updated successfully!",
+          request: payload,
+        });
     }
   } catch (error) {
     console.log("Error updating request", error.message);
@@ -119,14 +126,19 @@ export const changeRequests = async (req, res) => {
 export const approveRequests = async (req, res) => {
   try {
     const { id } = req.params;
+    console.log("Approving request with ID:", id);
 
     const reqDoc = await request.findById(id);
     if (!reqDoc) {
+      console.log("Request not found for ID:", id);
       return res.status(404).json({ message: "Request not found!" });
     }
 
     const currentStatus = reqDoc.status || reqDoc.Status;
+    console.log("Current status:", currentStatus);
+
     if (currentStatus === "approved") {
+      console.log("Request already approved");
       return res.status(400).json({ message: "Already approved!" });
     }
 
@@ -134,16 +146,20 @@ export const approveRequests = async (req, res) => {
     reqDoc.Status = "approved";
     reqDoc.status = "approved";
     await reqDoc.save();
+    console.log("Request saved successfully");
 
     const payload = reqDoc.toObject ? reqDoc.toObject() : reqDoc;
     payload.status = payload.status || payload.Status || "approved";
 
     io.to("admins").emit("requestApproved", payload);
     io.to("nurses").emit("requestApproved", payload);
-    res.status(200).json({ success: true, message: "Request approved!", request: payload });
+    console.log("Emitted approval to sockets");
+
+    res
+      .status(200)
+      .json({ success: true, message: "Request approved!", request: payload });
   } catch (error) {
     console.error("Error approving request:", error);
     res.status(500).json({ message: "Error approving request" });
   }
 };
-

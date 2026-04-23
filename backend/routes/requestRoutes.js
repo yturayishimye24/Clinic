@@ -4,7 +4,7 @@ import { autheticate } from "../middlewares/autheticateToken.js"
 const requestRouter = express.Router();
 
 requestRouter.get("/showRequests",autheticate,getRequests)
-requestRouter.post("/createRequests",createRequests)
+requestRouter.post("/createRequests",autheticate,createRequests)
 requestRouter.delete("/removeRequests/:id",autheticate,removeRequests)
 requestRouter.put("/changeRequests/:id",autheticate,changeRequests)
 requestRouter.patch("/approve/:id",autheticate,approveRequests)

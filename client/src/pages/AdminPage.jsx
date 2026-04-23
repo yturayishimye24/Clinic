@@ -95,8 +95,12 @@ export default function AdminPage() {
   const fetchRequests = async () => {
     setLoadingRequests(true);
     try {
+      const token = localStorage.getItem("token");
       const response = await axios.get(
         `${backendUrl}/api/requests/showRequests`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
       );
       const d = response.data;
       setRequests(
@@ -245,7 +249,8 @@ export default function AdminPage() {
         fetchRequests();
       }
     } catch (error) {
-      toast.error("Error approving request");
+      console.error("Error approving request:", error.response?.data || error.message);
+      toast.error(error.response?.data?.message || "Error approving request");
     } finally {
       setApproving(false);
     }
@@ -407,7 +412,7 @@ export default function AdminPage() {
               </div>
               <div className="mt-4">
                 <h2 className="text-5xl font-bold text-gray-800 tracking-tight">
-                  {requests.filter((r) => r.Status === "pending").length}
+                  {requests.filter((r) => r.status === "pending").length}
                 </h2>
               </div>
               <div className="mt-6 flex items-center gap-2">
@@ -560,11 +565,11 @@ export default function AdminPage() {
                               </span>
                             </td>
                             <td className="px-4 py-4">
-                              <StatusBadge status={req.Status} />
+                              <StatusBadge status={req.status} />
                             </td>
                             <td className="pr-6 py-4 text-right">
                               <div className="flex items-center justify-end gap-3">
-                                {req.Status === "pending" && (
+                                {req.status === "pending" && (
                                   <button
                                     onClick={(e) => {
                                       e.preventDefault();
