@@ -6,18 +6,67 @@ import { Search, Edit, ActivitySquare, Trash2 } from "lucide-react";
 import {Envelope, Globe, Plus, TrashBin} from "@gravity-ui/icons";
 import {Button} from "@heroui/react";
 import {Avatar} from "@heroui/react";
+import { useParams } from "react-router-dom";
 
 
 const PatientList = () => {
+  const {id} = useParams();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [saving, setSaving] = useState(false);
+
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [searchTerm, setSearchTerm] = useState("");
   useEffect(() => {
     fetchPatients();
   }, []);
+ 
+  const handleDeletePatient = async (patientId) => {
+    if(!window.confirm("Delete this patient?")) return;
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.delete(`${backendUrl}/api/patients/delete_patient/${patientId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        
+      });
+      if(response.status === 200){
+          toast.success("Patient deleted successfully");
+          fetchPatients();
+        } else {
+          toast.error("Failed to delete patient");
+        }
+    } catch (error) {
+      console.error("Error deleting patient:", error);
+    }
+  };
+  const handleEdit = async() =>{
+    setSaving(true);
 
+    try{
+      const token = localStorage.getItem("token");
+      const response = await axios.put(`${backendUrl}/api/patients/${id}`,{
+        firstName,
+        lastName,
+        gender,
+        date,
+        disease
+
+      })
+      if(!response.data){
+        toast.error("Failed to update patient")
+      }else{
+        toast.success("Patient updated successfully")
+        fetchPatients();
+      }
+    }catch(error){
+      console.error("Error updating patient:", error);
+    }finally{
+      setSaving(false);
+    }
+  }
   const fetchPatients = async () => {
     try {
       setLoading(true);
@@ -167,7 +216,7 @@ const PatientList = () => {
                     <td className="pr-6 py-4 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
-                          onClick={() => handleEdit(patient)}
+                          onClick={ handleEdit}
                           className="btn btn-ghost btn-xs btn-circle"
                         >
                           <Edit className="w-4 h-4" />
@@ -179,7 +228,7 @@ const PatientList = () => {
                           <ActivitySquare className="w-4 h-4" />
                         </button>
                         <button
-                          onClick={() => handleDelete(patient._id)}
+                          onClick={() => handleDeletePatient(patient._id)}
                           className="btn btn-error btn-xs btn-circle"
                         >
                           <Trash2 className="w-4 h-4" />

@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import Nurse from "../models/userModel.js";
 import dotenv from "dotenv";
 import {io} from "../server.js"
+// import { messaging } from "firebase-admin";
 
 dotenv.config();
 const userToken = (id, role) => {
@@ -138,3 +139,29 @@ export const getCurrentUser = async (req, res) => {
     res.status(500).json({ success: false, message: error.message || "Error getting user" });
   }
 };
+
+export const updateNurse = async (req, res) => {
+
+  try{
+    const { id } = req.params;
+
+    const { username, email, role } = req.body;
+
+    const updatedNurse = await Nurse.findByIdAndUpdate(
+      id,
+      {username, email, role},
+      { new: true}
+    )
+    if(!updatedNurse){
+      return res.status(404).json({ success: false, message: "Nurse not found!" });
+    }
+
+    const payload = updatedNurse.toObject ? updatedNurse.toObject() : updatedNurse;
+    io.to("admins").emit("nurseUpdated", payload);
+    res.status(200).json({ success: true, message: "Nurse updated successfully!", nurse: payload });
+
+  }catch(error){
+    console.log("Error updating nurse", error.message);
+    res.status(500).json({ success: false, message: error.message || "Error updating nurse"})
+  }
+}

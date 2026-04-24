@@ -2,7 +2,13 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate, Link, Outlet, useLocation } from "react-router-dom";
+import {
+  useNavigate,
+  Link,
+  Outlet,
+  useLocation,
+  useParams,
+} from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Inbox } from "lucide-react";
 import { UserOutlined } from "@ant-design/icons";
@@ -22,7 +28,7 @@ import {
   SquarePlus,
   TrashBin,
 } from "@gravity-ui/icons";
-import { Button, Dropdown, Label, Input } from "@heroui/react";
+import { Button, Dropdown, Label, Input, AlertDialog } from "@heroui/react";
 import {
   ChevronDown,
   UserPlus,
@@ -57,6 +63,7 @@ import {
 
 export default function NursePage() {
   const location = useLocation();
+  const { id } = useParams();
   const navigate = useNavigate();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -66,6 +73,7 @@ export default function NursePage() {
   const [showRequestForm, setShowRequestForm] = useState(false);
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [updating, setUpdating] = useState(false);
   const [expanded, setExpanded] = useState(true);
   const [active, setActive] = useState(false);
   // Patient Form States
@@ -269,7 +277,6 @@ export default function NursePage() {
   };
 
   const handleDelete = async (patientId) => {
-    if (!window.confirm("Delete this patient?")) return;
     try {
       const token = localStorage.getItem("token");
       await axios.delete(`${backendUrl}/api/patients/${patientId}`, {
@@ -301,16 +308,41 @@ export default function NursePage() {
   };
 
   // --- FORM HANDLERS ---
-  const handleEdit = (patient) => {
-    setEditingPatientId(patient._id);
-    setFirstName(patient.firstName || "");
-    setLastName(patient.lastName || "");
-    setGender(patient.gender || "");
-    setDate(patient.date ? patient.date.split("T")[0] : "");
-    setMaritalStatus(patient.maritalStatus || "");
-    setDisease(patient.disease || "");
-    setShowForm(true);
+  const handleEdit = async (e) => {
+    e.preventDefault();
+    setUpdating(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.put(
+        `${backendUrl}/api/patients/${id}`,
+        {
+          firstName,
+          lastName,
+          gender,
+          date,
+          maritalStatus,
+          disease,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+    } catch (error) {
+      console.log("Error updating patient", error);
+    } finally {
+      setUpdating(false);
+    }
   };
+  // const handleEdit = (patient) => {
+  //   setEditingPatientId(patient._id);
+  //   setFirstName(patient.firstName || "");
+  //   setLastName(patient.lastName || "");
+  //   setGender(patient.gender || "");
+  //   setDate(patient.date ? patient.date.split("T")[0] : "");
+  //   setMaritalStatus(patient.maritalStatus || "");
+  //   setDisease(patient.disease || "");
+  //   setShowForm(true);
+  // };
 
   const resetForm = () => {
     setFirstName("");
@@ -377,12 +409,11 @@ export default function NursePage() {
     try {
       const token = localStorage.getItem("token");
       const requestData = {
-       
         requestType,
         itemName,
         quantity,
         urgency,
-       
+
         reason,
       };
       const response = await axios.post(
@@ -402,7 +433,10 @@ export default function NursePage() {
         setReason("");
       }
     } catch (error) {
-      console.error("Error submitting request:", error.response?.data || error.message);
+      console.error(
+        "Error submitting request:",
+        error.response?.data || error.message,
+      );
       toast.error(error.response?.data?.message || "Failed to submit request");
     }
   };
@@ -699,135 +733,123 @@ export default function NursePage() {
                     </div>
                   </div>
 
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead className="bg-gray-50/50">
-                        <tr>
-                          <th className="pl-6 py-4 text-xs font-semibold text-gray-400 uppercase">
-                            Patient
-                          </th>
-                          <th className="px-4 py-4 text-xs font-semibold text-gray-400 uppercase">
-                            Condition
-                          </th>
-                          <th className="px-4 py-4 text-xs font-semibold text-gray-400 uppercase">
-                            Status
-                          </th>
-                          <th className="pr-6 py-4 text-right text-xs font-semibold text-gray-400 uppercase">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-base-300">
-                        {
-                          // I want that if patients.length is equal to zero, I want to display icon showing thtat there are no patients and a button to add one and I want ai
-                          filteredPatients.length === 0 ? (
+                  <div className="w-full">
+                    <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white">
+                      <table className="min-w-[700px] w-full text-left">
+                        {/* HEADER */}
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-4 text-xs font-semibold text-gray-400 uppercase whitespace-nowrap">
+                              Patient
+                            </th>
+                            <th className="px-4 py-4 text-xs font-semibold text-gray-400 uppercase whitespace-nowrap">
+                              Condition
+                            </th>
+                            <th className="px-4 py-4 text-xs font-semibold text-gray-400 uppercase whitespace-nowrap">
+                              Status
+                            </th>
+                            <th className="px-4 py-4 text-xs font-semibold text-gray-400 uppercase text-right whitespace-nowrap">
+                              Actions
+                            </th>
+                          </tr>
+                        </thead>
+
+                        {/* BODY */}
+                        <tbody className="divide-y divide-gray-100">
+                          {filteredPatients.length === 0 ? (
                             <tr>
-                              <td colSpan="4" className="p-6 text-center">
-                                <div className="flex flex-col items-center justify-center gap-4">
-                                  <img
-                                    src="/public/images/bed-solid-full.svg"
-                                    alt="No patients"
-                                    className="w-16 h-16 opacity-50"
-                                  />
+                              <td colSpan="4" className="p-10 text-center">
+                                <div className="flex flex-col items-center gap-4">
+                                  <i className="fa-solid fa-user-xmark text-5xl text-gray-300"></i>
                                   <p className="text-gray-500">
-                                    No patients assigned
+                                    No patients found
                                   </p>
-                                  <Button onClick={() => setShowForm(true)}>
+                                  <Button
+                                    fullWidth
+                                    variant="tertiary"
+                                    onClick={() => setShowForm(true)}
+                                    
+                                  >
                                     Add Patient
                                   </Button>
                                 </div>
                               </td>
                             </tr>
-                          ) : loading ? (
-                            <tr>
-                              <td colSpan="4" className="p-6">
-                                {[...Array(5)].map((_, i) => (
-                                  <div
-                                    key={i}
-                                    className="flex items-center gap-4 mb-4 p-4 rounded-lg bg-base-100"
-                                  >
-                                    <div className="skeleton h-10 w-10 rounded-full shrink-0"></div>
-                                    <div className="flex-1">
-                                      <div className="skeleton h-4 w-32 mb-2"></div>
-                                      <div className="skeleton h-3 w-24"></div>
-                                    </div>
-                                    <div className="skeleton h-8 w-16"></div>
-                                  </div>
-                                ))}
-                              </td>
-                            </tr>
                           ) : (
-                            filteredPatients.slice(0, 8).map((patient) => (
+                            filteredPatients.map((patient) => (
                               <tr
                                 key={patient._id}
-                                className="hover:bg-base-200 transition group"
+                                className="hover:bg-gray-50 transition"
                               >
-                                <td className="pl-6 py-4">
-                                  <div className="flex items-center gap-3">
-                                    <Avatar size="lg">
+                                {/* PATIENT */}
+                                <td className="px-4 py-4">
+                                  <div className="flex items-center gap-3 min-w-[180px]">
+                                    <Avatar size="md">
                                       <Avatar.Image
-                                        alt="Large Avatar"
-                                        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/red.jpg"
+                                        alt="Medium Avatar"
+                                        src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/purple.jpg"
                                       />
-                                      <Avatar.Fallback>LG</Avatar.Fallback>
+                                      <Avatar.Fallback>MD</Avatar.Fallback>
                                     </Avatar>
                                     <div>
-                                      <p className="font-bold text-sm text-base-content">
+                                      <p className="font-semibold text-sm whitespace-nowrap">
                                         {patient.firstName} {patient.lastName}
                                       </p>
-                                      <p className="text-xs text-base-content/60">
-                                        {patient.gender},{" "}
-                                        {new Date().getFullYear() -
-                                          new Date(
-                                            patient.date,
-                                          ).getFullYear()}{" "}
-                                        yrs
+                                      <p className="text-xs text-gray-500">
+                                        {patient.gender}
                                       </p>
                                     </div>
                                   </div>
                                 </td>
-                                <td className="px-4 py-4 text-sm text-base-content/80 font-medium">
+
+                                <td className="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
                                   {patient.disease}
                                 </td>
-                                <td className="px-4 py-4">
+
+                                <td className="px-4 py-4 whitespace-nowrap">
                                   {patient.isHospitalized ? (
-                                    <Badge variant="destructive">
+                                    <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-600">
                                       Hospitalized
-                                    </Badge>
+                                    </span>
                                   ) : (
-                                    <Badge variant="default">In care...</Badge>
+                                    <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-600">
+                                      In care
+                                    </span>
                                   )}
                                 </td>
-                                <td className="pr-6 py-4 text-right">
-                                  <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+
+                                <td className="px-4 py-4 text-right whitespace-nowrap">
+                                  <div className="flex justify-end gap-2">
                                     <button
                                       onClick={() => handleEdit(patient)}
-                                      className="btn btn-ghost btn-xs btn-circle"
+                                      className="p-2 rounded-full hover:bg-gray-100"
                                     >
                                       <Edit className="w-4 h-4" />
                                     </button>
+
                                     <button
                                       onClick={() =>
                                         handleHospitalize(patient._id)
                                       }
-                                      className="btn btn-warning btn-xs btn-circle"
+                                      className="p-2 rounded-full hover:bg-yellow-100"
                                     >
                                       <ActivitySquare className="w-4 h-4" />
                                     </button>
+
                                     <button
                                       onClick={() => handleDelete(patient._id)}
-                                      className="btn btn-error btn-xs btn-circle"
+                                      className="p-2 rounded-full hover:bg-red-100"
                                     >
-                                      <Trash2 className="w-4 h-4" />
+                                      <Trash2 className="w-4 h-4 text-red-500" />
                                     </button>
                                   </div>
                                 </td>
                               </tr>
                             ))
-                          )
-                        }
-                      </tbody>
-                    </table>
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
 
@@ -970,14 +992,12 @@ export default function NursePage() {
                           className="flex items-center justify-between p-3 rounded-xl transition 
           hover:bg-base-200 border border-transparent hover:border-base-300 group"
                         >
-                          {/* Left */}
                           <div className="flex items-center gap-3 min-w-0">
                             {/* Initial Badge */}
                             <div className="badge badge-accent badge-sm w-6 h-6 rounded-full font-semibold">
                               {req.itemName.substring(0, 2).toUpperCase()}
                             </div>
 
-                            {/* Info */}
                             <div className="min-w-0">
                               <p className="text-sm font-semibold truncate">
                                 {req.itemName}
@@ -989,18 +1009,47 @@ export default function NursePage() {
                             </div>
                           </div>
 
-                          {/* Right */}
                           <div className="flex items-center gap-3">
-                            {/* Status */}
                             <StatusBadge status={req.status} />
 
-                            {/* Delete */}
-                            <button
-                              onClick={(e) => handleDeleteRequest(req._id, e)}
-                              className="btn btn-ghost btn-xs btn-circle opacity-0 group-hover:opacity-100 transition"
-                            >
-                              <Trash2 className="w-4 h-4 text-error" />
-                            </button>
+                            <AlertDialog>
+                              <Button
+                                isIconOnly
+                                onClick={(e) => handleDeleteRequest(req._id, e)}
+                                className="btn btn-ghost btn-xs btn-circle opacity-0 group-hover:opacity-100 transition"
+                              >
+                                <Trash2 className="w-4 h-4 text-error" />
+                              </Button>
+                              <AlertDialog.Backdrop>
+                                <AlertDialog.Container>
+                                  <AlertDialog.Dialog className="sm:max-w-[400px]">
+                                    <AlertDialog.CloseTrigger />
+                                    <AlertDialog.Header>
+                                      <AlertDialog.Icon status="danger" />
+                                      <AlertDialog.Heading>
+                                        Delete project permanently?
+                                      </AlertDialog.Heading>
+                                    </AlertDialog.Header>
+                                    <AlertDialog.Body>
+                                      <p>
+                                        This will permanently delete{" "}
+                                        <strong>My Awesome Project</strong> and
+                                        all of its data. This action cannot be
+                                        undone.
+                                      </p>
+                                    </AlertDialog.Body>
+                                    <AlertDialog.Footer>
+                                      <Button slot="close" variant="tertiary">
+                                        Cancel
+                                      </Button>
+                                      <Button slot="close" variant="danger">
+                                        Delete Project
+                                      </Button>
+                                    </AlertDialog.Footer>
+                                  </AlertDialog.Dialog>
+                                </AlertDialog.Container>
+                              </AlertDialog.Backdrop>
+                            </AlertDialog>
                           </div>
                         </div>
                       ))
@@ -1315,7 +1364,9 @@ export default function NursePage() {
             className="modal-box w-full max-w-lg"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="font-bold text-lg mb-6">New Request</h2><br></br><br></br>
+            <h2 className="font-bold text-lg mb-6">New Request</h2>
+            <br></br>
+            <br></br>
             <form onSubmit={handleRequestSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -1378,7 +1429,9 @@ export default function NursePage() {
               <div>
                 <label className="label">
                   <span className="label-text font-semibold">Reason</span>
-                </label><br></br><br></br>
+                </label>
+                <br></br>
+                <br></br>
                 <textarea
                   required
                   rows={2}

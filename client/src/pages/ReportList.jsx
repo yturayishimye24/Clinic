@@ -1,19 +1,43 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import {OrbitProgress} from "react-loading-indicators"
-import {X,Plus} from "lucide-react"
+import { OrbitProgress } from "react-loading-indicators";
+import { X, Plus } from "lucide-react";
+import {Button} from "@heroui/react";
+import { TrashBin } from "@gravity-ui/icons";
+import { toast } from "react-toastify";
+
 const ReportList = () => {
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null); // For the Modal
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
-  const [close,setClose] = useState(false)
+  const [close, setClose] = useState(false);
 
   useEffect(() => {
     fetchReports();
   }, []);
+ 
 
+ //handles delete report
+ 
+ const handleReportDelete = (reportId) => async () => {
+  const token = localStorage.getItem("token");
+    try {
+   const deleteResponse = await axios.delete(`${backendUrl}/api/report/delete_report/${reportId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if(deleteResponse.status === 200){
+      toast.success("Report deleted successfully");
+      fetchReports(); 
+    } else {
+      toast.error("Failed to delete report");
+    }
+    }catch(err){
+      console.error("Error deleting report:", err);
+      toast.error("Failed to delete report");
+    }
+ }
   const fetchReports = async () => {
     try {
       setLoading(true);
@@ -51,30 +75,33 @@ const ReportList = () => {
 
         {loading ? (
           <div className="flex justify-center items-center h-96">
-          <OrbitProgress
-            variant="track-disc"
-            dense={false}
-            color={[
-              "#FBBC05",
-              "#FFBB00",
-              "#EA4335",
-              "#F65314",
-              "#34A853",
-              "#7CBB00",
-              "#4286F4",
-              "#00A1F1",
-            ]}
-            size="large"
-            text=""
-            textColor=""
-          />
+            <OrbitProgress
+              variant="track-disc"
+              dense={false}
+              color={[
+                "#FBBC05",
+                "#FFBB00",
+                "#EA4335",
+                "#F65314",
+                "#34A853",
+                "#7CBB00",
+                "#4286F4",
+                "#00A1F1",
+              ]}
+              size="large"
+              text=""
+              textColor=""
+            />
           </div>
         ) : reports.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-dashed border-gray-300">
             <p className="text-gray-400 text-lg flex flex-col items-center gap-3">
               <i class="fa-solid fa-file-circle-xmark fa-5x"></i>
               No reports found in the archive.
-              <button className="mt-6 cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-gray-800 text-sm font-medium border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"><Plus/>Create new report</button>
+              <button className="mt-6 cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-gray-800 text-sm font-medium border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200">
+                <Plus />
+                Create new report
+              </button>
             </p>
           </div>
         ) : (
@@ -86,21 +113,10 @@ const ReportList = () => {
               >
                 <div>
                   <div className="flex justify-between items-start mb-4">
-                    <div className="p-2 bg-blue-50 rounded-lg text-blue-600">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-6 w-6"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="9 17v-2m3 2v-4m3 4v-6m2 10H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"
-                        />
-                      </svg>
+                    <div className="p-2  rounded-lg ">
+                      <Button isIconOnly variant="danger" onClick={handleReportDelete(report._id)}>
+                        <TrashBin />
+                      </Button>
                     </div>
                     <span className="text-xs font-medium text-gray-400">
                       {new Date(report.createdAt).toLocaleDateString()}
@@ -152,8 +168,10 @@ const ReportList = () => {
 
       {/* --- BIG VIEW MODAL --- */}
       {selectedReport && (
-        <div className={`${close? "hidden" : "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"} `}>
-          <X onClick={()=>setClose(true)}/>
+        <div
+          className={`${close ? "hidden" : "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"} `}
+        >
+          <X onClick={() => setClose(true)} />
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-slate-800">
