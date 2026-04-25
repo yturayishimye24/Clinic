@@ -3,6 +3,7 @@ import { createRequestAccount} from "../controllers/requestAccountController.js"
 
 const requestAccountRouter = express.Router();
 
-requestAccountRouter.post("/request-account",createRequestAccount);
+requestAccountRouter.post("/",createRequestAccount);
+
 
 export default requestAccountRouter;

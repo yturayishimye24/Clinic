@@ -443,50 +443,9 @@ const LandingPage = () => {
         {/* Our Services Section */}
         
         <div
-          className="py-12 sm:py-16 lg:py-24 px-4 sm:px-6 bg-[#E8F5E9] text-center"
-          data-aos="zoom-out-down"
+          
         >
-          <div className="max-w-6xl mx-auto bg-[#4CAF50] rounded-[2.5rem] p-10 sm:p-20 shadow-2xl relative overflow-hidden">
-            {/* Subtle glow effect for depth */}
-            <div className="absolute top-0 left-0 w-full h-full bg-white opacity-[0.03] pointer-events-none"></div>
-
-            <div className="relative z-10 flex flex-col items-center">
-              <h2
-                className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white tracking-tight leading-tight"
-                data-aos="zoom-out-up"
-                duration="3000"
-              >
-                Your Clinic, <br className="hidden sm:block" /> Streamlined.
-              </h2>
-
-              <p
-                className="text-[#E8F5E9] text-lg sm:text-xl md:text-2xl max-w-3xl mb-10 opacity-90 leading-relaxed font-light"
-                data-aos="fade-right"
-                duration="2000"
-              >
-                Manage patient records, appointments, and billing in one secure
-                place. Focus on care while we handle the complexity.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  className="px-10 py-4 bg-white text-[#388E3C] text-lg font-bold rounded-sm shadow-lg hover:bg-[#E8F5E9] hover:scale-105 transition-all duration-300"
-                  data-aos="fade-up-right"
-                  onClick={()=>setSelectionOpen(true)}
-                >
-                  Get Started
-                </button>
-
-                <button
-                  className="px-10 py-4 bg-transparent border-2 border-[#E8F5E9] text-[#E8F5E9] text-lg font-medium rounded-full hover:bg-white/10 transition-all duration-300"
-                  data-aos="fade-up-left"
-                  onClick={()=>setSelectionOpen(true)}
-                >
-                  Explore Features
-                </button>
-              </div>
-            </div>
-          </div>
+          
         </div>
         <div className="bg-white shadow-lg rounded-full py-4 px-6 max-w-2xl mx-auto flex justify-center items-center gap-8 text-gray-600 text-sm mt-10 mb-10 sticky top-3 z-40 border border-gray-200">
           <ul className="flex items-center justify-center gap-8">

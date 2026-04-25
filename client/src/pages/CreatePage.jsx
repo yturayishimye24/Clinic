@@ -821,7 +821,7 @@ export default function NursePage() {
                                 <td className="px-4 py-4 text-right whitespace-nowrap">
                                   <div className="flex justify-end gap-2">
                                     <button
-                                      onClick={() => handleEdit(patient)}
+                                      onClick={()=> setShowForm(true)}
                                       className="p-2 rounded-full hover:bg-gray-100"
                                     >
                                       <Edit className="w-4 h-4" />
@@ -933,7 +933,7 @@ export default function NursePage() {
                         will appear here once generated.
                       </p>
                       <button
-                        onClick={() => setShowForm(true)}
+                        onClick={() => ShowReportForm(true)}
                         className="mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-gray-800 text-sm font-medium border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"
                       >
                         {reporting ? (
