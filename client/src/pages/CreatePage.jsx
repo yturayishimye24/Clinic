@@ -308,41 +308,42 @@ export default function NursePage() {
   };
 
   // --- FORM HANDLERS ---
-  const handleEdit = async (e) => {
-    e.preventDefault();
-    setUpdating(true);
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.put(
-        `${backendUrl}/api/patients/${id}`,
-        {
-          firstName,
-          lastName,
-          gender,
-          date,
-          maritalStatus,
-          disease,
-        },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-    } catch (error) {
-      console.log("Error updating patient", error);
-    } finally {
-      setUpdating(false);
-    }
-  };
-  // const handleEdit = (patient) => {
-  //   setEditingPatientId(patient._id);
-  //   setFirstName(patient.firstName || "");
-  //   setLastName(patient.lastName || "");
-  //   setGender(patient.gender || "");
-  //   setDate(patient.date ? patient.date.split("T")[0] : "");
-  //   setMaritalStatus(patient.maritalStatus || "");
-  //   setDisease(patient.disease || "");
-  //   setShowForm(true);
+  // const handleEdit = async (e) => {
+  //   e.preventDefault();
+  //   setUpdating(true);
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const response = await axios.put(
+  //       `${backendUrl}/api/patients/${id}`,
+  //       {
+  //         firstName,
+  //         lastName,
+  //         gender,
+  //         date,
+  //         maritalStatus,
+  //         disease,
+  //       },
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       },
+  //     );
+  //   } catch (error) {
+  //     console.log("Error updating patient", error);
+  //   } finally {
+  //     setUpdating(false);
+  //   }
   // };
+
+  const handleEdit = (patient) => {
+    setEditingPatientId(patient._id);
+    setFirstName(patient.firstName || "");
+    setLastName(patient.lastName || "");
+    setGender(patient.gender || "");
+    setDate(patient.date ? patient.date.split("T")[0] : "");
+    setMaritalStatus(patient.maritalStatus || "");
+    setDisease(patient.disease || "");
+    setShowForm(true);
+  };
 
   const resetForm = () => {
     setFirstName("");
@@ -821,7 +822,7 @@ export default function NursePage() {
                                 <td className="px-4 py-4 text-right whitespace-nowrap">
                                   <div className="flex justify-end gap-2">
                                     <button
-                                      onClick={()=> setShowForm(true)}
+                                      onClick={()=> handleEdit(patient)}
                                       className="p-2 rounded-full hover:bg-gray-100"
                                     >
                                       <Edit className="w-4 h-4" />
