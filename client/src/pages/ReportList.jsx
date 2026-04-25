@@ -5,12 +5,19 @@ import { X, Plus } from "lucide-react";
 import {Button} from "@heroui/react";
 import { TrashBin } from "@gravity-ui/icons";
 import { toast } from "react-toastify";
+import { AlertDialog} from "@heroui/react";
+import { Loader2 } from "lucide-react";
 
 const ReportList = () => {
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null); // For the Modal
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [reportForm, ShowReportForm] = useState(false);
+  const [reportTitle, setReportTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [conclusion, setConclusion] = useState("");
+  const [reporting, setReporting] = useState(false);
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
   const [close, setClose] = useState(false);
 
@@ -98,7 +105,10 @@ const ReportList = () => {
             <p className="text-gray-400 text-lg flex flex-col items-center gap-3">
               <i class="fa-solid fa-file-circle-xmark fa-5x"></i>
               No reports found in the archive.
-              <button className="mt-6 cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-gray-800 text-sm font-medium border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200">
+              <button 
+                className="mt-6 cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-gray-800 text-sm font-medium border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"
+                onClick={() => ShowReportForm(true)}
+              >
                 <Plus />
                 Create new report
               </button>
@@ -236,6 +246,87 @@ const ReportList = () => {
       )}
     </div>
   );
+      {reportForm && (
+          <dialog
+            className="modal modal-open bg-slate-900/40 backdrop-blur-sm"
+            onClick={() => ShowReportForm(false)}
+          >
+            <div
+              className="modal-box w-full max-w-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h2 className="font-bold text-lg mb-6">Generate Report</h2>
+              <br></br>
+              <br></br>
+              <form onSubmit={Report} className="space-y-4">
+                <div>
+                  <label className="label">
+                    <span className="label-text font-semibold">Title</span>
+                  </label>
+                  <br></br>
+                  <br></br>
+                  <input
+                    type="text"
+                    required
+                    value={reportTitle}
+                    onChange={(e) => setReportTitle(e.target.value)}
+                    placeholder="Enter report title"
+                    className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text font-semibold">Observations</span>
+                  </label>
+                  <br></br>
+                  <br></br>
+                  <textarea
+                    required
+                    rows={4}
+                    value={body}
+                    onChange={(e) => setBody(e.target.value)}
+                    placeholder="Enter observations"
+                    className="textarea textarea-bordered w-full bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  ></textarea>
+                </div>
+                <div>
+                  <label className="label">
+                    <span className="label-text font-semibold">Conclusion</span>
+                  </label>
+                  <br></br>
+                  <br></br>
+                  <textarea
+                    required
+                    rows={2}
+                    value={conclusion}
+                    onChange={(e) => setConclusion(e.target.value)}
+                    placeholder="Enter conclusion"
+                    className="textarea textarea-bordered w-full bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  ></textarea>
+                </div>
+                <div className="modal-action">
+                  <Button
+                    variant="danger"
+                    type="button"
+                    onClick={() => ShowReportForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    {reporting ? (
+                      <Loader2 className="animate-spin w-4 h-4" />
+                    ) : (
+                      "Submit Report"
+                    )}
+                  </Button>
+                </div>
+              </form>
+            </div>
+            <form method="dialog" className="modal-backdrop">
+              <button onClick={() => ShowReportForm(false)}>close</button>
+            </form>
+          </dialog>
+        )}
 };
 
 export default ReportList;
