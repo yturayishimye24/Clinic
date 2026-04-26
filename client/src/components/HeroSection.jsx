@@ -43,10 +43,11 @@ const HeroSection = () => {
             autoPlay
             loop
             muted
+            preload="metadata"
             className="relative w-[400px] h-[400px] object-cover rounded-full"
           />
-          <video src={HeroVideo} className="absolute top-1/5 left-[500px] transform -translate-x-1/5 -translate-y-1/5 w-[200px] h-[200px] object-cover rounded-full" autoPlay loop muted></video>
-          <video src={HelloVideo} className="absolute top-[400px] left-[500px] transform -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] object-cover rounded-full" autoPlay loop muted></video>
+          <video src={HeroVideo} preload="metadata" className="absolute top-1/5 left-[500px] transform -translate-x-1/5 -translate-y-1/5 w-[200px] h-[200px] object-cover rounded-full" autoPlay loop muted></video>
+          <video src={HelloVideo} preload="metadata" className="absolute top-[400px] left-[500px] transform -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] object-cover rounded-full" autoPlay loop muted></video>
         </div>
       </div>
     </section>

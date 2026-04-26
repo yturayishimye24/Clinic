@@ -2,6 +2,7 @@ import React from 'react';
 import GoogleButton from "react-google-button";
 import usFlag from "../../public/images/usFlag.png"
 import RwandaFlag from "../../public/images/RwandaFlag.png"
+import LoginImageSvg from "../../public/images/LoginImage.svg"
 import {Link,useNavigate} from "react-router-dom";
 import { useAuth } from '../../context/authContext.jsx';
 import {House, Eye, EyeOff} from "lucide-react";
@@ -107,7 +108,7 @@ const LoginPageNurse = () => {
         <div>
            
           <div className="text-center text-sm text-blue-400 font-medium">
-             <img src={"/images/LoginImage.svg"}/>
+             <img src={LoginImageSvg}/>
           </div>
         </div>
 
