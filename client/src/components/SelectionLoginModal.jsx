@@ -20,14 +20,14 @@ const LoginSelectionModal = ({ isOpen, isClosed }) => {
       title: "Login as Nurse",
       description: "Access patient care and ward management",
       path: "/nurseLogin",
-      icon: <img src="./public/images/NurseLogin.png"/>,
+      icon: <img src="/images/NurseLogin.png"/>,
       aos: "fade-up",
     },
     {
       title: "Login as Doctor",
       description: "Manage diagnoses, prescriptions, and rounds",
       path: "/doctorLogin",
-      icon: <img src="./public/images/DoctorLogin.png"/>,
+      icon: <img src="/images/DoctorLogin.png"/>,
       aos: "fade-up",
     },
   ];
