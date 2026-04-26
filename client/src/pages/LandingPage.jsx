@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 
+import Aos from "aos"
 import { useAuth } from "../../context/authContext.jsx";
 
 import {
@@ -55,8 +56,6 @@ import {
 } from "flowbite-react";
 import AOS from "aos";
 import "aos/dist/aos.css";
-
-// import { useFirebase } from "../ContextFireBase/contextFire.jsx";
 
 const LandingPage = () => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -115,7 +114,12 @@ const LandingPage = () => {
     ];
   }),
     []);
-
+ useEffect(() =>{
+   Aos.init({
+     duration: 1000,
+     once: true,
+   })
+ })
   const handleSubmit = async (e) => {
     e.preventDefault();
     setTimeout(() => {
@@ -258,195 +262,63 @@ const LandingPage = () => {
           </div>
         </div>
 
-        <div
-          ref={whyChooseUsRef}
-          className="py-5 sm:py-2 px-4 sm:px-6 bg-white overflow-hidden"
-        >
-          <section className="relative max-w-7xl mx-auto px-6 py-20 mt-30 overflow-hidden">
-            <div className="flex flex-col md:flex-row items-center gap-12">
-              {/* Left Content */}
-              <div className="flex-1 z-10">
-                <h2 className="text-5xl md:text-6xl text-slate-900 font-bold tracking-tight leading-tight">
-                  <Words data-aos="fade-right" duration="2000" /> <br />
+        <div ref={whyChooseUsRef} className="mb-30">
+          <section className="relative left-0 mt-20 overflow-hidden">
+            <h1 className="text-6xl text-center pb-5 font-poppins font-400 letter-spacing-[-.5px] line-height-[1.6]">
+              Giving fast and reliable services
+            </h1>
+
+            <div className="flex items-center justify-start gap-10 w-[100%]">
+              <img
+                src="/images/KID.png"
+                alt="Kid Image before treatment"
+                className="h-[100%] rounded-tr-[999px] ml-0 rounded-br-[999px] object-left object-fit w-[60%]"
+                data-aos="fade-right"
+              />
+              <div>
+                <h2 className="text-[2rem] leading-[1.25] font-normal tracking-[-0.25px] text-gray-900">
+                  Our Services
                 </h2>
-                <p
-                  className="text-lg text-slate-600 max-w-md mb-8"
-                  data-aos="fade-up"
-                  duration="2500"
-                >
-                  From patient scheduling to digital prescriptions, find
-                  everything you need to streamline your medical practice in one
-                  dashboard.
+                <p className="text-[1.125rem] leading-[1.55556] font-normal tracking-normal">
+                  Here are the services we offer to our patients.
+                  <br />
+                  Giving drug information and support to our patients.
+                  <br />
+                  Ensuring accurate and up-to-date drug information for safe
+                  medication use.
+                  <br />
+                  Providing personalized drug recommendations based on patient
+                  needs and medical history.
                 </p>
-                <button className="px-8 py-3 bg-blue-50 text-blue-600 rounded-full font-semibold hover:bg-blue-100 transition-all flex items-center gap-2" onClick={()=>setSelectionOpen(true)}>
-                  Explore features <span className="text-xl">↗</span>
-                </button>
-              </div>
-
-              <div className="flex-1 relative">
-                <div
-                  className="relative z-10 rounded-2xl shadow-2xl overflow-hidden border border-slate-200"
-                  data-aos="fade-left"
-                  duration="1000"
-                >
-                  <img
-                    src="/images/dashboard.png"
-                    alt="Clinic Dashboard"
-                    className="w-full object-cover"
-                  />
-                </div>
-
-                <div
-                  className="absolute -left-8 top-1/4 w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center shadow-lg z-20  transition-all duration-1000"
-                  data-aos="fade-down"
-                >
-                  <div className="w-8 h-8 bg-blue-500 rounded-sm opacity-50" />
-                </div>
-
-                <div
-                  className="absolute -right-4 -bottom-4 w-20 h-20 bg-green-200 rounded-full flex items-center justify-center shadow-lg z-20"
-                  data-aos="fade-up"
-                >
-                  <div className="w-10 h-10 bg-[#4CAF50] rounded-full opacity-70" />
-                </div>
-
-                <div
-                  className="absolute left-1/4 -bottom-10 w-24 h-24 bg-orange-100 rounded-full flex items-center justify-center shadow-lg z-20"
-                  data-aos="zoom-in-down"
-                >
-                  <div className="w-12 h-12 bg-orange-400 rounded-full opacity-60" />
-                </div>
-
-                <div
-                  className="absolute -right-6 -top-10 w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center shadow-xl z-20 border border-gray-100"
-                  data-aos="zoom-in-up"
-                >
-                  <div className="w-12 h-12 border-4 border-gray-800 rounded-md" />
-                </div>
               </div>
             </div>
           </section>
-
-          <div className="max-w-7xl mx-auto">
-            <div className="flex overflow-x-auto gap-6 pb-12 pt-4 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-              {/* Card 1 - Added 3d Transform / Scale Scroll Animation */}
-              <div className="animate-on-scroll opacity-0 [transform:translate3d(-200px,0,0)_scale(0.6)] transition-all duration-[600ms] delay-[300ms] [&.is-visible]:opacity-100 [&.is-visible]:[transform:translate3d(0,0,0)_scale(1)] bg-white rounded-[2rem] p-8 border border-gray-200/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 flex flex-col justify-between min-h-[320px] w-[85vw] sm:w-[400px] flex-shrink-0 snap-center group">
-                <div>
-                  <div className="w-14 h-14 rounded-2xl bg-blue-50/50 flex items-center justify-center mb-8 group-hover:bg-blue-50 transition-colors">
-                    <Activity className="text-blue-600" size={26} />
-                  </div>
-                  <h3 className="text-2xl font-medium text-gray-900 mb-3">
-                    Expert Team
-                  </h3>
-                  <p className="text-base text-gray-600 leading-relaxed">
-                    Our experienced professionals ensure top-quality care and
-                    seamless operational efficiency for every single patient.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 mt-8 text-blue-600 font-medium cursor-pointer w-max group/btn">
-                  <span>
-                    <button className="relative flex items-center px-6 py-3 overflow-hidden font-medium transition-all bg-indigo-500 rounded-md group">
-                      <span className="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-indigo-700 rounded group-hover:-mr-4 group-hover:-mt-4">
-                        <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
-                      </span>
-                      <span className="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-indigo-700 rounded group-hover:-ml-4 group-hover:-mb-4">
-                        <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
-                      </span>
-                      <span className="absolute bottom-0 left-0 w-full h-full transition-all duration-500 ease-in-out delay-200 -translate-x-full bg-indigo-600 rounded-md group-hover:translate-x-0"></span>
-                      <span className="relative w-full text-left text-white transition-colors duration-200 ease-in-out group-hover:text-white">
-                        Learn more
-                      </span>
-                    </button>
-                  </span>
-                  <ArrowRight
-                    size={18}
-                    className="transform group-hover/btn:translate-x-1 transition-transform"
-                  />
-                </div>
-              </div>
-
-              {/* Card 2 - Added 3d Transform / Scale Scroll Animation */}
-              <div className="animate-on-scroll opacity-0 [transform:translate3d(-200px,0,0)_scale(0.6)] transition-all duration-[600ms] delay-[300ms] [&.is-visible]:opacity-100 [&.is-visible]:[transform:translate3d(0,0,0)_scale(1)] bg-white rounded-[2rem] p-8 border border-gray-200/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 flex flex-col justify-between min-h-[320px] w-[85vw] sm:w-[400px] flex-shrink-0 snap-center group">
-                <div>
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-50/50 flex items-center justify-center mb-8 group-hover:bg-emerald-50 transition-colors">
-                    <Check className="text-emerald-600" size={26} />
-                  </div>
-                  <h3 className="text-2xl font-medium text-gray-900 mb-3">
-                    Reliable Services
-                  </h3>
-                  <p className="text-base text-gray-600 leading-relaxed">
-                    Dependable healthcare software solutions you can trust every
-                    day, backed by enterprise-grade stability.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 mt-8 text-emerald-600 font-medium cursor-pointer w-max group/btn">
-                  <span>
-                    <button className="relative flex items-center px-6 py-3 overflow-hidden font-medium transition-all bg-indigo-500 rounded-md group">
-                      <span className="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-indigo-700 rounded group-hover:-mr-4 group-hover:-mt-4">
-                        <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
-                      </span>
-                      <span className="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-indigo-700 rounded group-hover:-ml-4 group-hover:-mb-4">
-                        <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
-                      </span>
-                      <span className="absolute bottom-0 left-0 w-full h-full transition-all duration-500 ease-in-out delay-200 -translate-x-full bg-indigo-600 rounded-md group-hover:translate-x-0"></span>
-                      <span className="relative w-full text-left text-white transition-colors duration-200 ease-in-out group-hover:text-white">
-                        Learn more
-                      </span>
-                    </button>
-                  </span>
-                  <ArrowRight
-                    size={18}
-                    className="transform group-hover/btn:translate-x-1 transition-transform"
-                  />
-                </div>
-              </div>
-
-              {/* Card 3 - Added 3d Transform / Scale Scroll Animation */}
-              <div className="animate-on-scroll opacity-0 [transform:translate3d(-200px,0,0)_scale(0.6)] transition-all duration-[600ms] delay-[300ms] [&.is-visible]:opacity-100 [&.is-visible]:[transform:translate3d(0,0,0)_scale(1)] bg-white rounded-[2rem] p-8 border border-gray-200/60 shadow-[0_2px_12px_rgba(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] hover:-translate-y-1 flex flex-col justify-between min-h-[320px] w-[85vw] sm:w-[400px] flex-shrink-0 snap-center group">
-                <div>
-                  <div className="w-14 h-14 rounded-2xl bg-purple-50/50 flex items-center justify-center mb-8 group-hover:bg-purple-50 transition-colors">
-                    <Phone className="text-purple-600" size={26} />
-                  </div>
-                  <h3 className="text-2xl font-medium text-gray-900 mb-3">
-                    24/7 Support
-                  </h3>
-                  <p className="text-base text-gray-600 leading-relaxed">
-                    Round-the-clock technical assistance and medical triage
-                    support for all your operational needs.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 mt-8 text-purple-600 font-medium cursor-pointer w-max group/btn">
-                  <span>
-                    <button className="relative flex items-center px-6 py-3 overflow-hidden font-medium transition-all bg-indigo-500 rounded-md group">
-                      <span className="absolute top-0 right-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-indigo-700 rounded group-hover:-mr-4 group-hover:-mt-4">
-                        <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
-                      </span>
-                      <span className="absolute bottom-0 rotate-180 left-0 inline-block w-4 h-4 transition-all duration-500 ease-in-out bg-indigo-700 rounded group-hover:-ml-4 group-hover:-mb-4">
-                        <span className="absolute top-0 right-0 w-5 h-5 rotate-45 translate-x-1/2 -translate-y-1/2 bg-white"></span>
-                      </span>
-                      <span className="absolute bottom-0 left-0 w-full h-full transition-all duration-500 ease-in-out delay-200 -translate-x-full bg-indigo-600 rounded-md group-hover:translate-x-0"></span>
-                      <span className="relative w-full text-left text-white transition-colors duration-200 ease-in-out group-hover:text-white">
-                        Learn more
-                      </span>
-                    </button>
-                  </span>
-                  <ArrowRight
-                    size={18}
-                    className="transform group-hover/btn:translate-x-1 transition-transform"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Our Services Section */}
-        
-        <div
-          
-        >
-          
+        <div>
+          <h1 className="text-5xl text-center font-poppins font-400 letter-spacing-[-.5px] line-height-[1.6] mt-0 mb-10 text-gray-800">
+            Comprehensive healthcare solutions
+          </h1>
+          <div className="flex items-center justify-center gap-10 ">
+            <div className="ml-5">
+              <h2 className="text-[2rem] leading-[1.25] font-normal tracking-[-0.25px] text-gray-900">
+                Our Missions
+              </h2>
+              <p className="text-[1.125rem] leading-[1.55556] font-normal tracking-normal">
+                We are committed to providing the highest quality healthcare
+                services to our patients. 
+              </p>
+            </div>
+            <img
+              src="/images/AfNurse.png"
+              alt="Hero image"
+              className="rounded-tr-none rounded-br-none rounded-tl-[999px] rounded-bl-[999px] h-[50%] w-[60%] object-left"
+              data-aos="fade-left"
+            />
+          </div>
         </div>
+
         <div className="bg-white shadow-lg rounded-full py-4 px-6 max-w-2xl mx-auto flex justify-center items-center gap-8 text-gray-600 text-sm mt-10 mb-10 sticky top-3 z-40 border border-gray-200">
           <ul className="flex items-center justify-center gap-8">
             <li
@@ -484,7 +356,7 @@ const LandingPage = () => {
       {loading && <Loading />}
 
       <ToastContainer position="bottom-right" />
-      <ContactUs ref={contactUsRef}/>
+      <ContactUs ref={contactUsRef} />
       <Footer container className="mt-20 bg-white text-white">
         <div className="w-full text-center">
           <div className="w-full justify-between sm:flex sm:items-center sm:justify-between">
@@ -520,6 +392,22 @@ const LandingPage = () => {
       </Footer>
 
       <style jsx>{`
+        @keyframes slide-in-left {
+          from {
+            transform: translateX(-200px);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+
+        .scroll-left {
+          animation: slide-in-left linear;
+          animation-timeline: view();
+          animation-range: entry 0% cover 40%;
+        }
         @keyframes modalSlideIn {
           from {
             opacity: 0;

@@ -26,12 +26,12 @@ const ContactUs =forwardRef((props, ref) =>{
         quickReply
       })
       if(!name || !email || !message){
-        toast.error("Please fill in all fields", { position: "top-right" });
+        toast.error("Please fill in all fields", { position: "bottom-left" });
         return;
       }
       if(response.data.success){
  
-        toast.success("Request sent successfully", { position: "top-right" });
+        toast.success("Request sent successfully", { position: "bottom-left" });
         setName("");
         setEmail("");
         setMessage("");
@@ -39,7 +39,7 @@ const ContactUs =forwardRef((props, ref) =>{
       }
     }catch(error){
       console.error("Error requesting account", error);
-      toast.error("Failed to send request: " + error.message, { position: "top-right" });
+      toast.error("Failed to send request: " + error.message, { position: "bottom-left" });
     }finally{
       setRequesting(false);
     }

@@ -13,8 +13,12 @@ import "aos/dist/aos.css";
 import {OrbitProgress} from "react-loading-indicators";
 import {useEffect} from "react"
 import {toast, ToastContainer} from "react-toastify";
+import {GoogleLogin} from "@react-oauth/google";
+import {jwtDecode} from "jwt-decode";
+
 
 const LoginPageNurse = () => {
+    
     const navigate = useNavigate();
     const backendUrl = import.meta.env.VITE_BACKEND_URL;
     const {login,googleSignIn} = useAuth();
@@ -167,7 +171,11 @@ const LoginPageNurse = () => {
 
           {/* SSO Buttons */}
           <div className="w-full gap-3 flex align-items-center justify-center">
-            <GoogleButton style={{backgroundColor:"#87CEAB"}} onClick={handleGoogleSignIn}/>
+            <GoogleLogin onSuccess={(credentialResponse) =>{
+              console.log("Google Sign-In successful!", credentialResponse);
+              console.log("Decoded JWT:", jwtDecode(credentialResponse.credential));
+              navigate("/home");
+            }} onError={()=> console.log("Error Signing in with google")} auto_select={true} useOneTap/>
           </div>
 
           {/* Divider */}

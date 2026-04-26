@@ -1,48 +1,23 @@
 import React from "react";
 import { createContext, useState, useContext,useEffect } from "react";
 import axios from "axios"
-import {GoogleAuthProvider, signInWithPopup, signInWithRedirect, onAuthStateChanged, signOut} from "firebase/auth";
-import { auth} from "../../client/src/firebase.js";
 
 const userContext = createContext(null);
 
 export const AuthContext = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading,setLoading] = useState(false);
-  const [authLoading,setAuthLoading] = useState(true);
 
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
    const googleSignIn = async () => {
-    try {
-     const provider = new GoogleAuthProvider();
-     
-     const result = await signInWithPopup(auth, provider);
-
-     const firebaseUser = result.user;
-
-     const Idtoken = await firebaseUser.getIdToken();
-
-     const response = await axios.post(`${backendUrl}/api/AuthGoogle/google-login`, {
-      token: Idtoken,
-     });
-
-     if(response.data.success){
-      const {token,user,role} = response.data;
-      localStorage.setItem("token",token);
-      localStorage.setItem("role",role);
-      setUser(user)
-
-      login(user);
-     }
-    } catch(error){
-      console.log("Error during Google Sign-In:", error);
-    }
+    // TODO: Implement Google login with new approach
+    console.log("Google sign-in not implemented yet");
   };
 
   const logOut = async () => {
     try{
-      await signOut(auth);
+      // Removed Firebase signOut
       setUser(null);
       localStorage.removeItem("token");
       localStorage.removeItem("role");
@@ -51,21 +26,7 @@ export const AuthContext = ({ children }) => {
     }
 
   }
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) =>{
-      if(currentUser && !user){
-        const userData ={
-          id: currentUser.uid,
-          name: currentUser.displayName,
-          email: currentUser.email,
-          role: "doctor"
-        }
-        setUser(userData);
-      }
-      setAuthLoading(false);
-    })
-    return () => unsubscribe();
-  },[])
+  // Removed Firebase onAuthStateChanged useEffect
 
    useEffect(() => {
     const verifyUser = async () => {
@@ -96,7 +57,7 @@ export const AuthContext = ({ children }) => {
 
   
   return (
-    <userContext.Provider value={{ user, login, logOut,authLoading,loading,googleSignIn}}>
+    <userContext.Provider value={{ user, login, logOut,loading,googleSignIn}}>
       {children}
     </userContext.Provider>
   );

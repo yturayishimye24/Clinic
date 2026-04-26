@@ -35,14 +35,16 @@ const HeroSection = () => {
 
       {/* Right Content: Video + Floating UI Elements */}
       <div className="flex-1 relative w-full max-w-2xl" data-aos="zoom-in-left" data-aos-duration="1500">
-        <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl border border-gray-100">
+        <div>
            <video
             src={LandingVid}
             autoPlay
             loop
             muted
-            className="w-full h-auto object-cover"
+            className="relative w-[400px] h-[400px] object-cover rounded-full"
           />
+          <video src="/public/images/HeroVideo.mp4" className="absolute top-1/5 left-[500px] transform -translate-x-1/5 -translate-y-1/5 w-[200px] h-[200px] object-cover rounded-full" autoPlay loop muted></video>
+          <video src="/public/images/HelloVideo.mp4" className="absolute top-[400px] left-[500px] transform -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] object-cover rounded-full" autoPlay loop muted></video>
         </div>
       </div>
     </section>

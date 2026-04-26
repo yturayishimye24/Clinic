@@ -4,7 +4,6 @@ import jwt from "jsonwebtoken";
 import Nurse from "../models/userModel.js";
 import dotenv from "dotenv";
 import {io} from "../server.js"
-// import { messaging } from "firebase-admin";
 
 dotenv.config();
 const userToken = (id, role) => {
