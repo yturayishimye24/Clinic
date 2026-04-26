@@ -23,7 +23,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { useNavigate, Link } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
-import techImage from "../../public/images/techImage.jpg";
+import techImage from "../../public/images/techImage.png";
 
 import FAQ from "../components/Faqs.jsx";
 import TEAM from "../components/teamSection.jsx";
