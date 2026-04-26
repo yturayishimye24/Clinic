@@ -39,6 +39,8 @@ import monLightPurple from "../../public/images/MonLightPurple.jpg";
 import LoginBg from "../../public/images/LoginBg.jpg";
 import GoogleSimilar from "../../public/images/GoogleSimilar.jpg";
 import LandingVid from "../../public/images/LandingVid.mp4";
+import KID from "../../public/images/KID.png";
+import AfNurse from "../../public/images/AfNurse.png";
 import Loading from "../components/Loading.jsx";
 import Navbar from "../components/landingPageNavbar.jsx";
 import HeroSection from "../components/HeroSection.jsx";
@@ -270,7 +272,7 @@ const LandingPage = () => {
 
             <div className="flex items-center justify-start gap-10 w-[100%]">
               <img
-                src="/images/KID.png"
+                src={KID}
                 alt="Kid Image before treatment"
                 className="h-[100%] rounded-tr-[999px] ml-0 rounded-br-[999px] object-left object-fit w-[60%]"
                 data-aos="fade-right"
@@ -311,7 +313,7 @@ const LandingPage = () => {
               </p>
             </div>
             <img
-              src="/images/AfNurse.png"
+              src={AfNurse}
               alt="Hero image"
               className="rounded-tr-none rounded-br-none rounded-tl-[999px] rounded-bl-[999px] h-[50%] w-[60%] object-left"
               data-aos="fade-left"

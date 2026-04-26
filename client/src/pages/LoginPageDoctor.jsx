@@ -12,6 +12,7 @@ import axios from "axios";
 import { OrbitProgress } from "react-loading-indicators";
 import { delay } from "../utils/Delay.jsx";
 import ValidationError from "../components/ValidationError.jsx";
+import LoginImage from "../../public/images/LoginImage.png";
 
 const LoginPageDoctor = () => {
   const navigate = useNavigate();
@@ -116,7 +117,7 @@ const LoginPageDoctor = () => {
           Clinic<span className="text-xl font-normal">Auth</span>
         </div>
 
-        <img src="/images/LoginImage.png" width="100%" height="9000" />
+        <img src={LoginImage} width="100%" height="9000" />
       </div>
 
       <div className="relative flex flex-1 flex-col bg-white">
