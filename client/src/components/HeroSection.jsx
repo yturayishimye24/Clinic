@@ -43,8 +43,8 @@ const HeroSection = () => {
             muted
             className="relative w-[400px] h-[400px] object-cover rounded-full"
           />
-          <video src="/public/images/HeroVideo.mp4" className="absolute top-1/5 left-[500px] transform -translate-x-1/5 -translate-y-1/5 w-[200px] h-[200px] object-cover rounded-full" autoPlay loop muted></video>
-          <video src="/public/images/HelloVideo.mp4" className="absolute top-[400px] left-[500px] transform -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] object-cover rounded-full" autoPlay loop muted></video>
+          <video src="/images/HeroVideo.mp4" className="absolute top-1/5 left-[500px] transform -translate-x-1/5 -translate-y-1/5 w-[200px] h-[200px] object-cover rounded-full" autoPlay loop muted></video>
+          <video src="/images/HelloVideo.mp4" className="absolute top-[400px] left-[500px] transform -translate-x-1/2 -translate-y-1/2 w-[180px] h-[180px] object-cover rounded-full" autoPlay loop muted></video>
         </div>
       </div>
     </section>

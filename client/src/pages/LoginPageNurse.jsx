@@ -107,7 +107,7 @@ const LoginPageNurse = () => {
         <div>
            
           <div className="text-center text-sm text-blue-400 font-medium">
-             <img src={"/public/images/LoginImage.svg"}/>
+             <img src={"/images/LoginImage.svg"}/>
           </div>
         </div>
 
