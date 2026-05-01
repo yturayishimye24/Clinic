@@ -29,7 +29,7 @@ const HeroSection = () => {
         
         <button
     onClick={()=>setSelectionOpen(true)}
-          className="bg-[#FDBA74] text-[#FFF4E1] text-lg font-medium px-10 py-4 rounded-md hover:bg-[#FB923C] hover:shadow-lg transition-all"
+          className="bg-[#FB923C] text-[#FFF4E1] text-5xl font-poppins px-20 py-6 cursor-pointer  rounded-full hover:bg-[#FB923C] hover:shadow-lg transition-all"
         >
           Get started
         </button>
