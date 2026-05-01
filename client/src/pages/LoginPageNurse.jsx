@@ -17,7 +17,7 @@ import { toast, ToastContainer } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 
-import {Button} from "@heroui/react";
+import { Button } from "@heroui/react";
 
 const LoginPageNurse = () => {
   const navigate = useNavigate();
@@ -40,6 +40,7 @@ const LoginPageNurse = () => {
   const [error, setError] = useState(false);
   const [progressing, setProgressing] = useState(false);
   const [isVisible, setIvisible] = useState(false);
+  const [colorVisible, setColorVisible] = useState(true);
 
   useEffect(() => {
     AOS.refresh();
@@ -83,7 +84,7 @@ const LoginPageNurse = () => {
       }
     } catch (error) {
       console.log("Error logging in!", error);
-      // Show error message from backend or generic error
+
       if (error.response?.data?.message) {
         toast.error(error.response.data.message);
       } else {
@@ -95,6 +96,7 @@ const LoginPageNurse = () => {
   };
   const handleNext = () => {
     if (email.trim() !== "") {
+      setColorVisible(true);
       setShowPassword(true);
     } else {
       setError(true);
@@ -167,10 +169,7 @@ const LoginPageNurse = () => {
           <div className="h-6 w-px bg-gray-300"></div>
           <span className="text-gray-500">Not a nurse?</span>
           <Link to={"/doctorLogin"}>
-
-          <Button varient="secondary">
-            Doctor Login
-          </Button>
+            <Button varient="secondary">Doctor Login</Button>
           </Link>
         </div>
 
@@ -269,12 +268,26 @@ const LoginPageNurse = () => {
           {/* Footer Actions */}
           <div className="flex w-full items-center justify-between">
             <div className="flex gap-2">
-              <div className="h-3 w-3 rounded-full bg-[#87CEAB]"></div>
-              <div className="h-3 w-3 rounded-full bg-gray-200"></div>
+              <div className="flex gap-2">
+                {/* Email step */}
+                <div
+                  onClick={() => setShowPassword(false)}
+                  className={`h-3 w-3 rounded-full cursor-pointer ${
+                    !showPassword ? "bg-[#87CEAB]" : "bg-gray-200"
+                  }`}
+                ></div>
+
+                {/* Password step */}
+                <div
+                  onClick={() => email && setShowPassword(true)}
+                  className={`h-3 w-3 rounded-full cursor-pointer ${
+                    showPassword ? "bg-[#87CEAB]" : "bg-gray-200"
+                  }`}
+                ></div>
+              </div>
             </div>
             <Button
               varient="secondary"
-              
               onClick={showPassword ? handleLogin : handleNext}
             >
               {showPassword ? "Login" : "Next"}

@@ -7,10 +7,12 @@ import {Envelope, Globe, Plus, TrashBin} from "@gravity-ui/icons";
 import {Button} from "@heroui/react";
 import {Avatar} from "@heroui/react";
 import { useParams } from "react-router-dom";
-
+import {useNavigate} from "react-router-dom";
+import { toast } from "react-toastify";
 
 const PatientList = () => {
   const {id} = useParams();
+  const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -180,6 +182,7 @@ const PatientList = () => {
               ) : (
                 filteredPatients.slice(0, 8).map((patient) => (
                   <tr
+                    onClick={() => navigate(`/home/patients/${patient._id}`)}
                     key={patient._id}
                     className="hover:bg-base-200 transition group"
                   >
