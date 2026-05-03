@@ -21,7 +21,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { OrbitProgress } from "react-loading-indicators";
 import { Avatar } from "@heroui/react";
 import { Form } from "@heroui/react";
-
+import { Briefcase } from 'lucide-react';
 import {
   FloppyDisk,
   FolderOpen,
@@ -506,6 +506,12 @@ export default function NursePage() {
           onClick={() => navigate("/home/reports")}
           active={location.pathname === "/home/reports"}
         />
+         <SidebarItem
+          icon={<Briefcase />}
+          text="Medicines"
+          onClick={() => navigate("/home/medicines")}
+          active={location.pathname === "/home/reports"}
+        />
         <SidebarItem
           icon={<Settings />}
           text="Settings"
@@ -756,9 +762,9 @@ export default function NursePage() {
                         </thead>
 
                         {/* BODY */}
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-gray-100 cursor-pointer" >
                           {filteredPatients.length === 0 ? (
-                            <tr>
+                            <tr onClick={navigate(`/home/patients/${patients._id}`)}>
                               <td colSpan="4" className="p-10 text-center">
                                 <div className="flex flex-col items-center gap-4">
                                   <i className="fa-solid fa-user-xmark text-5xl text-gray-300"></i>

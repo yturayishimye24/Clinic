@@ -7,8 +7,7 @@ import CreatePage from "./pages/CreatePage.jsx";
 import LandingPage from "./pages/LandingPage.jsx";
 import AdminPage from "./pages/AdminPage.jsx";
 import { AuthContext } from "../context/authContext.jsx";
-import StockManager from "./pages/StockManager.jsx";
-
+import Medicines from "./pages/Medicines.jsx"
 import "./index.css";
 import "flowbite";
 // import PrivateRoutes from "./utils/PrivateRoutes.jsx";
@@ -33,6 +32,7 @@ const App = () => {
               <Route path="patients" element={<PatientList />}>
                  <Route path=":id" element={<PatientDetails />} />
               </Route>
+              <Route path="medicines" element={<Medicines/>}></Route>
               <Route path="requests" element={<RequestList />} />
               <Route path="reports" element={<ReportList />} />
               <Route path="settings" element={<SettingsPage />} />
@@ -45,7 +45,7 @@ const App = () => {
               <Route path="settings" element={<SettingsPage />} />
             </Route>
 
-            <Route path={"/stockmanager"} element={<StockManager />} />
+           
           </Routes>
         </div>
         <ToastContainer containerStyle={{ zIndex: 99999 }} />

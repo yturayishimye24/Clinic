@@ -6,8 +6,7 @@ import { Search, Edit, ActivitySquare, Trash2 } from "lucide-react";
 import {Envelope, Globe, Plus, TrashBin} from "@gravity-ui/icons";
 import {Button} from "@heroui/react";
 import {Avatar} from "@heroui/react";
-import { useParams } from "react-router-dom";
-import {useNavigate} from "react-router-dom";
+import { useParams, Outlet, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 const PatientList = () => {
@@ -162,12 +161,12 @@ const PatientList = () => {
                   
                 </div>
               ) : loading ? (
-                <tr>
+                <tr className="cursor-pointer">
                   <td colSpan="4" className="p-6">
                     {[...Array(5)].map((_, i) => (
                       <div
                         key={i}
-                        className="flex items-center gap-4 mb-4 p-4 rounded-lg bg-base-100"
+                        className="flex items-center gap-4 mb-4 p-4 rounded-lg bg-base-100 cursor-pointer animate-pulse"
                       >
                         <div className="skeleton h-10 w-10 rounded-full shrink-0"></div>
                         <div className="flex-1">
@@ -245,6 +244,7 @@ const PatientList = () => {
           </table>
         </div>
       </div>
+      <Outlet/>
     </>
   );
 };
