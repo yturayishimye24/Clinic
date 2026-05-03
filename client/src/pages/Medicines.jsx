@@ -24,7 +24,6 @@ function Medicines() {
         </Button>
       </div>
 
-      {/* Stats Summary */}
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
         {[
           { label: 'Total Medicines', value: '24', color: 'text-blue-600' },
