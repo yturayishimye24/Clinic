@@ -13,10 +13,19 @@ const newMedicinesSchema = new mongoose.Schema({
         required:true,
     },
     dosage:{
-        type:Selection,
+        type:String,
         required:true,
     },
+    medicineType:{
+        type: String,
+        enum: ["tablet","capsule","syrup","suspensions"],
+        required:true,  
+    },
     quantity:{
+        type:Number,
+        required:true,
+    },
+    medicineUnits:{
         type:Number,
         required:true,
     },

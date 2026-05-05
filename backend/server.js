@@ -14,6 +14,7 @@ import emailRouter from "./routes/getEmail.js";
 import router from "./routes/verifyRoute.js";
 import reportRouter from "./routes/reportRoute.js";
 import path from "path";
+import MedicineRouter from "./routes/medicinesRoutes.js";
 import requestAccountRouter from "./routes/requestAccountRoute.js";
 dotenv.config();
 
@@ -42,8 +43,8 @@ app.use("/api/requests", requestRouter);
 app.use("/api/infos", emailRouter);
 app.use("/api/verify", router);
 app.use("/api/report", reportRouter);
-//app.use("/api/AuthGoogle", googleRouter);
 app.use("/api/request-account", requestAccountRouter);
+app.use("/api/medicines",MedicineRouter);
 
 const server = http.createServer(app);
 export const io = new Server(server, {
