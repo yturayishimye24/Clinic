@@ -3,7 +3,7 @@ import mongoose from "mongoose"
 
 
 const newMedicinesSchema = new mongoose.Schema({
-    medecineName:{
+    medicineName:{
         type:String,
         required:true,
     },
