@@ -43,6 +43,17 @@ const PatientList = () => {
       console.error("Error deleting patient:", error);
     }
   };
+
+  const handleCreatePatient = async()=>{
+    try{
+      const response = await axios.post(`${backendUrl}/api/patients/create`,{
+        
+      })
+    }catch(error){
+      toast.error("Failed to create patient")
+    }
+  }
+
   const handleEdit = async() =>{
     setSaving(true);
 

@@ -17,7 +17,20 @@ const HeroSection = () => {
    },[])
   return (
     <>
-    <section className="relative max-w-7xl mx-auto px-6 pt-40 pb-32 flex flex-col lg:flex-row items-center justify-between gap-12">
+    <div className="min-h-screen w-full bg-[#f8fafc] relative">
+     {/* Your Content/Components */}
+</div>
+    <section className="absolute inset-0 z-0 max-w-7xl mx-auto px-6 pt-40 pb-32 flex flex-col lg:flex-row items-center justify-between gap-12" style={{
+      backgroundImage: `
+        linear-gradient(to right, #e2e8f0 1px, transparent 1px),
+        linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)
+      `,
+      backgroundSize: "20px 30px",
+      WebkitMaskImage:
+        "radial-gradient(ellipse 100% 80% at 50% 0%, #000 70%, transparent 100%)",
+      maskImage:
+        "radial-gradient(ellipse 100% 80% at 50% 0%, #000 70%, transparent 100%)",
+    }} >
       {/* Left Content */}
       <div className="flex-1 text-center lg:text-left" data-aos="fade-right" data-aos-duration="1000">
         <h1 className="text-5xl md:text-7xl font-poppins text-gray-900 leading-[1.1] mb-8">

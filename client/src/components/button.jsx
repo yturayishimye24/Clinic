@@ -23,7 +23,7 @@ export default function DropdownMenuDemo() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="w-10 h-10 rounded-full">
-            <img src="/public/images/user.png" alt="User default avatar" className="w-10 h-10 rounded-full object-cover"/>
+            <img src="/images/user.png" alt="User default avatar" className="w-10 h-10 rounded-full object-cover"/>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-40" align="start">
@@ -31,7 +31,7 @@ export default function DropdownMenuDemo() {
           <DropdownMenuLabel>My Account</DropdownMenuLabel>
           <DropdownMenuItem>
             Profile
-            <DropdownMenuShortcut><img src="/public/images/user.png" alt ="profile icon image" className="w-10 h-10"/></DropdownMenuShortcut>
+            <DropdownMenuShortcut><img src="/images/user.png" alt ="profile icon image" className="w-10 h-10"/></DropdownMenuShortcut>
           </DropdownMenuItem>
           <DropdownMenuItem>
             Patients

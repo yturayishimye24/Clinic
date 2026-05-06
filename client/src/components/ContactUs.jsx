@@ -1,6 +1,6 @@
 import React from 'react';
 import {forwardRef} from "react"
-import Gmail from "../../public/images/Gmail.png";
+// import Gmail from "../../public/images/Gmail.png"
 import {ToastContainer, toast} from "react-toastify";
 import {useState} from "react"
 import axios from "axios";
@@ -51,7 +51,7 @@ const ContactUs =forwardRef((props, ref) =>{
         
         <div 
           className="absolute inset-0 z-0 opacity-20 bg-cover bg-center pointer-events-none mix-blend-multiply"
-          style={{ backgroundImage: `url('${Gmail}')` }}
+          style={{ backgroundImage: `url("/images/Gmail.png")` }}
         ></div>
 
         <h1 className="text-5xl md:text-7xl font-normal leading-tight z-10 mb-20">
