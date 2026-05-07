@@ -1,52 +1,56 @@
-import React, { useState } from "react";
+import React from "react";
 
-const Accordion = ({ title, answer }) => {
-  const [accordionOpen, setAccordionOpen] = useState(false);
+const Accordion = ({ title, answer, isOpen, onClick }) => {
 
   return (
-    <div className="py-2">
+    <div className={`border-b ${isOpen ?"border-[#1967D2]":"border-gray-300"} py-6`}>
+
       <button
-        onClick={() => setAccordionOpen(!accordionOpen)}
-        className="flex justify-between w-full"
+        onClick={onClick}
+        className="flex justify-between items-center w-full group py-2"
       >
-        <span>{title}</span>
-        
-        {/* <svg
-          className="fill-indigo-500 shrink-0 ml-8"
-          width="50"
-          height="50"
+
+        <span className="font-google text-2xl md:text-3xl text-left font-medium tracking-tight text-[#1967D2] transition-colors group-hover:text-blue-800">
+          {title}
+        </span>
+
+        <svg
+          className={`transform transition-transform duration-300 ease-in-out ${
+            isOpen ? "rotate-45" : "rotate-0"
+          }`}
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          <rect
-            y="7"
-            width="16"
-            height="2"
-            rx="1"
-            className={`transform origin-center transition duration-200 ease-out ${
-              accordionOpen && "!rotate-180"
-            }`}
+          <path
+            d="M12 4V20M4 12H20"
+            stroke="#1967D2"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
-          <rect
-            y="7"
-            width="16"
-            height="2"
-            rx="1"
-            className={`transform origin-center rotate-90 transition duration-200 ease-out ${
-              accordionOpen && "!rotate-180"
-            }`}
-          />
-        </svg> */}
-        <i class="fa-sharp fa-solid fa-plus" className={`${accordionOpen && "!rotate-180"}`}></i>
+        </svg>
+
       </button>
+
       <div
-        className={`grid overflow-hidden transition-all duration-300 ease-in-out text-slate-600 text-sm ${
-          accordionOpen
-            ? "grid-rows-[1fr] opacity-100"
+        className={`grid overflow-hidden transition-all duration-300 ease-in-out ${
+          isOpen
+            ? "grid-rows-[1fr] opacity-100 mt-4"
             : "grid-rows-[0fr] opacity-0"
         }`}
       >
-        <div className="overflow-hidden">{answer}</div>
+        <div className="overflow-hidden">
+
+          <p className="font-google text-lg md:text-xl text-gray-600 leading-relaxed max-w-4xl">
+            {answer}
+          </p>
+
+        </div>
       </div>
+
     </div>
   );
 };

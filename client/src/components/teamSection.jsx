@@ -17,8 +17,8 @@ const TeamSection = forwardRef((props, ref) => {
   })
   return (
 
-    <section className="max-w-6xl mx-auto px-4 py-16" ref={ref}>
-      <h2 className="text-3xl font-bold mb-12 text-center mb-30 text-gray-400">
+    <section className="max-w-6xl mx-auto px-4 py-16 animate-scroll-appear" ref={ref}>
+      <h2 className="text-center font-google text-4xl md:text-6xl lg:text-[72px] font-medium tracking-[-0.03em] leading-[1.1] text-slate-900 mb-12 max-w-4xl mx-auto">
         Meet Our Team
       </h2>
       <div

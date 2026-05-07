@@ -16,7 +16,7 @@ import { useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
-
+import Navbar from "../components/landingPageNavbar.jsx"
 import { Button } from "@heroui/react";
 
 const LoginPageNurse = () => {
@@ -106,28 +106,7 @@ const LoginPageNurse = () => {
   return (
     <div className="flex min-h-screen w-full font-sans text-gray-700">
       {/* Left Sidebar */}
-      <div className="hidden w-[400px] flex-col bg-[#E7F5EE] px-10 py-8 lg:flex">
-        <div className="mb-12 flex items-center text-3xl font-black cursor-pointer text-[#0F9D58]">
-          Clinic<span className="text-xl font-normal text-[#0F9D58]">Auth</span>
-        </div>
-
-        <div>
-          <div className="text-center text-sm text-blue-400 font-medium">
-            <img src={LoginImageSvg} />
-          </div>
-        </div>
-
-        <div>
-          <h2 className="mb-4 text-xl font-poppins text-[#235b8e]">
-            Prepare Your Students for Their Future
-          </h2>
-          <p className="text-md leading-relaxed font-poppins text-[#3f5c77]">
-            Manage, track, and report on student progress quickly and easily.
-            Unlimited students, unlimited classes, unlimited teachers, unlimited
-            schools. Typing.com is completely FREE!
-          </p>
-        </div>
-      </div>
+   
 
       <div className="relative flex flex-1 flex-col bg-white">
         {progressing && (
@@ -152,13 +131,13 @@ const LoginPageNurse = () => {
             </p>
           </div>
         )}
-        <span
-          className="flex absolute mt-6 gap-5 font-poppins text-[#0F9D58] cursor-pointer items-center"
-          onClick={() => navigate("/")}
-        >
-          <House size={30} color={"green"} className="ml-10" />{" "}
-          <h2>Back home</h2>
-        </span>
+         <Navbar 
+            scrollToTeam={() => navigate("/")} 
+            scrollToFaqs={() => navigate("/")} 
+            goToHome={() => navigate("/")} 
+            scrollToWhyUs={() => navigate("/")} 
+            scrollToContactUs={() => navigate("/")} 
+          />
         <div className="absolute right-6 top-6 flex items-center gap-4 text-sm">
           <button className="flex items-center gap-1 text-gray-500 hover:text-gray-700">
             <select>

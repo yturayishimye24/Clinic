@@ -2,7 +2,7 @@ import React, { useRef, useState, useEffect } from "react";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 
-import Aos from "aos"
+import Aos from "aos";
 import { useAuth } from "../../context/authContext.jsx";
 
 import {
@@ -116,12 +116,12 @@ const LandingPage = () => {
     ];
   }),
     []);
- useEffect(() =>{
-   Aos.init({
-     duration: 1000,
-     once: true,
-   })
- })
+  useEffect(() => {
+    Aos.init({
+      duration: 1000,
+      once: true,
+    });
+  });
   const handleSubmit = async (e) => {
     e.preventDefault();
     setTimeout(() => {
@@ -263,62 +263,101 @@ const LandingPage = () => {
             </p>
           </div>
         </div>
-
-        <div ref={whyChooseUsRef} className="mb-30">
-          <section className="relative left-0 mt-20 overflow-hidden">
-            <h1 className="text-6xl text-center pb-5 font-poppins font-400 letter-spacing-[-.5px] line-height-[1.6]">
-              Giving fast and reliable services
-            </h1>
-
-            <div className="flex items-center justify-start gap-10 w-[100%]">
+        <div ref={whyChooseUsRef} className="py-24 bg-white overflow-hidden">
+          <h1 className="text-center font-google text-4xl md:text-6xl lg:text-[72px] font-medium tracking-[-0.03em] leading-[1.1] text-slate-900 mb-12 max-w-4xl mx-auto">
+            Why choose a modern <br className="hidden md:block" /> Clinic
+            Management System?
+          </h1>{" "}
+         
+          <section className="flex flex-col lg:flex-row items-center gap-16 lg:gap-24 mb-40">
+           
+            <div className="w-full lg:w-[55%] animate-scroll-appear" data-aos="fade-right">
               <img
-                src={KID}
-                alt="Kid Image before treatment"
-                className="h-[100%] rounded-tr-[999px] ml-0 rounded-br-[999px] object-left object-fit w-[60%]"
-                data-aos="fade-right"
+                src="/images/rightDoctor.jpg"
+                alt="Digital Patient Intake"
+                className="w-full h-[500px] md:h-[650px] object-cover rounded-r-[500px] shadow-2xl"
               />
-              <div>
-                <h2 className="text-[2rem] leading-[1.25] font-normal tracking-[-0.25px] text-gray-900">
-                  Our Services
-                </h2>
-                <p className="text-[1.125rem] leading-[1.55556] font-normal tracking-normal">
-                  Here are the services we offer to our patients.
-                  <br />
-                  Giving drug information and support to our patients.
-                  <br />
-                  Ensuring accurate and up-to-date drug information for safe
-                  medication use.
-                  <br />
-                  Providing personalized drug recommendations based on patient
-                  needs and medical history.
-                </p>
+            </div>
+
+            
+            <div className="w-full lg:w-[35%] px-6 lg:px-0">
+              <h2 className="font-google text-4xl md:text-5xl text-gray-900 mb-6 tracking-tight font-medium">
+                Patient-First Focus
+              </h2>
+              <p className="font-google text-lg md:text-xl text-gray-600 leading-relaxed mb-10">
+                Streamline the journey from check-in to recovery. Our intuitive
+                interface reduces waiting room friction and puts health history
+                at your patients' fingertips.
+              </p>
+
+           
+              <div className="flex flex-col gap-6">
+                <a
+                  href="#"
+                  className="text-[#1a73e8] font-google font-medium text-lg hover:underline flex items-center gap-2"
+                >
+                  Digital Intake Forms <span>→</span>
+                </a>
+                <a
+                  href="#"
+                  className="text-[#1a73e8] font-google font-medium text-lg hover:underline flex items-center gap-2"
+                >
+                  Telehealth Integration <span>→</span>
+                </a>
+                <a
+                  href="#"
+                  className="text-[#1a73e8] font-google font-medium text-lg hover:underline flex items-center gap-2"
+                >
+                  Patient Portal <span>→</span>
+                </a>
               </div>
             </div>
           </section>
-        </div>
-
-        {/* Our Services Section */}
-        <div>
-          <h1 className="text-5xl text-center font-poppins font-400 letter-spacing-[-.5px] line-height-[1.6] mt-0 mb-10 text-gray-800">
-            Comprehensive healthcare solutions
-          </h1>
-          <div className="flex items-center justify-center gap-10 ">
-            <div className="ml-5">
-              <h2 className="text-[2rem] leading-[1.25] font-normal tracking-[-0.25px] text-gray-900">
-                Our Missions
+          
+          <section className="flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-24">
+            
+            <div className="w-full lg:w-[35%] lg:ml-auto px-6 lg:px-0 text-left lg:text-right">
+              <h2 className="font-google text-4xl md:text-5xl text-gray-900 mb-6 tracking-tight font-medium">
+                Clinical Intelligence
               </h2>
-              <p className="text-[1.125rem] leading-[1.55556] font-normal tracking-normal">
-                We are committed to providing the highest quality healthcare
-                services to our patients. 
+              <p className="font-google text-lg md:text-xl text-gray-600 leading-relaxed mb-10">
+                Empower your practitioners with real-time data. From automated
+                billing to AI-driven scheduling, we handle the complex
+                operations so you can focus on care.
               </p>
+
+             
+              <div className="flex flex-col gap-6 items-start lg:items-end">
+                <a
+                  href="#"
+                  className="text-[#1a73e8] font-google font-medium text-lg hover:underline flex items-center gap-2"
+                >
+                  Smart Scheduling <span>→</span>
+                </a>
+                <a
+                  href="#"
+                  className="text-[#1a73e8] font-google font-medium text-lg hover:underline flex items-center gap-2"
+                >
+                  Automated Billing <span>→</span>
+                </a>
+                <a
+                  href="#"
+                  className="text-[#1a73e8] font-google font-medium text-lg hover:underline flex items-center gap-2"
+                >
+                  E-Prescriptions <span>→</span>
+                </a>
+              </div>
             </div>
-            <img
-              src={AfNurse}
-              alt="Hero image"
-              className="rounded-tr-none rounded-br-none rounded-tl-[999px] rounded-bl-[999px] h-[50%] w-[60%] object-left"
-              data-aos="fade-left"
-            />
-          </div>
+
+            
+            <div className="w-full lg:w-[55%]" data-aos="fade-left">
+              <img
+                src="/images/leftDoctor.jpg"
+                alt="Medical Data Analytics"
+                className="w-full h-[500px] md:h-[650px] object-cover rounded-l-[500px] shadow-2xl"
+              />
+            </div>
+          </section>
         </div>
 
         <div className="bg-white shadow-lg rounded-full py-4 px-6 max-w-2xl mx-auto flex justify-center items-center gap-8 text-gray-600 text-sm mt-10 mb-10 sticky top-3 z-40 border border-gray-200">

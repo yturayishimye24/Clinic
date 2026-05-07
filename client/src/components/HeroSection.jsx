@@ -30,7 +30,7 @@ const HeroSection = () => {
         - relative: serves as the anchor for the background
         - overflow-hidden: prevents the circular videos from creating scrollbars
       */}
-      <div className="relative w-full min-h-screen bg-[#f8fafc] overflow-hidden flex flex-col justify-center">
+      <div className="relative w-full min-h-screen bg-[#f8fafc] overflow-hidden flex flex-col justify-center animate-scroll-appear">
         
         {/* BACKGROUND LAYER (Pattern Craft)
           - absolute inset-0: fills the container

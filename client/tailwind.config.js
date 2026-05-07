@@ -16,15 +16,24 @@ export default {
   ],
   theme: {
     extend: {
+      // Added your specific big-size dimensions
+      height: {
+        '96vh': '96vh',
+      },
+      spacing: {
+        '10rem': '10rem',
+      },
       fonts: {
         poppins: ["Poppins", "sans-serif"],
       },
       fontFamily: {
-        // 1. Added Plus Jakarta Sans as the primary sans font
         sans: ['"Plus Jakarta Sans"', "Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        google: ['"Google Sans"', 'Arial', 'sans-serif']
+      },
+      fontSize: {
+        accordionFont: ["16px"]
       },
       boxShadow: {
-        // 2. Updated the cozy shadow to your new values
         cozy: "0px 4px 20px rgba(0, 0, 0, 0.03)",
         "cozy-lg": "0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03)",
       },
@@ -35,19 +44,27 @@ export default {
         cozy: "200ms",
       },
       keyframes: {
+        // Your existing form animation
         formEnter: {
-          '0%': {
-            opacity: '0',
-            transform: 'translateY(40px) scale(0.98)',
+          '0%': { opacity: '0', transform: 'translateY(40px) scale(0.98)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        // NEW: Your scroll-driven "appear" animation
+        appear: {
+          'from': { 
+            opacity: '0', 
+            transform: 'translateX(-100px)' 
           },
-          '100%': {
-            opacity: '1',
-            transform: 'translateY(0) scale(1)',
+          'to': { 
+            opacity: '1', 
+            transform: 'translateX(0)' 
           },
         },
       },
       animation: {
         formEnter: 'formEnter 0.5s ease-out forwards',
+        // Standard non-scroll version if ever needed
+        appear: 'appear 0.8s ease-out forwards', 
       },
     },
   },
@@ -56,8 +73,16 @@ export default {
     flowbite.plugin(),
     daisyui,
     require('taos/plugin'),
-    // 3. Added Tailwind plugin to inject your custom CSS classes
-    plugin(function ({ addComponents }) {
+    plugin(function ({ addComponents, addUtilities }) {
+      // Added Utilities for the Scroll-Driven behavior
+      addUtilities({
+        '.animate-scroll-appear': {
+          'animation': 'appear linear both',
+          'animation-timeline': 'view()',
+          'animation-range': 'entry 0% cover 40%',
+        },
+      });
+
       addComponents({
         '.cozy-transition': {
           transition: 'all 0.2s ease-in-out',
@@ -95,40 +120,7 @@ export default {
     }),
   ],
   daisyui: {
-    themes: [
-      "light",
-      "dark",
-      "cupcake",
-      "bumblebee",
-      "emerald",
-      "corporate",
-      "synthwave",
-      "retro",
-      "cyberpunk",
-      "valentine",
-      "halloween",
-      "garden",
-      "forest",
-      "aqua",
-      "lofi",
-      "pastel",
-      "fantasy",
-      "wireframe",
-      "black",
-      "luxury",
-      "dracula",
-      "cmyk",
-      "autumn",
-      "business",
-      "acid",
-      "lemonade",
-      "night",
-      "coffee",
-      "winter",
-      "dim",
-      "nord",
-      "sunset",
-    ],
+    themes: ["light", "dark", "cupcake", "emerald", "corporate", "retro", "cyberpunk", "valentine", "aqua", "pastel", "fantasy", "wireframe", "luxury", "dracula", "business", "night", "coffee", "winter"],
     darkMode: "class",
   },
 };

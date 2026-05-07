@@ -14,7 +14,7 @@ createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthContext>
       <GoogleOAuthProvider clientId={import.meta.env.CLIENT_ID}>
-        <App />
+        <App className="animate-scroll-appear"/>
       </GoogleOAuthProvider>
     </AuthContext>
   </React.StrictMode>,
