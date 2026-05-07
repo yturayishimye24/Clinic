@@ -14,7 +14,7 @@ const Navbar = ({scrollToTeam,scrollToFaqs,goToHome,scrollToWhyUs,scrollToContac
       
       <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
         <img src="/images/LOGO.png" alt="Logo" className="w-8 h-8" />
-        <span className="text-xl text-gray-600 font-normal">Workspace</span>
+        <span className="text-xl text-gray-600 font-normal">Clinic Workspace</span>
       </div>
 
       <div className="hidden md:flex items-center gap-8 text-gray-600 text-[15px] font-medium">
