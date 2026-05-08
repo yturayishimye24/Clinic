@@ -19,15 +19,8 @@ import {
   Label,
   Separator,
 } from "@heroui/react";
-import {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Button } from "@/components/ui/button";
+import PopoverInteractive from "../components/popoverSignOut.jsx";
+
 
 const SidebarContext = createContext();
 export default function Sidebar({ children, expanded, setExpanded }) {
@@ -106,40 +99,9 @@ export default function Sidebar({ children, expanded, setExpanded }) {
         </SidebarContext.Provider>
 
         <div className="border-t flex p-3">
-          <Space vertical size={16}>
-            <Space wrap size={16}>
-              <Popover>
-                <PopoverTrigger>
-                  <Avatar
-                    size={64}
-                    icon={<UserOutlined className="cursor-pointer" />}
-                  />
-                </PopoverTrigger>
-                <PopoverContent
-                  side="top"
-                  align="center"
-                  sideOffset={10}
-                  className="w-48 rounded-xl shadow-lg border bg-white p-3"
-                >
-                  <PopoverHeader>
-                    <PopoverTitle className="text-center font-poppins text-2xl">
-                      Sign out
-                    </PopoverTitle>
-                    <PopoverDescription>
-                      <Button
-                        className="btn btn-secondary w-full mt-10"
-                        onClick={handleLogout}
-                      >
-                        Sign out
-                      </Button>
-                    </PopoverDescription>
-                  </PopoverHeader>
-                </PopoverContent>
-              </Popover>
-            </Space>
-          </Space>
+          <PopoverInteractive/>
 
-          <div
+          {/* <div
             className={`flex justify-between items-center ${expanded ? "w-52 ml-3" : "w-0"}`}
           >
             <div className="leading-4">
@@ -217,7 +179,7 @@ export default function Sidebar({ children, expanded, setExpanded }) {
                 </Dropdown.Menu>
               </Dropdown.Popover>
             </Dropdown>
-          </div>
+          </div> */}
         </div>
       </nav>
     </aside>
