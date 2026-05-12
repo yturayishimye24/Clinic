@@ -1,9 +1,9 @@
-import delay from "../utils/Delay.jsx";
+import {delay} from "../utils/Delay.jsx";
 
 import {Avatar, Button, Popover} from "@heroui/react";
 import {useState} from "react";
 import {useNavigate} from "react-router-dom";
-import { useAuth } from "../context/authContext.jsx";
+import { useAuth } from "../../context/authContext.jsx"
 
 export default function PopoverInteractive() { 
   const navigate = useNavigate();
