@@ -1,9 +1,10 @@
 import transporter from "../config/mailer.js";
-
+// import { Envelope, Globe, Plus, TrashBin } from "lucide-react";
+// import { Button } from "@heroui/react";
+// import { ArrowRightToSquare } from "@gravity-ui/icons";
 export const createRequestAccount = async (req, res) => {
   const { name, email, message, quickReply } = req.body;
 
- 
   if (!name || !email || !message) {
     return res.status(400).json({
       success: false,
@@ -14,7 +15,6 @@ export const createRequestAccount = async (req, res) => {
   try {
     console.log("Incoming request:", { name, email, message, quickReply });
 
-    // ✅ 1. Send email to ADMIN
     const adminMail = await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: process.env.ADMIN_EMAIL,
@@ -31,7 +31,6 @@ export const createRequestAccount = async (req, res) => {
 
     console.log("Admin email sent:", adminMail.response);
 
-  
     const userMail = await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
@@ -63,7 +62,10 @@ export const createRequestAccount = async (req, res) => {
               </div>
 
               <p>If this wasn’t you, just ignore this email.</p>
-
+                <Button variant="secondary">
+                  // <ArrowRightToSquare />
+                   Add Member
+                   </Button>
               <br/>
 
               <p>
@@ -91,7 +93,6 @@ export const createRequestAccount = async (req, res) => {
       success: true,
       message: "Request sent successfully",
     });
-
   } catch (error) {
     console.error("FULL EMAIL ERROR:", error); // 🔥 shows real issue
 

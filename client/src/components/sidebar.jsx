@@ -99,7 +99,7 @@ export default function Sidebar({ children, expanded, setExpanded }) {
         </SidebarContext.Provider>
 
         <div className="border-t flex p-3">
-          <PopoverInteractive/>
+          <PopoverInteractive expanded={expanded} />
 
           {/* <div
             className={`flex justify-between items-center ${expanded ? "w-52 ml-3" : "w-0"}`}

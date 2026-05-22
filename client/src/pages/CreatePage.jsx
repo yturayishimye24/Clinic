@@ -510,7 +510,7 @@ export default function NursePage() {
           icon={<Briefcase />}
           text="Medicines"
           onClick={() => navigate("/home/medicines")}
-          active={location.pathname === "/home/reports"}
+          active={location.pathname === "/home/medicines"}
         />
         <SidebarItem
           icon={<Settings />}
@@ -550,7 +550,7 @@ export default function NursePage() {
                   </Button>
                   <Dropdown.Popover>
                     <Dropdown.Menu>
-                      <Dropdown.Item id="new-file" textValue="New file">
+                      <Dropdown.Item id="new-file" textValue="New file" onClick={() => setShowForm(true)}>
                         <div className="flex h-8 items-start justify-center pt-px">
                           <SquarePlus className="size-4 shrink-0" />
                         </div>
@@ -764,7 +764,7 @@ export default function NursePage() {
                         {/* BODY */}
                         <tbody className="divide-y divide-gray-100 cursor-pointer" >
                           {filteredPatients.length === 0 ? (
-                            <tr onClick={navigate(`/home/patients/${patients._id}`)}>
+                            <tr>
                               <td colSpan="4" className="p-10 text-center">
                                 <div className="flex flex-col items-center gap-4">
                                   <i className="fa-solid fa-user-xmark text-5xl text-gray-300"></i>
@@ -1216,7 +1216,10 @@ export default function NursePage() {
       {showForm && (
         <dialog
           className="modal modal-open bg-slate-900/40 backdrop-blur-sm"
-          onClick={() => setShowForm(false)}
+          onClick={() => {
+            setShowForm(false);
+            setFormError("");
+          }}
         >
           <div
             className="modal-box w-full max-w-2xl p-8 bg-base-100 rounded-2xl shadow-2xl border border-base-200"
@@ -1234,12 +1237,34 @@ export default function NursePage() {
                 </p>
               </div>
               <button
-                onClick={() => setShowForm(false)}
+                onClick={() => {
+                  setShowForm(false);
+                  setFormError("");
+                }}
                 className="btn btn-sm btn-circle btn-ghost"
               >
                 ✕
               </button>
             </div>
+
+            {formError && (
+              <div className="alert alert-error mb-6">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="stroke-current shrink-0 h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M10 14l-2-2m0 0l-2-2m2 2l2-2m-2 2l-2 2m2-2l2 2m-2-2l-2 2"
+                  />
+                </svg>
+                <span>{formError}</span>
+              </div>
+            )}
 
             <form
               onSubmit={handleSubmit}
@@ -1340,7 +1365,10 @@ export default function NursePage() {
                 <button
                   type="button"
                   className="btn btn-ghost hover:bg-base-200 px-6"
-                  onClick={() => setShowForm(false)}
+                  onClick={() => {
+                    setShowForm(false);
+                    setFormError("");
+                  }}
                 >
                   Cancel
                 </button>

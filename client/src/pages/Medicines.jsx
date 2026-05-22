@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@heroui/react";
+import { Trash2 } from "lucide-react";
+import { TrashBin } from "@gravity-ui/icons";
 import { Plus } from "lucide-react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
@@ -45,6 +47,22 @@ function Medicines() {
     }
   };
 
+  const groupedMedicines = medicines.reduce((groups, medicine) => {
+    const date = new Date(medicine.createdAt).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+
+    groups[date].push(medicine);
+
+    return groups;
+  }, {});
+
   useEffect(() => {
     fetchMedicines();
   }, []);
@@ -79,7 +97,9 @@ function Medicines() {
       if (response.data.success) {
         toast.success("Added medicine successfully!");
 
-        setMedicines((prev) => [...prev, response.data.medicine]);
+        const newMedicine =
+          response.data.medicine || response.data.CreatedMedicine;
+        setMedicines((prev) => [...prev, newMedicine]);
         setMedicineFormOpen(false);
 
         setMedicineName("");
@@ -130,83 +150,125 @@ function Medicines() {
             No medicines available.
           </div>
         ) : (
-          medicines.map((medicine) => {
-            const status = medicine.status || "In Stock";
-            const expiry = medicine.expiryDate
-              ? medicine.expiryDate.toString().slice(0, 10)
-              : "N/A";
+          Object.entries(groupedMedicines).map(([date, meds]) => (
+            <div key={date} className="col-span-full">
+              <h2 className="text-2xl font-bold text-slate-700 mb-6 mt-4">
+                {date}
+              </h2>
 
-            return (
-              <div
-                key={medicine._id || medicine.id}
-                className="bg-white group rounded-3xl border border-slate-100 p-6 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 transition-colors">
-                    <svg
-                      className="w-6 h-6 text-slate-400 group-hover:text-blue-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {meds.map((medicine) => {
+                  const status = medicine.status || "In Stock";
+
+                  const expiry = medicine.expiryDate
+                    ? medicine.expiryDate.toString().slice(0, 10)
+                    : "N/A";
+
+                  return (
+                    <div
+                      key={medicine._id || medicine.id}
+                      className="bg-white group rounded-3xl border border-slate-100 p-6 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 relative"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
-                      />
-                    </svg>
-                  </div>
-                  <span
-                    className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-md ${
-                      status === "Low Stock"
-                        ? "bg-rose-50 text-rose-600"
-                        : "bg-emerald-50 text-emerald-600"
-                    }`}
-                  >
-                    {status}
-                  </span>
-                </div>
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 transition-colors">
+                          <svg
+                            className="w-6 h-6 text-slate-400 group-hover:text-blue-500"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"
+                            />
+                          </svg>
+                        </div>
 
-                <h3 className="text-xl font-bold text-slate-800">
-                  {medicine.medicineName || "Unnamed medicine"}
-                </h3>
-                <p className="text-slate-500 text-sm mb-4">
-                  {medicine.dosage || "No dosage provided"} •{" "}
-                  {medicine.category || ""}
-                </p>
+                        <span
+                          className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-md ${
+                            status === "Low Stock"
+                              ? "bg-rose-50 text-rose-600"
+                              : "bg-emerald-50 text-emerald-600"
+                          }`}
+                        >
+                          {status}
+                        </span>
+                      </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                  <div>
-                    <p className="text-[10px] text-slate-400 uppercase font-bold">
-                      In Stock
-                    </p>
-                    <p className="text-lg font-semibold text-slate-700">
-                      {medicine.quantity ?? 0} units
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] text-slate-400 uppercase font-bold">
-                      Expiry
-                    </p>
-                    <p className="text-sm font-medium text-slate-700">
-                      {expiry}
-                    </p>
-                  </div>
-                </div>
+                      <h3 className="text-xl font-bold text-slate-800">
+                        {medicine.medicineName || "Unnamed medicine"}
+                      </h3>
 
-                <button className="w-full mt-6 py-2 rounded-xl bg-slate-50 text-slate-600 font-medium text-sm hover:bg-slate-100 transition-colors">
-                  View Details
-                </button>
+                      <p className="text-slate-500 text-sm mb-4">
+                        {medicine.dosage || "No dosage provided"} •{" "}
+                        {medicine.category || ""}
+                      </p>
+
+                      <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                        <div>
+                          <Button variant="danger" className="absolute right-2 top-2">
+                            <TrashBin />
+                            Delete
+                          </Button>
+                          <p className="text-[10px] text-slate-400 uppercase font-bold">
+                            In Stock
+                          </p>
+
+                          <p className="text-lg font-semibold text-slate-700">
+                            {medicine.quantity ?? 0} units
+                          </p>
+                        </div>
+
+                        <div className="text-right">
+                          <p className="text-[10px] text-slate-400 uppercase font-bold">
+                            Expiry
+                          </p>
+
+                          <p className="text-sm font-medium text-slate-700">
+                            {expiry}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button className="w-full mt-6 py-2 rounded-xl bg-slate-50 text-slate-600 font-medium text-sm hover:bg-slate-100 transition-colors">
+                        View Details
+                      </button>
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })
+            </div>
+          ))
         )}
       </div>
       {medicineFormOpen && (
-        <div className="card bg-base-100 shadow-md">
-          <div className="card-body">
-            <h2 className="card-title text-2xl mb-4">Add New Medicine</h2>
+        <dialog
+          className="modal modal-open bg-slate-900/40 backdrop-blur-sm"
+          onClick={() => setMedicineFormOpen(false)}
+        >
+          <div
+            className="modal-box w-full max-w-2xl p-8 bg-base-100 rounded-2xl shadow-2xl border border-base-200 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h2 className="text-2xl font-bold tracking-tight text-base-content">
+                  Add New Medicine
+                </h2>
+                <p className="text-sm text-base-content/60 mt-1">
+                  Fill in the medicine details below.
+                </p>
+              </div>
+              <button
+                onClick={() => setMedicineFormOpen(false)}
+                className="btn btn-sm btn-circle btn-ghost"
+              >
+                ✕
+              </button>
+            </div>
 
             <form onSubmit={(e) => addMedicines(e)}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -355,7 +417,10 @@ function Medicines() {
               </div>
             </form>
           </div>
-        </div>
+          <form method="dialog" className="modal-backdrop">
+            <button onClick={() => setMedicineFormOpen(false)}>close</button>
+          </form>
+        </dialog>
       )}
     </div>
   );

@@ -26,17 +26,7 @@ const HeroSection = () => {
 
   return (
     <>
-      {/* MAIN WRAPPER 
-        - relative: serves as the anchor for the background
-        - overflow-hidden: prevents the circular videos from creating scrollbars
-      */}
       <div className="relative w-full min-h-screen bg-[#f8fafc] overflow-hidden flex flex-col justify-center animate-scroll-appear">
-        
-        {/* BACKGROUND LAYER (Pattern Craft)
-          - absolute inset-0: fills the container
-          - pointer-events-none: ensures users can still click buttons through the pattern
-          - z-0: stays behind the content
-        */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
@@ -45,8 +35,10 @@ const HeroSection = () => {
               linear-gradient(to bottom, #e2e8f0 1px, transparent 1px)
             `,
             backgroundSize: "20px 30px",
-            WebkitMaskImage: "radial-gradient(ellipse 100% 80% at 50% 0%, #000 70%, transparent 100%)",
-            maskImage: "radial-gradient(ellipse 100% 80% at 50% 0%, #000 70%, transparent 100%)",
+            WebkitMaskImage:
+              "radial-gradient(ellipse 100% 80% at 50% 0%, #000 70%, transparent 100%)",
+            maskImage:
+              "radial-gradient(ellipse 100% 80% at 50% 0%, #000 70%, transparent 100%)",
           }}
         />
 
@@ -55,7 +47,6 @@ const HeroSection = () => {
           - Removed 'absolute': allows the section to take up actual space in the document flow
         */}
         <section className="relative z-10 max-w-7xl mx-auto px-6 pt-40 pb-32 flex flex-col lg:flex-row items-center justify-between gap-12">
-          
           {/* Left Content */}
           <div
             className="flex-1 text-center lg:text-left"
@@ -115,7 +106,6 @@ const HeroSection = () => {
         </section>
       </div>
 
-      {/* Modal */}
       <LoginSelectionModal
         isOpen={selectionOpen}
         isClosed={() => setSelectionOpen(false)}

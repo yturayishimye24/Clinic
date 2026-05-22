@@ -5,7 +5,7 @@ import {useState} from "react";
 import {useNavigate} from "react-router-dom";
 import { useAuth } from "../../context/authContext.jsx"
 
-export default function PopoverInteractive() { 
+export default function PopoverInteractive({expanded}) { 
   const navigate = useNavigate();
   const { logOut } = useAuth();
   const [isFollowing, setIsFollowing] = useState(false);
@@ -29,8 +29,8 @@ export default function PopoverInteractive() {
               <Avatar.Fallback>SJ</Avatar.Fallback>
             </Avatar>
             <div className="flex flex-col">
-              <p className="text-sm font-medium">Sarah Johnson</p>
-              <p className="text-xs text-gray-500">@sarahj</p>
+              <p className={`text-sm font-medium ${expanded?"":"hidden"}`}>{localStorage.getItem("username")}</p>
+              <p className={`text-xs text-gray-500 ${expanded?"":"hidden"}`}>{localStorage.getItem("email")}</p>
             </div>
           </div>
         </Popover.Trigger>

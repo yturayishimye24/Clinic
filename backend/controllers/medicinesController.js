@@ -39,6 +39,7 @@ export const addMedicine = async (req, res) => {
         .json({
           success: true,
           msg: "Medicine created successfully!",
+          medicine: CreatedMedicine,
           CreatedMedicine,
         });
     }
@@ -52,7 +53,7 @@ export const addMedicine = async (req, res) => {
 
 export const getMedicine = async (req, res) => {
   try {
-    const medicine = await Medicine.find();
+    const medicine = (await Medicine.find()).toSorted({createdAt: -1});
     if (medicine) {
       res
         .status(200)

@@ -41,7 +41,7 @@ const newMedicinesSchema = new mongoose.Schema({
         type:String,
         required:true,
     }
-})
+},{timestamps:true})
 
 const Medecine = mongoose.model("Medecine",newMedicinesSchema);
 export default Medecine;
