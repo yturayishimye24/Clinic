@@ -5,6 +5,7 @@ import { TrashBin } from "@gravity-ui/icons";
 import { Plus } from "lucide-react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
+import { OrbitProgress } from "react-loading-indicators";
 
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
@@ -62,6 +63,25 @@ function Medicines() {
 
     return groups;
   }, {});
+
+  const handleDeleteMedicine = async (id) => {
+    if(!window.confirm("Are you sure you want to delete this medicine?")){
+      return;
+    }
+    const token = localStorage.getItem("token");  
+    try {
+       const response = await axios.delete(`${backendUrl}/api/medicines/delete/${id}`,{
+        headers: { Authorization: `Bearer ${token}` },
+       })
+       if(response.data.success){
+        toast.success("Medicine deleted successfully!");
+        setMedicines((prev) => prev.filter((med) => med._id !== id));
+       }
+    }catch(error){
+      console.log("Error deleting medicine", error?.message || error);
+      toast.error("Error deleting medicine");
+    }
+  }
 
   useEffect(() => {
     fetchMedicines();
@@ -142,7 +162,8 @@ function Medicines() {
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full rounded-3xl bg-white border border-slate-100 p-8 text-center text-slate-500 shadow-sm">
+          <div className="flex flex-col items-centercol-span-full rounded-3xl bg-white border border-slate-100 p-8 text-center text-slate-500 shadow-sm">
+            <OrbitProgress size={40} color="#94a3b8" />
             Loading medicines...
           </div>
         ) : medicines.length === 0 ? (
@@ -186,15 +207,7 @@ function Medicines() {
                           </svg>
                         </div>
 
-                        <span
-                          className={`text-[10px] uppercase font-bold tracking-widest px-2 py-1 rounded-md ${
-                            status === "Low Stock"
-                              ? "bg-rose-50 text-rose-600"
-                              : "bg-emerald-50 text-emerald-600"
-                          }`}
-                        >
-                          {status}
-                        </span>
+                        
                       </div>
 
                       <h3 className="text-xl font-bold text-slate-800">
@@ -208,13 +221,10 @@ function Medicines() {
 
                       <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                         <div>
-                          <Button variant="danger" className="absolute right-2 top-2">
-                            <TrashBin />
-                            Delete
+                          <Button variant="danger" className="absolute right-2 top-2" onClick={() => handleDeleteMedicine(medicine._id)}>
+                            <TrashBin  />
                           </Button>
-                          <p className="text-[10px] text-slate-400 uppercase font-bold">
-                            In Stock
-                          </p>
+                          
 
                           <p className="text-lg font-semibold text-slate-700">
                             {medicine.quantity ?? 0} units

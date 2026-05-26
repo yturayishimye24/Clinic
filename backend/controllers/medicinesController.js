@@ -53,7 +53,7 @@ export const addMedicine = async (req, res) => {
 
 export const getMedicine = async (req, res) => {
   try {
-    const medicine = (await Medicine.find()).toSorted({createdAt: -1});
+    const medicine = await Medicine.find().sort({createdAt: -1});
     if (medicine) {
       res
         .status(200)
@@ -71,23 +71,30 @@ export const getMedicine = async (req, res) => {
     res.status(501).json({ success: false, msg: "Error fetching medicines!" });
   }
 };
+
 export const deleteMedicine = async (req, res) => {
   try {
-    const medicineExist = await Medicine.find();
-    if (medicineExist) {
-      const deletedMedicine = await Medicine.findByIdAndDelete(req.params.id);
-    } else {
-    }
+    const deletedMedicine = await Medicine.findByIdAndDelete(req.params.id);
 
     if (!deletedMedicine) {
-      console.log("Error deleting medicine");
-      res
-        .status(500)
-        .json({ success: false, message: "Error deleting medicines" });
+      return res.status(404).json({
+        success: false,
+        message: "Medicine not found",
+      });
     }
+
+    return res.status(200).json({
+      success: true,
+      message: "Medicine deleted successfully",
+      deletedMedicine,
+    });
   } catch (error) {
-    console.log("Error deleting medicnies!");
-    res.status(500).json({ success: false, msg: "Error deleting medicine" });
+    console.log("Error deleting medicines!", error.message);
+
+    return res.status(500).json({
+      success: false,
+      msg: "Error deleting medicine",
+    });
   }
 };
 

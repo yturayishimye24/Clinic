@@ -958,7 +958,7 @@ export default function NursePage() {
 
                 {/* --- REQUESTS LIST (Based on Requests.png style) --- */}
                 <div className="card bg-base-100 shadow-md flex flex-col h-fit">
-                  {/* Header */}
+                  
                   <div className="flex justify-between items-center px-4 pt-4 pb-2 border-b border-base-300">
                     <h3 className="text-lg font-semibold">My Requests</h3>
 

@@ -140,27 +140,37 @@ export const getCurrentUser = async (req, res) => {
 };
 
 export const updateNurse = async (req, res) => {
-
-  try{
+  try {
     const { id } = req.params;
+    const { username, email, password } = req.body;
 
-    const { username, email, role } = req.body;
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Authentication required" });
+    }
 
-    const updatedNurse = await Nurse.findByIdAndUpdate(
-      id,
-      {username, email, role},
-      { new: true}
-    )
-    if(!updatedNurse){
+    if (req.user.id !== id && req.user.role !== "admin") {
+      return res.status(403).json({ success: false, message: "You are not allowed to update this profile" });
+    }
+
+    const updateData = { username, email };
+    if (password && password.trim().length > 0) {
+      if (password.length < 8) {
+        return res.status(400).json({ success: false, message: "Password must be at least 8 characters" });
+      }
+      const salt = await bcrypt.genSalt(10);
+      updateData.password = await bcrypt.hash(password, salt);
+    }
+
+    const updatedNurse = await Nurse.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
+    if (!updatedNurse) {
       return res.status(404).json({ success: false, message: "Nurse not found!" });
     }
 
     const payload = updatedNurse.toObject ? updatedNurse.toObject() : updatedNurse;
     io.to("admins").emit("nurseUpdated", payload);
     res.status(200).json({ success: true, message: "Nurse updated successfully!", nurse: payload });
-
-  }catch(error){
+  } catch (error) {
     console.log("Error updating nurse", error.message);
-    res.status(500).json({ success: false, message: error.message || "Error updating nurse"})
+    res.status(500).json({ success: false, message: error.message || "Error updating nurse" });
   }
-}
+};

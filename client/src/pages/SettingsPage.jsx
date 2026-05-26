@@ -1,7 +1,64 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { Button, AlertDialog } from "@heroui/react";
+import { useAuth } from "../../context/authContext.jsx";
+
+const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 export default function SettingsPage() {
+  const { user, login } = useAuth();
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    
+    if (user) {
+      setFullName(user.username || "");
+      setEmail(user.email || "");
+    }
+  }, [user]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    setSaving(true);
+    setMessage("");
+
+    try {
+      const token = localStorage.getItem("token");
+      const payload = { username: fullName, email };
+      if (password.trim()) payload.password = password;
+
+      const response = await axios.put(
+        `${backendUrl}/api/accounts/nurses/${user._id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+
+      if (response.data.success) {
+        const updatedUser = response.data.nurse;
+        login(updatedUser);
+        localStorage.setItem("username", updatedUser.username);
+        localStorage.setItem("email", updatedUser.email);
+        setMessage("Profile updated successfully.");
+        setPassword("");
+      } else {
+        setMessage(response.data.message || "Unable to update profile.");
+      }
+    } catch (error) {
+      setMessage(error.response?.data?.message || "Error saving profile.");
+      console.error("Profile update failed:", error);
+    } finally {
+      setSaving(false);
+    }
+  };
   return (
     <div>
 
@@ -22,7 +79,7 @@ export default function SettingsPage() {
 
           <AlertDialog.Backdrop>
             <AlertDialog.Container>
-              <AlertDialog.Dialog className="sm:max-w-[500px]">
+              <AlertDialog.Dialog className="sm:max-w-125">
 
                 <AlertDialog.Header>
                   <AlertDialog.Heading>
@@ -31,33 +88,43 @@ export default function SettingsPage() {
                 </AlertDialog.Header>
 
                 <AlertDialog.Body>
-                  <form className="flex flex-col gap-4">
+                  <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
                     <input
                       type="text"
                       placeholder="Full Name"
-                      className=" text-black p-3 focused:ring-3 focus:ring-violet-600 focus:outline-none placeholder:text-black/50"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      required
+                      className="text-green-700 border border-gray-200 p-3 focus:outline-none focus:border-gray-300 placeholder:text-gray-600"
                     />
                     <input
                       type="email"
                       placeholder="Email"
-                      className=" text-black p-3 focused:ring-3 focus:ring-violet-600 focus:outline-none placeholder:text-black/50"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      className="text-green-700 border border-gray-200 p-3 focus:outline-none focus:border-gray-300 placeholder:text-gray-600"
                     />
                     <input
                       type="password"
-                      placeholder="New Password"
-                      className=" text-black p-3 focused:ring-3 focus:ring-violet-600 focus:outline-none placeholder:text-black/50"
+                      placeholder="New Password (leave blank to keep current)"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="text-green-700 border border-gray-200 p-3 focus:outline-none focus:border-gray-300 placeholder:text-gray-600"
                     />
+                    {message && (
+                      <div className="text-sm text-left text-green-600">{message}</div>
+                    )}
+                    <div className="flex items-center justify-end gap-3">
+                      <Button variant="tertiary" slot="close">Cancel</Button>
+                      <Button type="submit" variant="primary" disabled={saving}>
+                        {saving ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </div>
                   </form>
                 </AlertDialog.Body>
 
-                <AlertDialog.Footer>
-                  <Button variant="tertiary" slot="close">
-                    Cancel
-                  </Button>
-                  <Button variant="primary">
-                    Save Changes
-                  </Button>
-                </AlertDialog.Footer>
+                <AlertDialog.Footer />
 
               </AlertDialog.Dialog>
             </AlertDialog.Container>
