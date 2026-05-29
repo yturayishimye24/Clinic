@@ -33,7 +33,10 @@ const addSchema = new mongoose.Schema({
     type: String,
     enum: ["active", "hospitalized", "released"],
   },
-  // Image: { type: String, default: "" },
+  image: {
+    type: String,
+    default: "",
+  },
 },{timestamps:true});
 const addedPatient = mongoose.model("addedPatient", addSchema);
 export default addedPatient;

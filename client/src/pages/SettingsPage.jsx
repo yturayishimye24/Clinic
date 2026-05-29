@@ -45,8 +45,12 @@ export default function SettingsPage() {
       if (response.data.success) {
         const updatedUser = response.data.nurse;
         login(updatedUser);
+        const role = localStorage.getItem("role") || "nurse";
+        // update both role-scoped and global for compatibility
+        localStorage.setItem(`${role}Username`, updatedUser.username);
+        localStorage.setItem(`${role}Email`, updatedUser.email || "");
         localStorage.setItem("username", updatedUser.username);
-        localStorage.setItem("email", updatedUser.email);
+        localStorage.setItem("email", updatedUser.email || "");
         setMessage("Profile updated successfully.");
         setPassword("");
       } else {

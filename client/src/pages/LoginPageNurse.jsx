@@ -74,7 +74,13 @@ const LoginPageNurse = () => {
 
         localStorage.setItem("token", token);
         localStorage.setItem("role", role);
+        localStorage.setItem(`${role}Username`, userData.username);
+        localStorage.setItem(`${role}Email`, userData.email || "");
+        if (userData.image) {
+          localStorage.setItem(`${role}Image`, userData.image);
+        }
         localStorage.setItem("username", userData.username);
+        localStorage.setItem("email", userData.email || "");
         login(userData);
 
         toast.success("Logged in successfully!");

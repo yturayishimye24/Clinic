@@ -21,6 +21,14 @@ export const AuthContext = ({ children }) => {
       setUser(null);
       localStorage.removeItem("token");
       localStorage.removeItem("role");
+      localStorage.removeItem("username");
+      localStorage.removeItem("email");
+      localStorage.removeItem("adminUsername");
+      localStorage.removeItem("adminEmail");
+      localStorage.removeItem("doctorUsername");
+      localStorage.removeItem("doctorEmail");
+      localStorage.removeItem("nurseUsername");
+      localStorage.removeItem("nurseEmail");
     }catch(error){
       console.log("Error during logout:", error);
     }

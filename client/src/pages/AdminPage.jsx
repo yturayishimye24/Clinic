@@ -2,13 +2,15 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Popover, Spinner } from "flowbite-react";
 import socket, { connectSocket } from "../socket.js";
 import Sidebar, { SidebarItem } from "../components/sidebar.jsx";
 import { Avatar } from "@heroui/react";
 import { Envelope, Globe, Plus, TrashBin } from "@gravity-ui/icons";
+import Metric from "../components/DailyMetric.jsx";
 import { Button } from "@heroui/react";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 import {
   Users,
   Home,
@@ -36,10 +38,27 @@ export default function AdminPage() {
   const [reports, setReports] = useState([]);
   const [nurses, setNurses] = useState([]);
   const [username, setUsername] = useState("");
+  const [userId, setUserId] = useState("");
+  const [settingsEmail, setSettingsEmail] = useState("");
+  const [settingsPassword, setSettingsPassword] = useState("");
+  const [settingsImageFile, setSettingsImageFile] = useState(null);
+  const [settingsImagePreview, setSettingsImagePreview] = useState("");
+  const [settingsMessage, setSettingsMessage] = useState("");
+  const [settingsSaving, setSettingsSaving] = useState(false);
   const [loadingPatients, setLoadingPatients] = useState(false);
   const [loadingRequests, setLoadingRequests] = useState(false);
   const [loadingReports, setLoadingReports] = useState(false);
   const [loadingNurses, setLoadingNurses] = useState(false);
+  const [showPatientModal, setShowPatientModal] = useState(false);
+  const [editingPatient, setEditingPatient] = useState(null);
+  const [patientFirstName, setPatientFirstName] = useState("");
+  const [patientLastName, setPatientLastName] = useState("");
+  const [patientGender, setPatientGender] = useState("");
+  const [patientDate, setPatientDate] = useState("");
+  const [patientDisease, setPatientDisease] = useState("");
+  const [patientImageFile, setPatientImageFile] = useState(null);
+  const [patientImagePreview, setPatientImagePreview] = useState("");
+  const [editError, setEditError] = useState("");
 
   // Form States
   const [em, setEmail] = useState("");
@@ -54,7 +73,27 @@ export default function AdminPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [expanded, setExpanded] = useState(true);
+  const [activeSection, setActiveSection] = useState("dashboard");
+  
+
+
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname.toLowerCase();
+    if (path.includes("/requests")) {
+      setActiveSection("requests");
+    } else if (path.includes("/reports")) {
+      setActiveSection("reports");
+    } else if (path.includes("/settings")) {
+      setActiveSection("settings");
+    } else if (path.includes("/patients")) {
+      setActiveSection("patients");
+    } else {
+      setActiveSection("dashboard");
+    }
+  }, [location.pathname]);
 
   // --- DATA FETCHING ---
   const fetchPatients = async () => {
@@ -142,8 +181,15 @@ export default function AdminPage() {
       const response = await axios.get(`${backendUrl}/api/infos/email`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+      const role = localStorage.getItem("role") || "admin";
       setUsername(response.data.username);
-      localStorage.setItem("image", response.data.image);
+      setUserId(response.data._id || "");
+      setSettingsEmail(response.data.email || "");
+      setSettingsImagePreview(response.data.image ? `${backendUrl}${response.data.image}` : "");
+      // store image and username scoped to role to avoid overwriting session data
+      localStorage.setItem(`${role}Username`, response.data.username);
+      localStorage.setItem(`${role}Email`, response.data.email || "");
+      localStorage.setItem(`${role}Image`, response.data.image || "");
     } catch (error) {
       console.log(error);
     }
@@ -202,7 +248,6 @@ export default function AdminPage() {
         password,
         role: formRole,
       });
-      localStorage.setItem("email", em);
       if (response.data.success) {
         toast.success("Account created successfully");
         fetchNurses();
@@ -257,6 +302,15 @@ export default function AdminPage() {
   };
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
+    localStorage.removeItem("adminUsername");
+    localStorage.removeItem("adminEmail");
+    localStorage.removeItem("doctorUsername");
+    localStorage.removeItem("doctorEmail");
+    localStorage.removeItem("nurseUsername");
+    localStorage.removeItem("nurseEmail");
     toast.success("Logged out successfully");
     navigate("/doctorLogin");
   };
@@ -277,6 +331,107 @@ export default function AdminPage() {
     }
   };
 
+  const handleSettingsSubmit = async (event) => {
+    event.preventDefault();
+    setSettingsSaving(true);
+    setSettingsMessage("");
+    try {
+      const token = localStorage.getItem("token");
+      const formData = new FormData();
+      formData.append("username", username);
+      formData.append("email", settingsEmail);
+      if (settingsPassword.trim()) {
+        formData.append("password", settingsPassword);
+      }
+      if (settingsImageFile) {
+        formData.append("image", settingsImageFile);
+      }
+
+      const response = await axios.put(
+        `${backendUrl}/api/accounts/nurses/${userId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        },
+      );
+      if (response.data.success) {
+        const updatedUser = response.data.nurse;
+        setUsername(updatedUser.username);
+        setSettingsEmail(updatedUser.email || "");
+        setSettingsImagePreview(
+          updatedUser.image ? `${backendUrl}${updatedUser.image}` : "",
+        );
+        setSettingsPassword("");
+        setSettingsImageFile(null);
+        setSettingsMessage("Profile updated successfully.");
+        const role = localStorage.getItem("role") || "admin";
+        localStorage.setItem(`${role}Username`, updatedUser.username);
+        localStorage.setItem(`${role}Email`, updatedUser.email || "");
+        localStorage.setItem(`${role}Image`, updatedUser.image || "");
+      } else {
+        setSettingsMessage(response.data.message || "Unable to update profile.");
+      }
+    } catch (error) {
+      setSettingsMessage(error.response?.data?.message || "Error saving profile.");
+      console.error("Profile update failed:", error);
+    } finally {
+      setSettingsSaving(false);
+    }
+  };
+
+  const handleOpenPatientEdit = (patient) => {
+    setEditingPatient(patient);
+    setPatientFirstName(patient.firstName || "");
+    setPatientLastName(patient.lastName || "");
+    setPatientGender(patient.gender || "");
+    setPatientDate(patient.date ? patient.date.split("T")[0] : "");
+    setPatientDisease(patient.disease || "");
+    setPatientImageFile(null);
+    setPatientImagePreview(getPatientImageUrl(patient.image));
+    setEditError("");
+    setShowPatientModal(true);
+  };
+
+  const handleSavePatient = async (event) => {
+    event.preventDefault();
+    if (!editingPatient) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      const payload = {
+        firstName: patientFirstName,
+        lastName: patientLastName,
+        gender: patientGender,
+        date: patientDate,
+        disease: patientDisease,
+      };
+
+      const response = await axios.put(
+        `${backendUrl}/api/patients/${editingPatient._id}`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
+      setPatients((prev) =>
+        prev.map((p) =>
+          p._id === editingPatient._id ? response.data : p,
+        ),
+      );
+      setShowPatientModal(false);
+      setEditingPatient(null);
+      setEditError("");
+    } catch (err) {
+      console.error("Update failed", err);
+      setEditError(err.response?.data?.message || "Unable to update patient.");
+    }
+  };
+
   // --- FILTERING ---
   const filteredPatients = patients.filter((patient) => {
     const term = searchTerm.toLowerCase();
@@ -287,6 +442,24 @@ export default function AdminPage() {
       (patient.disease || "").toLowerCase().includes(term)
     );
   });
+
+  const patientGenderChartData = [
+    {
+      name: "Male",
+      value: patients.filter((patient) => patient.gender === "Male").length,
+    },
+    {
+      name: "Female",
+      value: patients.filter((patient) => patient.gender === "Female").length,
+    },
+  ];
+  const patientGenderColors = ["#2563eb", "#ec4899"];
+
+  const getPatientImageUrl = (imagePath) => {
+    if (!imagePath) return "";
+    if (imagePath.startsWith("http")) return imagePath;
+    return `${backendUrl}${imagePath}`;
+  };
 
   // --- SUB-COMPONENTS ---
 
@@ -324,18 +497,49 @@ export default function AdminPage() {
       <Sidebar expanded={expanded} setExpanded={setExpanded}>
         <SidebarItem
           icon={<Home />}
-          onClick={() => navigate("/home")}
+          onClick={() => {
+            setActiveSection("dashboard");
+            navigate("/home/admin");
+          }}
           text="Dashboard"
-          active
+          active={activeSection === "dashboard"}
         />
         <SidebarItem
           icon={<Users />}
-          onClick={() => navigate("/home/patients")}
+          onClick={() => {
+            setActiveSection("patients");
+            navigate("/home/admin/patients");
+          }}
           text="Patients"
+          active={activeSection === "patients"}
         />
-        <SidebarItem icon={<ClipboardList />} text="Requests" />
-        <SidebarItem icon={<BarChart3 />} text="Reports" />
-        <SidebarItem icon={<Settings />} text="Settings" />
+        <SidebarItem
+          icon={<ClipboardList />}
+          onClick={() => {
+            setActiveSection("requests");
+            navigate("/home/admin/requests");
+          }}
+          text="Requests"
+          active={activeSection === "requests"}
+        />
+        <SidebarItem
+          icon={<BarChart3 />}
+          onClick={() => {
+            setActiveSection("reports");
+            navigate("/home/admin/reports");
+          }}
+          text="Reports"
+          active={activeSection === "reports"}
+        />
+        <SidebarItem
+          icon={<Settings />}
+          onClick={() => {
+            setActiveSection("settings");
+            navigate("/home/admin/settings");
+          }}
+          text="Settings"
+          active={activeSection === "settings"}
+        />
       </Sidebar>
 
       {/* --- Main Container (Sidebar + Content) --- */}
@@ -344,6 +548,8 @@ export default function AdminPage() {
       >
         {/* --- MAIN CONTENT --- */}
         <main className="flex-1 pt-4 px-6 lg:px-10 pb-10 overflow-y-auto">
+          {activeSection === "dashboard" && (
+            <>
           {/* HEADER SECTION */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
             <div>
@@ -469,9 +675,76 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
-
+          <div className="w-full hover:bg-gray-50 rounded-3xl border border-gray-100 cozy-shadow p-6 mb-8 transition-all">
+             <Metric/>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">
+                    Gender distribution
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Patient count by gender.
+                  </p>
+                </div>
+                <span className="text-xs text-gray-400 uppercase tracking-[0.2em]">
+                  {patients.length} entries
+                </span>
+              </div>
+              <div className="h-72">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={patientGenderChartData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={90}
+                      paddingAngle={4}
+                    >
+                      {patientGenderChartData.map((entry, index) => (
+                        <Cell
+                          key={entry.name}
+                          fill={patientGenderColors[index % patientGenderColors.length]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => `${value} patients`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">
+                Gender counts
+              </h3>
+              <div className="space-y-4">
+                {patientGenderChartData.map((item, index) => (
+                  <div key={item.name} className="flex items-center justify-between gap-4 rounded-3xl bg-slate-50 p-4">
+                    <div>
+                      <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
+                        {item.name}
+                      </p>
+                      <p className="text-3xl font-bold text-slate-900">
+                        {item.value}
+                      </p>
+                    </div>
+                    <div
+                      className="h-12 w-12 rounded-2xl"
+                      style={{ backgroundColor: patientGenderColors[index] }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* LEFT COLUMN: REQUESTS & PATIENTS */}
+            
             <div className="xl:col-span-2 space-y-8">
               {/* REQUESTS TABLE */}
               <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow overflow-hidden">
@@ -691,11 +964,14 @@ export default function AdminPage() {
                               </span>
                             </td>
                             <td className="pr-6 py-4 text-right">
-                              <span className="text-xs font-medium text-gray-400">
-                                {typeof p.createdBy === "object"
-                                  ? p.createdBy.username
-                                  : "Staff"}
-                              </span>
+                              <div className="flex justify-end gap-2">
+                                <button
+                                  onClick={() => handleOpenPatientEdit(p)}
+                                  className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-slate-200 text-slate-600 hover:bg-slate-50 transition"
+                                >
+                                  Edit
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         ))
@@ -763,6 +1039,296 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+            </>
+          )}
+
+          {activeSection === "reports" && (
+            <>
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-8">
+                Reports
+              </h1>
+              <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow overflow-hidden">
+                <div className="p-6 border-b border-gray-50 flex items-center justify-between">
+                  <h3 className="font-bold text-lg text-gray-800">
+                    All Reports
+                  </h3>
+                  <button
+                    onClick={fetchReports}
+                    className="p-2 hover:bg-gray-50 rounded-lg text-gray-400 hover:text-emerald-600 transition"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-50/50 sticky top-0">
+                      <tr>
+                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Title</th>
+                        <th className="px-4 py-4 text-xs font-semibold text-gray-500 uppercase">Body</th>
+                        <th className="px-4 py-4 text-xs font-semibold text-gray-500 uppercase">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {loadingReports ? (
+                        <tr>
+                          <td colSpan="3" className="py-10 text-center">
+                            <Spinner />
+                          </td>
+                        </tr>
+                      ) : reports.length === 0 ? (
+                        <tr>
+                          <td colSpan="3" className="py-10 text-center text-gray-400">
+                            No reports found
+                          </td>
+                        </tr>
+                      ) : (
+                        reports.map((report) => (
+                          <tr key={report._id} className="hover:bg-gray-50 transition">
+                            <td className="px-6 py-4">
+                              <p className="text-sm font-bold text-gray-900">{report.title || "Untitled"}</p>
+                            </td>
+                            <td className="px-4 py-4">
+                              <p className="text-sm text-gray-600 truncate">{report.body || "No description"}</p>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span className="text-sm text-gray-500">
+                                {new Date(report.createdAt).toLocaleDateString()}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeSection === "patients" && (
+            <>
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-8">
+                Patients
+              </h1>
+              <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow overflow-hidden">
+                <div className="p-6 border-b border-gray-50 flex items-center justify-between flex-wrap gap-4">
+                  <h3 className="font-bold text-lg text-gray-800">
+                    All Patients
+                  </h3>
+                  <div className="relative">
+                    <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search patients..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 pr-4 py-2 bg-gray-50 border-none rounded-xl text-sm w-48 focus:ring-2 focus:ring-emerald-500/20"
+                    />
+                  </div>
+                </div>
+                <div className="overflow-x-auto max-h-[600px] custom-scrollbar">
+                  <table className="w-full text-left">
+                    <thead className="bg-gray-50/50 sticky top-0">
+                      <tr>
+                        <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Patient Name</th>
+                        <th className="px-4 py-4 text-xs font-semibold text-gray-500 uppercase">Condition</th>
+                        <th className="px-4 py-4 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {loadingPatients ? (
+                        <tr>
+                          <td colSpan="3" className="py-10 text-center">
+                            <Spinner />
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredPatients.map((p) => (
+                          <tr key={p._id} className="hover:bg-gray-50 transition">
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-gray-200 overflow-hidden">
+                                  <Avatar>
+                                    <Avatar.Image alt="Avatar" src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg" />
+                                    <Avatar.Fallback>P</Avatar.Fallback>
+                                  </Avatar>
+                                </div>
+                                <div>
+                                  <p className="text-sm font-bold text-gray-900">
+                                    {p.firstName} {p.lastName}
+                                  </p>
+                                  <p className="text-xs text-gray-400">{p.email || "No email"}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded-md">
+                                {p.disease || "Checkup"}
+                              </span>
+                            </td>
+                            <td className="px-4 py-4">
+                              <span
+                                className={`text-xs font-bold px-2 py-1 rounded-full border ${
+                                  p.Status === "hospitalized"
+                                    ? "bg-rose-50 text-rose-600 border-rose-100"
+                                    : "bg-emerald-50 text-emerald-600 border-emerald-100"
+                                }`}
+                              >
+                                {p.Status || "Active"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
+
+          {activeSection === "settings" && (
+            <>
+              <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-8">
+                Settings
+              </h1>
+              <div className="grid gap-8 lg:grid-cols-[360px_1fr]">
+                <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow p-8">
+                  <div className="flex flex-col items-center gap-4 text-center">
+                    <div className="relative rounded-full overflow-hidden w-32 h-32 border-4 border-emerald-100 shadow-sm">
+                      <img
+                        src={
+                          settingsImagePreview ||
+                          "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=200&h=200&fit=crop&crop=faces"
+                        }
+                        alt="Profile"
+                        className="object-cover w-full h-full"
+                      />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900">{username || "Admin"}</h2>
+                      <p className="text-sm text-gray-500">Administrator profile</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-8 space-y-6">
+                    <div className="rounded-3xl bg-slate-50 p-5 border border-slate-100">
+                      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-[0.2em] mb-3">
+                        Profile image
+                      </h3>
+                      <p className="text-sm text-slate-500 mb-4">
+                        Upload a new avatar for your admin account.
+                      </p>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] ?? null;
+                          setSettingsImageFile(file);
+                          setSettingsImagePreview(
+                            file ? URL.createObjectURL(file) : settingsImagePreview,
+                          );
+                        }}
+                        className="w-full text-sm text-gray-600 file:mr-4 file:rounded-full file:border-0 file:bg-emerald-600 file:px-4 file:py-2 file:text-sm file:text-white"
+                      />
+                    </div>
+
+                    <div className="rounded-3xl bg-slate-50 p-5 border border-slate-100">
+                      <h3 className="text-sm font-semibold text-slate-900 uppercase tracking-[0.2em] mb-3">
+                        Account info
+                      </h3>
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-xs font-semibold uppercase text-slate-500 mb-2">
+                            Name
+                          </label>
+                          <input
+                            type="text"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            className="w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold uppercase text-slate-500 mb-2">
+                            Email
+                          </label>
+                          <input
+                            type="email"
+                            value={settingsEmail}
+                            onChange={(e) => setSettingsEmail(e.target.value)}
+                            className="w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold uppercase text-slate-500 mb-2">
+                            New password
+                          </label>
+                          <input
+                            type="password"
+                            placeholder="Leave blank to keep current"
+                            value={settingsPassword}
+                            onChange={(e) => setSettingsPassword(e.target.value)}
+                            className="w-full rounded-3xl border border-gray-200 bg-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow p-8">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-800">Admin Settings</h3>
+                      <p className="text-sm text-gray-500">
+                        Edit your profile information and avatar.
+                      </p>
+                    </div>
+                    <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                      Secure updates
+                    </span>
+                  </div>
+
+                  <form onSubmit={handleSettingsSubmit} className="space-y-6">
+                    <div className="rounded-3xl bg-slate-50 p-5 border border-slate-100">
+                      <p className="text-sm font-medium text-slate-700 mb-2">Profile preview</p>
+                      <div className="flex items-center gap-4">
+                        <div className="w-16 h-16 rounded-full overflow-hidden border border-gray-200">
+                          <img
+                            src={
+                              settingsImagePreview ||
+                              "https://images.unsplash.com/photo-1502685104226-ee32379fefbe?w=200&h=200&fit=crop&crop=faces"
+                            }
+                            alt="Profile preview"
+                            className="object-cover w-full h-full"
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">{username || "Your profile"}</p>
+                          <p className="text-xs text-slate-500">{settingsEmail || "No email set"}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {settingsMessage && (
+                      <div className="rounded-3xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                        {settingsMessage}
+                      </div>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={settingsSaving || !userId}
+                      className="inline-flex items-center justify-center w-full rounded-3xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+                    >
+                      {settingsSaving ? "Saving..." : "Save profile"}
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </>
+          )}
         </main>
 
         {/* MODAL: ADD NURSE */}
@@ -849,6 +1415,115 @@ export default function AdminPage() {
                     "Create Account"
                   )}
                 </button>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {showPatientModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/20 backdrop-blur-sm"
+              onClick={() => setShowPatientModal(false)}
+            />
+            <div className="relative z-10 w-full max-w-xl rounded-3xl bg-white shadow-2xl overflow-hidden">
+              <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                <div>
+                  <h2 className="text-xl font-bold text-gray-900">
+                    Edit Patient
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    Update patient details and save changes.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setShowPatientModal(false)}
+                  className="rounded-full p-2 text-gray-500 hover:bg-gray-100"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <form onSubmit={handleSavePatient} className="p-6 grid gap-5 md:grid-cols-2">
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase text-slate-500">
+                    First name
+                  </label>
+                  <input
+                    value={patientFirstName}
+                    onChange={(e) => setPatientFirstName(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase text-slate-500">
+                    Last name
+                  </label>
+                  <input
+                    value={patientLastName}
+                    onChange={(e) => setPatientLastName(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase text-slate-500">
+                    Gender
+                  </label>
+                  <select
+                    value={patientGender}
+                    onChange={(e) => setPatientGender(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"
+                    required
+                  >
+                    <option value="">Select gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold uppercase text-slate-500">
+                    Date of birth
+                  </label>
+                  <input
+                    type="date"
+                    value={patientDate}
+                    onChange={(e) => setPatientDate(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"
+                    required
+                  />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-xs font-semibold uppercase text-slate-500">
+                    Condition / disease
+                  </label>
+                  <input
+                    value={patientDisease}
+                    onChange={(e) => setPatientDisease(e.target.value)}
+                    className="w-full rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3"
+                    required
+                  />
+                </div>
+                {editError && (
+                  <div className="md:col-span-2 rounded-2xl bg-rose-50 border border-rose-100 p-4 text-rose-700">
+                    {editError}
+                  </div>
+                )}
+                <div className="md:col-span-2 flex justify-end gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowPatientModal(false)}
+                    className="rounded-2xl border border-gray-200 px-6 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="rounded-2xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-700"
+                  >
+                    Save Patient
+                  </button>
+                </div>
               </form>
             </div>
           </div>

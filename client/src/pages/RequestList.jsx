@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Envelope, Globe, Plus, TrashBin } from "@gravity-ui/icons";
+import { Plus, TrashBin } from "@gravity-ui/icons"; // Using TrashBin from your package
 import { Button, Input, Label } from "@heroui/react";
 import { OrbitProgress } from "react-loading-indicators";
 
-const RequestDashboard = () => {
+// 1. Explicit Tailwind border utility tokens to prevent purge compilation issues
+const PALE_BORDERS = [
+  'border-[#F4E0CB]', // Pale Beige/Orange
+  'border-[#C0DCBD]', // Pale Green/Mint
+  'border-[#D0E1FD]', // Pale Blue
+  'border-[#EBD3F8]', // Pale Purple
+];
+
+const RequestList = () => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [requestType, setRequestType] = useState("");
+  const [requestType, setRequestType] = useState("Medicine"); // Added default matching fallback
   const [quantity, setQuantity] = useState(1);
   const [itemName, setItemName] = useState("");
   const [reason, setReason] = useState("");
@@ -66,10 +74,11 @@ const RequestDashboard = () => {
         alert("Request submitted successfully");
         setShowRequestForm(false);
         fetchRequests();
-        // Reset request form
+        // Reset request form fields cleanly
         setItemName("");
-        setQuantity("");
+        setQuantity(1);
         setReason("");
+        setUrgency("low");
       }
     } catch (error) {
       console.error(error.response?.data || error.message);
@@ -77,218 +86,250 @@ const RequestDashboard = () => {
     }
   };
 
+  // Keep your existing custom deletion endpoint fallback configuration
+  const handleDeleteRequest = async (id, e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    if (!window.confirm("Are you sure you want to delete this request?")) return;
+
+    try {
+      const token = localStorage.getItem("token");
+      await axios.delete(`${backendUrl}/api/requests/removeRequests/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchRequests();
+    } catch (error) {
+      console.error(error);
+      alert("Failed to delete the request item");
+    }
+  };
+
   if (loading)
     return (
-      <>
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4 bg-gray-50">
         <OrbitProgress
           size={60}
           color={["#32cd32", "#327fcd", "#cd32cd", "#cd8032"]}
         />
-        <div className="p-6 text-center text-gray-500">
+        <div className="text-center text-gray-500 font-medium">
           Loading Dashboard...
         </div>
-      </>
+      </div>
     );
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Left Side: Requests Grid */}
-        <div className="flex-1">
-          <h2 className="text-xl font-bold text-gray-700 mb-6">Stats</h2>
+    <div >
+      {/* Top Header Section */}
+      <div className="flex justify-between items-center mb-10">
+        <h1 className="text-[#202124] text-4xl leading-[1.2222222222] font-normal tracking-[-0.25px]">
+          Requests
+        </h1>
+        
+        {/* Dynamic Action Button toggles layout view state natively */}
+        {!showRequestForm && (
+          <Button
+            color="primary"
+            variant="solid"
+            className="rounded-xl font-medium"
+            onClick={() => setShowRequestForm(true)}
+          >
+            <Plus />
+            Make a Request
+          </Button>
+        )}
+      </div>
+
+      {/* Main Container Layer split horizontally */}
+      <div className="flex flex-col lg:flex-row gap-10 items-start">
+        
+        {/* Left Side Section: Full Width Stack List */}
+        <div className="flex-1 w-full space-y-4">
           {requests.length === 0 ? (
-            <div>
-              <div className="col-span-full row-span-full pl-6 flex flex-col items-center justify-center py-16 px-10 text-center bg-white border border-gray-100 rounded-[2rem]">
-                <div className="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                  <span className="text-gray-400 text-2xl">📭</span>
-                </div>
-                <h3 className="text-gray-700 font-semibold text-lg">
-                  No Requests Yet
-                </h3>
-                <p className="text-gray-400 text-sm mt-1 max-w-xs">
-                  You haven't created or received any requests. Start by
-                  creating one.
-                </p>
-                <Button variant="secondary">
-                  <Plus />
-                  Add Request
-                </Button>
+            <div className="flex flex-col items-center justify-center py-20 px-10 text-center bg-white border border-gray-100 rounded-[2rem] shadow-sm">
+              <div className="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center mb-4 text-2xl">
+                📭
               </div>
+              <h3 className="text-gray-700 font-semibold text-lg">
+                No Requests Yet
+              </h3>
+              <p className="text-gray-400 text-sm mt-1 max-w-xs mb-6">
+                You haven't created any request records. Get started right away by making a new entry.
+              </p>
+              <Button color="primary" variant="flat" onClick={() => setShowRequestForm(true)}>
+                <Plus />
+                Add Request
+              </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {requests.map((req) => (
+            requests.map((req, idx) => {
+              // Mathematical color loop distribution matching execution positions
+              const cardBorderColor = PALE_BORDERS[idx % PALE_BORDERS.length];
+
+              return (
                 <div
                   key={req._id}
-                  className="bg-white p-6 rounded-[2rem] shadow-sm flex items-center gap-4 border border-gray-100"
+                  className={`w-full border-2 ${cardBorderColor} bg-white h-[127px] rounded-xl flex items-center justify-between px-6 transition-all duration-200 hover:shadow-sm group`}
                 >
-                  <div
-                    className={`p-4 rounded-2xl ${req.urgency === "high" ? "bg-red-50" : "bg-purple-50"}`}
+                  {/* Item Details Layout */}
+                  <div className="flex items-center gap-4 min-w-0">
+                    {/* Character Token Badge container matching original layout design structure */}
+                    <div className="flex items-center justify-center bg-gray-100 text-gray-700 text-xs w-9 h-9 rounded-full font-bold shrink-0">
+                      {(req.itemName || "RQ").substring(0, 2).toUpperCase()}
+                    </div>
+
+                    <div className="min-w-0">
+                      <p className="text-base font-semibold text-gray-900 truncate">
+                        {req.itemName}
+                      </p>
+                      <p className="text-xs font-medium text-gray-500 mt-1 truncate">
+                        {req.requestType || "General Request"} &bull; Qty: {req.quantity || 0}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Status Badges + Action Buttons Column */}
+                  <div className="flex items-center gap-4 shrink-0">
+                    <span
+                      className={`text-xs font-bold px-3 py-1.5 rounded-full capitalize ${
+                        req.urgency === "high" 
+                          ? "bg-red-50 text-red-600" 
+                          : req.urgency === "medium"
+                          ? "bg-amber-50 text-amber-600"
+                          : "bg-purple-50 text-purple-600"
+                      }`}
+                    >
+                      {req.urgency || "low"}
+                    </span>
+
+                    <span
+                      className={`text-xs font-semibold px-3 py-1.5 rounded-md uppercase tracking-wider ${
+                        req.status === "approved" 
+                          ? "bg-green-100 text-green-700" 
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {req.status || "pending"}
+                    </span>
+
+                    {/* Isolated Trash Controls avoiding link layer bleeding loops */}
+                    <Button
+                      isIconOnly
+                      variant="light"
+                      onClick={(e) => handleDeleteRequest(req._id, e)}
+                      className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-all duration-200"
+                    >
+                      <TrashBin className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Modal Sheet Rendering Framework Block */}
+        {showRequestForm && (
+          <dialog className="modal modal-open bg-slate-900/40 backdrop-blur-sm flex items-center justify-center fixed inset-0 z-50">
+            <div className="modal-box w-full max-w-lg bg-white p-6 rounded-[2rem] shadow-xl border border-gray-100">
+              <h2 className="font-bold text-xl text-gray-800 mb-6">New Request</h2>
+              
+              <form onSubmit={handleRequestSubmit} className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-gray-700">Type</label>
+                    <select
+                      value={requestType}
+                      onChange={(e) => setRequestType(e.target.value)}
+                      className="w-full p-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                    >
+                      <option value="Medicine">Medicine Request</option>
+                      <option value="Equipment">Equipment Request</option>
+                      <option value="Supply">Supply Request</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <Label htmlFor="item-name-input" className="text-sm font-semibold text-gray-700">Item name</Label>
+                    <Input
+                      required
+                      value={itemName}
+                      onChange={(e) => setItemName(e.target.value)}
+                      id="item-name-input"
+                      placeholder="e.g. Paracetamol"
+                      type="text"
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-gray-700">Quantity</label>
+                    <input
+                      type="number"
+                      required
+                      min="1"
+                      value={quantity}
+                      onChange={(e) => setQuantity(Number(e.target.value))}
+                      placeholder="1"
+                      className="w-full p-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                    />
+                  </div>
+                  
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-gray-700">Urgency</label>
+                    <select
+                      value={urgency}
+                      onChange={(e) => setUrgency(e.target.value)}
+                      className="w-full p-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                    >
+                      <option value="low">Low</option>
+                      <option value="medium">Medium</option>
+                      <option value="high">High</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-gray-700">Reason</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Provide justification details..."
+                    className="w-full p-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm resize-none"
+                  ></textarea>
+                </div>
+
+                {/* Form Navigation Controls Actions */}
+                <div className="flex justify-end items-center gap-3 mt-6 pt-4 border-t border-gray-100">
+                  <Button
+                    type="button"
+                    variant="light"
+                    color="danger"
+                    className="rounded-xl font-medium"
+                    onClick={() => setShowRequestForm(false)}
                   >
-                    {/* Placeholder Icon */}
-                    <div
-                      className={`w-5 h-10 rounded-full border-2 ${req.urgency === "high" ? "border-red-400" : "border-purple-400"}`}
-                    ></div>
-                  </div>
-                  <div>
-                    <p className="text-gray-400 text-sm font-medium">
-                      {req.requestType || "Request"}
-                    </p>
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-2xl font-bold text-gray-800">
-                        {req.quantity || 0}
-                      </span>
-                      <span
-                        className={`text-xs font-bold ${req.status === "approved" ? "text-green-500" : "text-red-400"}`}
-                      >
-                        {req.status === "approved" ? "↑" : "↓"}{" "}
-                        {req.urgency || "Normal"}
-                      </span>
-                    </div>
-                    <p className="text-gray-500 text-xs mt-1 truncate w-32">
-                      {req.itemName}
-                    </p>
-                  </div>
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="submit" 
+                    color="primary"
+                    className="rounded-xl font-medium"
+                  >
+                    Submit Request
+                  </Button>
                 </div>
-              ))}
+              </form>
             </div>
-          )}
-        </div>
-
-        {/* Right Side: Quick Post Form */}
-        <div className="w-full lg:w-[400px]">
-          <h2 className="text-xl font-bold text-gray-700 mb-6">Quick Post</h2>
-          <br></br>
-          <br></br>
-          {showRequestForm ? (
-            <>
-              <dialog
-                className="modal modal-open bg-slate-900/40 backdrop-blur-sm"
-                onClick={() => setShowRequestForm(false)}
-              >
-                <div
-                  className="modal-box w-full max-w-lg"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <h2 className="font-bold text-lg mb-6">New Request</h2>
-                  <br></br>
-                  <br></br>
-                  <form onSubmit={handleRequestSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="label">
-                          <span className="label-text font-semibold">Type</span>
-                        </label>
-                        <select
-                          value={requestType}
-                          onChange={(e) => setRequestType(e.target.value)}
-                          className=" input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
-                        >
-                          <option value="Medicine">Medicine Request</option>
-                          <option value="Equipment">Equipment Request</option>
-                          <option value="Supply">Supply Request</option>
-                        </select>
-                      </div>
-
-                      <div className="flex flex-col gap-1">
-                        <Label htmlFor="input-type-email">Item name</Label>
-                        <Input
-                          required
-                          value={itemName}
-                          onChange={(e) => setItemName(e.target.value)}
-                          id="input-type-email"
-                          placeholder="e.g. Paracetamol"
-                          type="text"
-                          className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="label">
-                          <span className="label-text font-semibold">
-                            Quantity
-                          </span>
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          value={quantity}
-                          onChange={(e) => setQuantity(e.target.value)}
-                          placeholder="0"
-                          className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
-                        />
-                      </div>
-                      <div>
-                        <label className="label">
-                          <span className="label-text font-semibold">
-                            Urgency
-                          </span>
-                        </label>
-                        <select
-                          value={urgency}
-                          onChange={(e) => setUrgency(e.target.value)}
-                          className="input bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
-                        >
-                          <option value="low">Low</option>
-                          <option value="medium">Medium</option>
-                          <option value="high">High</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="label">
-                        <span className="label-text font-semibold">Reason</span>
-                      </label>
-                      <br></br>
-                      <br></br>
-                      <textarea
-                        required
-                        rows={2}
-                        value={reason}
-                        onChange={(e) => setReason(e.target.value)}
-                        placeholder="Enter reason"
-                        className="textarea bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all w-full"
-                      ></textarea>
-                    </div>
-                    <div className="modal-action">
-                      <Button
-                        variant="danger"
-                        type="button"
-                        className="btn btn-ghost"
-                        onClick={() => setShowRequestForm(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button type="submit" disabled={loading}>
-                        Submit Request
-                      </Button>
-                    </div>
-                  </form>
-                </div>
-                <form method="dialog" className="modal-backdrop">
-                  <button onClick={() => setShowRequestForm(false)}>
-                    close
-                  </button>
-                </form>
-              </dialog>
-            </>
-          ) : (
-            <>
-              <Button
-                fullWidth
-                color="primary"
-                onClick={() => setShowRequestForm(true)}
-              >
-                <Plus />
-                Make a Request
-              </Button>
-            </>
-          )}
-        </div>
+          </dialog>
+        )}
       </div>
     </div>
   );
 };
 
-export default RequestDashboard;
+export default RequestList;

@@ -162,12 +162,13 @@ function Medicines() {
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="flex flex-col items-centercol-span-full rounded-3xl bg-white border border-slate-100 p-8 text-center text-slate-500 shadow-sm">
+          <div className="flex flex-col items-centercol-span-full rounded-3xl  p-8 text-center text-slate-500 shadow-sm">
             <OrbitProgress size={40} color="#94a3b8" />
             Loading medicines...
           </div>
         ) : medicines.length === 0 ? (
-          <div className="col-span-full rounded-3xl bg-white border border-slate-100 p-8 text-center text-slate-500 shadow-sm">
+          <div className="flex flex-col items-center col-span-full rounded-3xl p-8 text-center text-slate-500 shadow-sm gap-4">
+            <i class="fa-solid fa-file-circle-xmark fa-5x"></i>
             No medicines available.
           </div>
         ) : (

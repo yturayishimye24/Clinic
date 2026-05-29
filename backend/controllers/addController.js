@@ -59,13 +59,12 @@ export const createPatient = async (req, res) => {
       gender,
       date: new Date(date),
       disease,
-      
-      // Image: req.file ? `/uploads/${req.file.filename}` : "",
+      image: req.file ? `/uploads/${req.file.filename}` : "",
       // store the creator's ObjectId so populate() works correctly
       createdBy: req.user._id,
     });
     
-    const payload = await addedPatient.findById(createdPatient.id).populate("createdBy","username role")
+    const payload = await addedPatient.findById(createdPatient.id).populate("createdBy","username role");
 
     io.to("admins").emit("patientCreated",payload);
     
@@ -93,18 +92,34 @@ export const deletePatient = async (req, res) => {
 };
 
 export const updatePatient = async (req, res) => {
-  try{
-  const{firstName,lastName,gender,date,disease}=req.body;
-  const updatedPatient = await addedPatient.findByIdAndUpdate(req.params.id,{
-    firstName,lastName,date,gender,disease,
-  },{new:true})
-  if(!updatedPatient){
-    console.log("Error updating")
-  }else{
-    res.status(201).json(updatedPatient)
-  }
-  }catch(error){
-    console.log("Threw an error updating",error);
+  try {
+    const { firstName, lastName, gender, date, disease } = req.body;
+    const updatePayload = {
+      firstName,
+      lastName,
+      gender,
+      date: date ? new Date(date) : undefined,
+      disease,
+    };
+
+    if (req.file) {
+      updatePayload.image = `/uploads/${req.file.filename}`;
+    }
+
+    const updatedPatient = await addedPatient.findByIdAndUpdate(
+      req.params.id,
+      updatePayload,
+      { new: true },
+    );
+
+    if (!updatedPatient) {
+      return res.status(404).json({ success: false, message: "Patient not found" });
+    }
+
+    res.status(200).json(updatedPatient);
+  } catch (error) {
+    console.log("Threw an error updating", error);
+    res.status(500).json({ success: false, message: "Error updating patient." });
   }
 };
 

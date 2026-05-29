@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+
 import {
   useNavigate,
   Link,
@@ -21,7 +23,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { OrbitProgress } from "react-loading-indicators";
 import { Avatar } from "@heroui/react";
 import { Form } from "@heroui/react";
-import { Briefcase } from 'lucide-react';
+import { Briefcase } from "lucide-react";
 import {
   FloppyDisk,
   FolderOpen,
@@ -82,6 +84,7 @@ export default function NursePage() {
   const [lastName, setLastName] = useState("");
   const [date, setDate] = useState("");
   const [patientImage, setPatientImage] = useState(null);
+  const [patientImagePreview, setPatientImagePreview] = useState("");
   const [disease, setDisease] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [formError, setFormError] = useState("");
@@ -180,7 +183,8 @@ export default function NursePage() {
       navigate("/");
       return;
     }
-    if (role !== "nurse") {
+    // allow both nurses and admins to view this page
+    if (role !== "nurse" && role !== "admin") {
       toast.error("Unauthorized access");
       navigate("/");
     }
@@ -197,7 +201,12 @@ export default function NursePage() {
     setTimeout(() => navigate("/"), 2000);
     setTimeout(() => toast.success("Logged out Successfully!"), 2000);
   };
-
+  const PALE_COLORS = [
+    "border-[#F4E0CB]",
+    "border-[#C0DCBD]",
+    "border-[#D0E1FD]",
+    "border-[#EBD3F8]",
+  ];
   const Report = async (e) => {
     e.preventDefault();
     setReporting(true);
@@ -342,6 +351,10 @@ export default function NursePage() {
     setDate(patient.date ? patient.date.split("T")[0] : "");
     setMaritalStatus(patient.maritalStatus || "");
     setDisease(patient.disease || "");
+    setPatientImage(null);
+    setPatientImagePreview(
+      patient.image ? `${backendUrl}${patient.image}` : "",
+    );
     setShowForm(true);
   };
 
@@ -353,6 +366,7 @@ export default function NursePage() {
     setMaritalStatus("");
     setDisease("");
     setPatientImage(null);
+    setPatientImagePreview("");
     setEditingPatientId(null);
     setFormError("");
   };
@@ -364,20 +378,25 @@ export default function NursePage() {
 
     try {
       const token = localStorage.getItem("token");
-      const patientData = {
-        firstName,
-        lastName,
-        date,
-        disease,
-        gender,
-      };
+      const formData = new FormData();
+      formData.append("firstName", firstName);
+      formData.append("lastName", lastName);
+      formData.append("gender", gender);
+      formData.append("date", date);
+      formData.append("disease", disease);
+      if (patientImage) {
+        formData.append("patientImage", patientImage);
+      }
 
       if (editingPatientId) {
         const response = await axios.put(
           `${backendUrl}/api/patients/${editingPatientId}`,
-          patientData,
+          formData,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
           },
         );
         setPatients((prev) =>
@@ -387,9 +406,12 @@ export default function NursePage() {
       } else {
         const response = await axios.post(
           `${backendUrl}/api/patients/create`,
-          patientData,
+          formData,
           {
-            headers: { Authorization: `Bearer ${token}` },
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
           },
         );
         setPatients((prev) => [...prev, response.data.patient]);
@@ -458,6 +480,17 @@ export default function NursePage() {
         )[0]
       : null;
 
+  const genderChartData = [
+    { name: "Male", value: patients.filter((patient) => patient.gender === "Male").length },
+    { name: "Female", value: patients.filter((patient) => patient.gender === "Female").length },
+  ];
+  const genderColors = ["#2563eb", "#ec4899"];
+
+  const getPatientImageUrl = (imagePath) => {
+    if (!imagePath) return "";
+    return imagePath.startsWith("http") ? imagePath : `${backendUrl}${imagePath}`;
+  };
+
   const StatusBadge = ({ status }) => {
     const s = status?.toLowerCase() || "";
     if (s === "approved" || s === "active")
@@ -506,7 +539,7 @@ export default function NursePage() {
           onClick={() => navigate("/home/reports")}
           active={location.pathname === "/home/reports"}
         />
-         <SidebarItem
+        <SidebarItem
           icon={<Briefcase />}
           text="Medicines"
           onClick={() => navigate("/home/medicines")}
@@ -550,7 +583,11 @@ export default function NursePage() {
                   </Button>
                   <Dropdown.Popover>
                     <Dropdown.Menu>
-                      <Dropdown.Item id="new-file" textValue="New file" onClick={() => setShowForm(true)}>
+                      <Dropdown.Item
+                        id="new-file"
+                        textValue="New file"
+                        onClick={() => setShowForm(true)}
+                      >
                         <div className="flex h-8 items-start justify-center pt-px">
                           <SquarePlus className="size-4 shrink-0" />
                         </div>
@@ -762,7 +799,7 @@ export default function NursePage() {
                         </thead>
 
                         {/* BODY */}
-                        <tbody className="divide-y divide-gray-100 cursor-pointer" >
+                        <tbody className="divide-y divide-gray-100 cursor-pointer">
                           {filteredPatients.length === 0 ? (
                             <tr>
                               <td colSpan="4" className="p-10 text-center">
@@ -775,7 +812,6 @@ export default function NursePage() {
                                     fullWidth
                                     variant="tertiary"
                                     onClick={() => setShowForm(true)}
-                                    
                                   >
                                     Add Patient
                                   </Button>
@@ -828,7 +864,7 @@ export default function NursePage() {
                                 <td className="px-4 py-4 text-right whitespace-nowrap">
                                   <div className="flex justify-end gap-2">
                                     <button
-                                      onClick={()=> handleEdit(patient)}
+                                      onClick={() => handleEdit(patient)}
                                       className="p-2 rounded-full hover:bg-gray-100"
                                     >
                                       <Edit className="w-4 h-4" />
@@ -955,125 +991,175 @@ export default function NursePage() {
                     </div>
                   )}
                 </div>
+              </div>
 
-                {/* --- REQUESTS LIST (Based on Requests.png style) --- */}
-                <div className="card bg-base-100 shadow-md flex flex-col h-fit">
-                  
-                  <div className="flex justify-between items-center px-4 pt-4 pb-2 border-b border-base-300">
-                    <h3 className="text-lg font-semibold">My Requests</h3>
-
-                    <button
-                      onClick={fetchRequests}
-                      className="btn btn-ghost btn-xs normal-case"
-                    >
-                      Refresh
-                    </button>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+                <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-bold text-gray-900">
+                        Patient Gender Balance
+                      </h3>
+                      <p className="text-sm text-gray-500">
+                        Male vs female sick patient counts.
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+                      {patients.length} total
+                    </span>
                   </div>
-
-                  {/* Content */}
-                  <div className="flex-1 overflow-y-auto px-3 py-2 space-y-2">
-                    {myRequests.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center py-10 text-gray-500 text-center">
-                        {loading ? (
-                          <Skeleton className="h-12 w-12 rounded-full" />
-                        ) : (
-                          <Inbox
-                            size={55}
-                            strokeWidth={1.5}
-                            className="mb-3 opacity-50"
-                          />
-                        )}
-
-                        <h2 className="text-base font-semibold">
-                          No Requests Yet
-                        </h2>
-
-                        <p className="text-xs text-gray-400 mt-1 max-w-[200px]">
-                          Requests you create will appear here.
-                        </p>
-                      </div>
-                    ) : (
-                      myRequests.slice(0, 4).map((req) => (
-                        <div
-                          key={req._id}
-                          className="flex items-center justify-between p-3 rounded-xl transition 
-          hover:bg-base-200 border border-transparent hover:border-base-300 group"
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={genderChartData}
+                          dataKey="value"
+                          nameKey="name"
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={90}
+                          paddingAngle={4}
                         >
-                          <div className="flex items-center gap-3 min-w-0">
-                            {/* Initial Badge */}
-                            <div className="badge badge-accent badge-sm w-6 h-6 rounded-full font-semibold">
-                              {req.itemName.substring(0, 2).toUpperCase()}
-                            </div>
-
-                            <div className="min-w-0">
-                              <p className="text-sm font-semibold truncate">
-                                {req.itemName}
-                              </p>
-
-                              <p className="text-xs text-base-content/60 truncate">
-                                {req.requestType} • Qty: {req.quantity}
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3">
-                            <StatusBadge status={req.status} />
-
-                            <AlertDialog>
-                              <Button
-                                isIconOnly
-                                onClick={(e) => handleDeleteRequest(req._id, e)}
-                                className="btn btn-ghost btn-xs btn-circle opacity-0 group-hover:opacity-100 transition"
-                              >
-                                <Trash2 className="w-4 h-4 text-error" />
-                              </Button>
-                              <AlertDialog.Backdrop>
-                                <AlertDialog.Container>
-                                  <AlertDialog.Dialog className="sm:max-w-[400px]">
-                                    <AlertDialog.CloseTrigger />
-                                    <AlertDialog.Header>
-                                      <AlertDialog.Icon status="danger" />
-                                      <AlertDialog.Heading>
-                                        Delete project permanently?
-                                      </AlertDialog.Heading>
-                                    </AlertDialog.Header>
-                                    <AlertDialog.Body>
-                                      <p>
-                                        This will permanently delete{" "}
-                                        <strong>My Awesome Project</strong> and
-                                        all of its data. This action cannot be
-                                        undone.
-                                      </p>
-                                    </AlertDialog.Body>
-                                    <AlertDialog.Footer>
-                                      <Button slot="close" variant="tertiary">
-                                        Cancel
-                                      </Button>
-                                      <Button slot="close" variant="danger">
-                                        Delete Project
-                                      </Button>
-                                    </AlertDialog.Footer>
-                                  </AlertDialog.Dialog>
-                                </AlertDialog.Container>
-                              </AlertDialog.Backdrop>
-                            </AlertDialog>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-
-                  {/* Footer */}
-                  <div className="p-3 border-t border-base-300">
-                    <button
-                      onClick={() => setShowRequestForm(true)}
-                      className="w-full mt-6 w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-white text-gray-800 text-sm font-medium border border-gray-200 hover:bg-gray-50 active:bg-gray-100 transition-all duration-200"
-                    >
-                      <Plus className="w-4 h-4" />
-                      New Request
-                    </button>
+                          {genderChartData.map((entry, index) => (
+                            <Cell
+                              key={entry.name}
+                              fill={genderColors[index % genderColors.length]}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => `${value} patients`} />
+                      </PieChart>
+                    </ResponsiveContainer>
                   </div>
                 </div>
+
+                <div className="bg-gradient-to-br from-slate-950 to-slate-800 rounded-3xl p-6 text-white shadow-xl">
+                  <h3 className="text-lg font-bold mb-3">Gender Counts</h3>
+                  <div className="space-y-4">
+                    {genderChartData.map((item, idx) => (
+                      <div key={item.name} className="flex items-center justify-between rounded-3xl bg-white/10 p-4">
+                        <div>
+                          <p className="text-sm uppercase tracking-[0.2em] text-slate-300">
+                            {item.name}
+                          </p>
+                          <p className="text-3xl font-bold text-white">
+                            {item.value}
+                          </p>
+                        </div>
+                        <div className="h-12 w-12 rounded-2xl" style={{ backgroundColor: genderColors[idx] }} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <h1 className="text-[#202124] text-4xl leading-[1.2222222222] font-normal tracking-[-0.25px] mb-8 pt-20">
+                Requests
+              </h1>
+
+              <div className="space-y-4">
+                {myRequests.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-16 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
+                    {loading ? (
+                      <div className="animate-pulse bg-gray-200 h-12 w-12 rounded-full mb-3" />
+                    ) : (
+                      <Inbox
+                        size={48}
+                        strokeWidth={1.5}
+                        className="mb-3 opacity-60"
+                      />
+                    )}
+                    <h2 className="text-base font-medium text-gray-700">
+                      No Requests Yet
+                    </h2>
+                    <p className="text-xs mt-1">
+                      Your created items will show up here.
+                    </p>
+                  </div>
+                ) : (
+                  myRequests.map((request, idx) => {
+                    const cardBorderColor =
+                      PALE_COLORS[idx % PALE_COLORS.length];
+
+                    return (
+                      <Link to={`/home/requests`} className="block w-full mb-4 no-underline group">
+                      <div
+                        key={request._id}
+                        className={`w-full border-3 ${cardBorderColor} bg-white h-[127px] rounded-xl flex items-center justify-between px-6 transition-all duration-200 hover:shadow-sm group`}
+                      >
+                        <div className="flex items-center gap-4 min-w-0">
+                          <div className="flex items-center justify-center bg-black/5 text-black/80 text-xs w-9 h-9 rounded-full font-bold shrink-0">
+                            {request.itemName.substring(0, 2).toUpperCase()}
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className="text-base font-semibold text-gray-900 truncate">
+                              {request.itemName}
+                            </p>
+                            <p className="text-xs font-medium text-gray-700/70 mt-1 truncate">
+                              {request.requestType} &bull; Qty:{" "}
+                              {request.quantity}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-4 shrink-0">
+                          <StatusBadge status={request.status} />
+
+                          {/* Desktop Hover Trigger Action, easily clickable on mobile */}
+                          <AlertDialog>
+                            <Button
+                              isIconOnly
+                              onClick={(e) =>
+                                handleDeleteRequest(request._id, e)
+                              }
+                              className="opacity-0 group-hover:opacity-100 bg-white/40 hover:bg-red-50 hover:text-red-600 p-2 rounded-full transition-all duration-200"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+
+                            {/* Your existing context-safe AlertDialog configuration backdrop fits safely here */}
+                            <AlertDialog.Backdrop>
+                              <AlertDialog.Container>
+                                <AlertDialog.Dialog className="sm:max-w-[400px]">
+                                  <AlertDialog.CloseTrigger />
+                                  <AlertDialog.Header>
+                                    <AlertDialog.Icon status="danger" />
+                                    <AlertDialog.Heading>
+                                      Delete request permanently?
+                                    </AlertDialog.Heading>
+                                  </AlertDialog.Header>
+                                  <AlertDialog.Body>
+                                    <p>
+                                      This will permanently delete{" "}
+                                      <strong>{request.itemName}</strong>.
+                                    </p>
+                                  </AlertDialog.Body>
+                                  <AlertDialog.Footer>
+                                    <Button slot="close" variant="tertiary">
+                                      Cancel
+                                    </Button>
+                                    <Button slot="close" variant="danger">
+                                      Delete
+                                    </Button>
+                                  </AlertDialog.Footer>
+                                </AlertDialog.Dialog>
+                              </AlertDialog.Container>
+                            </AlertDialog.Backdrop>
+                          </AlertDialog>
+                        </div>
+                      </div>
+                      </Link>
+                    );
+                  })
+                )}
+                <Button
+                  onClick={() => setShowRequestForm(true)}
+                  variant="primary"
+                >
+                  Add new request
+                </Button>
               </div>
             </>
           ) : (
@@ -1339,6 +1425,34 @@ export default function NursePage() {
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
+              </div>
+
+              {/* Patient Image */}
+              <div className="form-control w-full md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-xs font-bold uppercase tracking-wider opacity-70">
+                    Patient Photo
+                  </span>
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0] ?? null;
+                    setPatientImage(file);
+                    setPatientImagePreview(
+                      file ? URL.createObjectURL(file) : "",
+                    );
+                  }}
+                  className="file-input file-input-bordered w-full bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
+                />
+                {patientImagePreview && (
+                  <img
+                    src={patientImagePreview}
+                    alt="Patient preview"
+                    className="mt-3 h-28 w-full rounded-2xl object-cover border border-gray-200"
+                  />
+                )}
               </div>
 
               {/* Condition / Disease */}

@@ -46,6 +46,14 @@ export default function Sidebar({ children, expanded, setExpanded }) {
   function handleLogout() {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
+    localStorage.removeItem("username");
+    localStorage.removeItem("email");
+    localStorage.removeItem("adminUsername");
+    localStorage.removeItem("adminEmail");
+    localStorage.removeItem("doctorUsername");
+    localStorage.removeItem("doctorEmail");
+    localStorage.removeItem("nurseUsername");
+    localStorage.removeItem("nurseEmail");
     navigate("/");
   }
   return (

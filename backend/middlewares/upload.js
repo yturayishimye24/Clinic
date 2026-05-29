@@ -32,3 +32,11 @@ export const uploadPatientImage = multer({
     fileSize: 10 * 1024 * 1024,
   },
 });
+
+export const uploadProfileImage = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024,
+  },
+});

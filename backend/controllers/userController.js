@@ -128,10 +128,11 @@ export const getCurrentUser = async (req, res) => {
     }
     res.status(200).json({
       success: true,
+      _id: user._id,
       email: user.email,
       username: user.username,
       role: user.role,
-      image: user.image
+      image: user.image,
     });
   } catch (error) {
     console.log("Error getting current user", error.message);
@@ -159,6 +160,9 @@ export const updateNurse = async (req, res) => {
       }
       const salt = await bcrypt.genSalt(10);
       updateData.password = await bcrypt.hash(password, salt);
+    }
+    if (req.file) {
+      updateData.image = `/uploads/${req.file.filename}`;
     }
 
     const updatedNurse = await Nurse.findByIdAndUpdate(id, updateData, { new: true }).select("-password");
