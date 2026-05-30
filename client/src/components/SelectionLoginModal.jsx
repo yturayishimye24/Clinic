@@ -83,10 +83,10 @@ const LoginSelectionModal = ({ isOpen, isClosed }) => {
           ))}
         </div>
 
-        {/* Modal Footer */}
+       
         <div className="bg-slate-50/80 p-4 border-t border-slate-100">
           <p className="text-xs text-center text-slate-400">
-            Internal Security System • <span className="cursor-pointer hover:underline">Help Desk</span>
+            Clinic Management System <span className="cursor-pointer hover:underline"></span>
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Popover, Spinner } from "flowbite-react";
+import { ButtonGroupContext, Popover, Spinner } from "flowbite-react";
 import socket, { connectSocket } from "../socket.js";
 import Sidebar, { SidebarItem } from "../components/sidebar.jsx";
 import { Avatar } from "@heroui/react";
@@ -184,12 +184,14 @@ export default function AdminPage() {
       const role = localStorage.getItem("role") || "admin";
       setUsername(response.data.username);
       setUserId(response.data._id || "");
+      const absoluteImageUrl = response.data.image ? `${backendUrl}${response.data.image}` : "";
       setSettingsEmail(response.data.email || "");
-      setSettingsImagePreview(response.data.image ? `${backendUrl}${response.data.image}` : "");
+      setSettingsImagePreview(absoluteImageUrl);
       // store image and username scoped to role to avoid overwriting session data
       localStorage.setItem(`${role}Username`, response.data.username);
       localStorage.setItem(`${role}Email`, response.data.email || "");
-      localStorage.setItem(`${role}Image`, response.data.image || "");
+      localStorage.setItem(`${role}Image`, absoluteImageUrl);
+      localStorage.setItem("image", absoluteImageUrl);
     } catch (error) {
       console.log(error);
     }
@@ -361,16 +363,16 @@ export default function AdminPage() {
         const updatedUser = response.data.nurse;
         setUsername(updatedUser.username);
         setSettingsEmail(updatedUser.email || "");
-        setSettingsImagePreview(
-          updatedUser.image ? `${backendUrl}${updatedUser.image}` : "",
-        );
+        const absoluteImageUrl = updatedUser.image ? `${backendUrl}${updatedUser.image}` : "";
+        setSettingsImagePreview(absoluteImageUrl);
         setSettingsPassword("");
         setSettingsImageFile(null);
         setSettingsMessage("Profile updated successfully.");
         const role = localStorage.getItem("role") || "admin";
         localStorage.setItem(`${role}Username`, updatedUser.username);
         localStorage.setItem(`${role}Email`, updatedUser.email || "");
-        localStorage.setItem(`${role}Image`, updatedUser.image || "");
+        localStorage.setItem(`${role}Image`, absoluteImageUrl);
+        localStorage.setItem("image", absoluteImageUrl);
       } else {
         setSettingsMessage(response.data.message || "Unable to update profile.");
       }
@@ -676,72 +678,9 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="w-full hover:bg-gray-50 rounded-3xl border border-gray-100 cozy-shadow p-6 mb-8 transition-all">
-             <Metric/>
+             <Metric />
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <h3 className="text-lg font-bold text-gray-900">
-                    Gender distribution
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    Patient count by gender.
-                  </p>
-                </div>
-                <span className="text-xs text-gray-400 uppercase tracking-[0.2em]">
-                  {patients.length} entries
-                </span>
-              </div>
-              <div className="h-72">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={patientGenderChartData}
-                      dataKey="value"
-                      nameKey="name"
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={50}
-                      outerRadius={90}
-                      paddingAngle={4}
-                    >
-                      {patientGenderChartData.map((entry, index) => (
-                        <Cell
-                          key={entry.name}
-                          fill={patientGenderColors[index % patientGenderColors.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `${value} patients`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-            <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">
-                Gender counts
-              </h3>
-              <div className="space-y-4">
-                {patientGenderChartData.map((item, index) => (
-                  <div key={item.name} className="flex items-center justify-between gap-4 rounded-3xl bg-slate-50 p-4">
-                    <div>
-                      <p className="text-sm uppercase tracking-[0.2em] text-slate-500">
-                        {item.name}
-                      </p>
-                      <p className="text-3xl font-bold text-slate-900">
-                        {item.value}
-                      </p>
-                    </div>
-                    <div
-                      className="h-12 w-12 rounded-2xl"
-                      style={{ backgroundColor: patientGenderColors[index] }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+        
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
             {/* LEFT COLUMN: REQUESTS & PATIENTS */}
             
@@ -1317,13 +1256,13 @@ export default function AdminPage() {
                       </div>
                     )}
 
-                    <button
+                    <Button
                       type="submit"
                       disabled={settingsSaving || !userId}
-                      className="inline-flex items-center justify-center w-full rounded-3xl bg-emerald-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 transition"
+                      
                     >
                       {settingsSaving ? "Saving..." : "Save profile"}
-                    </button>
+                    </Button>
                   </form>
                 </div>
               </div>

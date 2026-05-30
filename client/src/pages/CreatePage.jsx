@@ -64,6 +64,8 @@ import {
 } from "lucide-react";
 
 export default function NursePage() {
+  const role = localStorage.getItem("role");
+  const image = localStorage.getItem(`${role}Image`) || localStorage.getItem("image") || "https://img.heroui.chat/image/avatar?w=400&h=400&u=1";
   const location = useLocation();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -83,8 +85,6 @@ export default function NursePage() {
   const [gender, setGender] = useState("");
   const [lastName, setLastName] = useState("");
   const [date, setDate] = useState("");
-  const [patientImage, setPatientImage] = useState(null);
-  const [patientImagePreview, setPatientImagePreview] = useState("");
   const [disease, setDisease] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [formError, setFormError] = useState("");
@@ -365,8 +365,6 @@ export default function NursePage() {
     setDate("");
     setMaritalStatus("");
     setDisease("");
-    setPatientImage(null);
-    setPatientImagePreview("");
     setEditingPatientId(null);
     setFormError("");
   };
@@ -378,24 +376,21 @@ export default function NursePage() {
 
     try {
       const token = localStorage.getItem("token");
-      const formData = new FormData();
-      formData.append("firstName", firstName);
-      formData.append("lastName", lastName);
-      formData.append("gender", gender);
-      formData.append("date", date);
-      formData.append("disease", disease);
-      if (patientImage) {
-        formData.append("patientImage", patientImage);
-      }
+      const payload = {
+        firstName,
+        lastName,
+        gender,
+        date,
+        disease,
+      };
 
       if (editingPatientId) {
         const response = await axios.put(
           `${backendUrl}/api/patients/${editingPatientId}`,
-          formData,
+          payload,
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
             },
           },
         );
@@ -406,11 +401,10 @@ export default function NursePage() {
       } else {
         const response = await axios.post(
           `${backendUrl}/api/patients/create`,
-          formData,
+          payload,
           {
             headers: {
               Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
             },
           },
         );
@@ -918,7 +912,7 @@ export default function NursePage() {
                           <Avatar>
                             <Avatar.Image
                               alt="Blue"
-                              src="https://heroui-assets.nyc3.cdn.digitaloceanspaces.com/avatars/blue.jpg"
+                              src={image}
                             />
                             <Avatar.Fallback>B</Avatar.Fallback>
                           </Avatar>
@@ -993,66 +987,7 @@ export default function NursePage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
-                <div className="bg-white rounded-3xl border border-gray-100 cozy-shadow p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <div>
-                      <h3 className="text-lg font-bold text-gray-900">
-                        Patient Gender Balance
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        Male vs female sick patient counts.
-                      </p>
-                    </div>
-                    <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
-                      {patients.length} total
-                    </span>
-                  </div>
-                  <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={genderChartData}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={50}
-                          outerRadius={90}
-                          paddingAngle={4}
-                        >
-                          {genderChartData.map((entry, index) => (
-                            <Cell
-                              key={entry.name}
-                              fill={genderColors[index % genderColors.length]}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip formatter={(value) => `${value} patients`} />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-br from-slate-950 to-slate-800 rounded-3xl p-6 text-white shadow-xl">
-                  <h3 className="text-lg font-bold mb-3">Gender Counts</h3>
-                  <div className="space-y-4">
-                    {genderChartData.map((item, idx) => (
-                      <div key={item.name} className="flex items-center justify-between rounded-3xl bg-white/10 p-4">
-                        <div>
-                          <p className="text-sm uppercase tracking-[0.2em] text-slate-300">
-                            {item.name}
-                          </p>
-                          <p className="text-3xl font-bold text-white">
-                            {item.value}
-                          </p>
-                        </div>
-                        <div className="h-12 w-12 rounded-2xl" style={{ backgroundColor: genderColors[idx] }} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
+      
 
               <h1 className="text-[#202124] text-4xl leading-[1.2222222222] font-normal tracking-[-0.25px] mb-8 pt-20">
                 Requests
@@ -1425,34 +1360,6 @@ export default function NursePage() {
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
-              </div>
-
-              {/* Patient Image */}
-              <div className="form-control w-full md:col-span-2">
-                <label className="label">
-                  <span className="label-text text-xs font-bold uppercase tracking-wider opacity-70">
-                    Patient Photo
-                  </span>
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0] ?? null;
-                    setPatientImage(file);
-                    setPatientImagePreview(
-                      file ? URL.createObjectURL(file) : "",
-                    );
-                  }}
-                  className="file-input file-input-bordered w-full bg-base-200 border-none focus:ring-2 focus:ring-primary/20 transition-all"
-                />
-                {patientImagePreview && (
-                  <img
-                    src={patientImagePreview}
-                    alt="Patient preview"
-                    className="mt-3 h-28 w-full rounded-2xl object-cover border border-gray-200"
-                  />
-                )}
               </div>
 
               {/* Condition / Disease */}

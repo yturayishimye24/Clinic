@@ -30,10 +30,10 @@ export default function PopoverInteractive({expanded}) {
           <div className="flex items-center gap-2">
             <Avatar size="sm">
               <Avatar.Image
-                alt="User avatar"
-                src="https://img.heroui.chat/image/avatar?w=400&h=400&u=1"
+                alt={username || "User avatar"}
+                src={image}
               />
-              <Avatar.Fallback>U</Avatar.Fallback>
+              <Avatar.Fallback>{(username || "U").slice(0, 2).toUpperCase()}</Avatar.Fallback>
             </Avatar>
             <div className="flex flex-col">
               <p className={`text-sm font-medium ${expanded?"":"hidden"}`}>{username}</p>
