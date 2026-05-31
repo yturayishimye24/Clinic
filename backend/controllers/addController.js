@@ -1,10 +1,11 @@
 import { trusted } from "mongoose";
 import addedPatient from "../models/addModel.js";
-import {io} from "../server.js"
+import Medicine from "../models/medicinesModel.js";
+import { io } from "../server.js";
 
 export const getOnePatient = async (req, res) => {
   try {
-    const user = await addedPatient.findById(req.params.id);
+    const user = await addedPatient.findById(req.params.id).populate("prescriptions.medicineId").populate("createdBy","username email");
     if (!user) {
       return res.status(404).json({ message: "User not Found!" });
     }
@@ -17,7 +18,7 @@ export const getOnePatient = async (req, res) => {
 
 export const getAllPatients = async (req, res) => {
   try {
-    const patients = await addedPatient.find().populate("createdBy","username email").sort({createdAt: -1}).lean();
+    const patients = await addedPatient.find().populate("createdBy","username email").populate("prescriptions.medicineId").sort({createdAt: -1}).lean();
     if (!patients || patients.length === 0) {
       return res
         .status(200)
@@ -153,5 +154,51 @@ export const hPatient = async (req, res) => {
   } catch (error) {
     console.log("Error hospitalizing patient:", error.message);
     res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Inside your controllers/addController.js
+export const dispenseMedicineToPatient = async (req, res) => {
+  try {
+    const { patientId, medicineId, quantityGiven, morningDose, afternoonDose, eveningDose, notes } = req.body;
+
+    // 1. Find the medicine and verify stock
+    const medicine = await Medicine.findById(medicineId);
+    if (!medicine) return res.status(404).json({ success: false, message: "Medicine not found." });
+    if (medicine.quantity < Number(quantityGiven)) {
+      return res.status(400).json({ success: false, message: `Only ${medicine.quantity} left in stock.` });
+    }
+
+    // 2. Reduce stock
+    medicine.quantity -= Number(quantityGiven);
+    await medicine.save();
+
+    // 3. Find patient and push data
+    const patient = await addedPatient.findById(patientId);
+    if (!patient) return res.status(404).json({ success: false, message: "Patient not found." });
+
+    patient.prescriptions.push({
+      medicineId,
+      quantityGiven: Number(quantityGiven),
+      // Adding your dosing tracking fields dynamically
+      dosingSchedule: {
+        morning: morningDose || "0",
+        afternoon: afternoonDose || "0",
+        evening: eveningDose || "0"
+      },
+      notes: notes || ""
+    });
+
+    await patient.save();
+
+    const updatedPatient = await addedPatient.findById(patientId)
+      .populate("prescriptions.medicineId")
+      .populate("createdBy", "username role");
+
+    io.to("admins").emit("patientPrescriptionUpdated", updatedPatient);
+
+    res.status(200).json({ success: true, message: "Medicine prescribed successfully!", patient: updatedPatient });
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Server error." });
   }
 };

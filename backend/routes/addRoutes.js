@@ -1,5 +1,5 @@
 import express from "express"
-import { getAllPatients,getOnePatient,createPatient,deletePatient,updatePatient,hPatient } from "../controllers/addController.js";  
+import { getAllPatients,getOnePatient,createPatient,deletePatient,updatePatient,hPatient,dispenseMedicineToPatient } from "../controllers/addController.js";  
 import { requireRole } from "../middlewares/roleMiddleware.js";
 import {autheticate} from "../middlewares/autheticateToken.js"
 import {uploadPatientImage} from "../middlewares/upload.js";
@@ -33,6 +33,12 @@ addRouter.patch(
   autheticate,
   requireRole(["nurse", "admin"]),
   hPatient,
+);
+addRouter.post(
+  "/dispense-medicine",
+  autheticate,
+  requireRole(["nurse", "admin"]),
+  dispenseMedicineToPatient
 );
 export default addRouter
 

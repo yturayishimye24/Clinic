@@ -3,6 +3,7 @@ import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+import PrescribeMedicineModal from "../components/PrescribeMedicineModal.jsx";
 
 import {
   useNavigate,
@@ -65,7 +66,10 @@ import {
 
 export default function NursePage() {
   const role = localStorage.getItem("role");
-  const image = localStorage.getItem(`${role}Image`) || localStorage.getItem("image") || "https://img.heroui.chat/image/avatar?w=400&h=400&u=1";
+  const image =
+    localStorage.getItem(`${role}Image`) ||
+    localStorage.getItem("image") ||
+    "https://img.heroui.chat/image/avatar?w=400&h=400&u=1";
   const location = useLocation();
   const { id } = useParams();
   const navigate = useNavigate();
@@ -121,6 +125,16 @@ export default function NursePage() {
   const isOnDashboard =
     location.pathname === "/home" || location.pathname === "/home/";
 
+  //prescription states
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handlePrescriptionSuccess = (updatedPatient) => {
+    // Dynamically replace old patient record with updated array inside list view
+    setPatients((prev) =>
+      prev.map((p) => (p._id === updatedPatient._id ? updatedPatient : p)),
+    );
+  };
   //Lasts reports
 
   const fetchPatients = async () => {
@@ -475,14 +489,22 @@ export default function NursePage() {
       : null;
 
   const genderChartData = [
-    { name: "Male", value: patients.filter((patient) => patient.gender === "Male").length },
-    { name: "Female", value: patients.filter((patient) => patient.gender === "Female").length },
+    {
+      name: "Male",
+      value: patients.filter((patient) => patient.gender === "Male").length,
+    },
+    {
+      name: "Female",
+      value: patients.filter((patient) => patient.gender === "Female").length,
+    },
   ];
   const genderColors = ["#2563eb", "#ec4899"];
 
   const getPatientImageUrl = (imagePath) => {
     if (!imagePath) return "";
-    return imagePath.startsWith("http") ? imagePath : `${backendUrl}${imagePath}`;
+    return imagePath.startsWith("http")
+      ? imagePath
+      : `${backendUrl}${imagePath}`;
   };
 
   const StatusBadge = ({ status }) => {
@@ -879,6 +901,15 @@ export default function NursePage() {
                                     >
                                       <Trash2 className="w-4 h-4 text-red-500" />
                                     </button>
+                                    <button
+                                      onClick={() => {
+                                        setSelectedPatient(patient);
+                                        setIsModalOpen(true);
+                                      }}
+                                      className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow"
+                                    >
+                                      Prescribe Medicine
+                                    </button>
                                   </div>
                                 </td>
                               </tr>
@@ -886,6 +917,12 @@ export default function NursePage() {
                           )}
                         </tbody>
                       </table>
+                      <PrescribeMedicineModal
+                        isOpen={isModalOpen}
+                        patient={selectedPatient}
+                        onClose={() => setIsModalOpen(false)}
+                        onPrescriptionSuccess={handlePrescriptionSuccess}
+                      />
                     </div>
                   </div>
                 </div>
@@ -910,10 +947,7 @@ export default function NursePage() {
                       <div className="flex items-center gap-4 mb-6">
                         <div className="relative">
                           <Avatar>
-                            <Avatar.Image
-                              alt="Blue"
-                              src={image}
-                            />
+                            <Avatar.Image alt="Blue" src={image} />
                             <Avatar.Fallback>B</Avatar.Fallback>
                           </Avatar>
                         </div>
@@ -987,8 +1021,6 @@ export default function NursePage() {
                 </div>
               </div>
 
-      
-
               <h1 className="text-[#202124] text-4xl leading-[1.2222222222] font-normal tracking-[-0.25px] mb-8 pt-20">
                 Requests
               </h1>
@@ -1018,73 +1050,76 @@ export default function NursePage() {
                       PALE_COLORS[idx % PALE_COLORS.length];
 
                     return (
-                      <Link to={`/home/requests`} className="block w-full mb-4 no-underline group">
-                      <div
-                        key={request._id}
-                        className={`w-full border-3 ${cardBorderColor} bg-white h-[127px] rounded-xl flex items-center justify-between px-6 transition-all duration-200 hover:shadow-sm group`}
+                      <Link
+                        to={`/home/requests`}
+                        className="block w-full mb-4 no-underline group"
                       >
-                        <div className="flex items-center gap-4 min-w-0">
-                          <div className="flex items-center justify-center bg-black/5 text-black/80 text-xs w-9 h-9 rounded-full font-bold shrink-0">
-                            {request.itemName.substring(0, 2).toUpperCase()}
+                        <div
+                          key={request._id}
+                          className={`w-full border-3 ${cardBorderColor} bg-white h-[127px] rounded-xl flex items-center justify-between px-6 transition-all duration-200 hover:shadow-sm group`}
+                        >
+                          <div className="flex items-center gap-4 min-w-0">
+                            <div className="flex items-center justify-center bg-black/5 text-black/80 text-xs w-9 h-9 rounded-full font-bold shrink-0">
+                              {request.itemName.substring(0, 2).toUpperCase()}
+                            </div>
+
+                            <div className="min-w-0">
+                              <p className="text-base font-semibold text-gray-900 truncate">
+                                {request.itemName}
+                              </p>
+                              <p className="text-xs font-medium text-gray-700/70 mt-1 truncate">
+                                {request.requestType} &bull; Qty:{" "}
+                                {request.quantity}
+                              </p>
+                            </div>
                           </div>
 
-                          <div className="min-w-0">
-                            <p className="text-base font-semibold text-gray-900 truncate">
-                              {request.itemName}
-                            </p>
-                            <p className="text-xs font-medium text-gray-700/70 mt-1 truncate">
-                              {request.requestType} &bull; Qty:{" "}
-                              {request.quantity}
-                            </p>
+                          <div className="flex items-center gap-4 shrink-0">
+                            <StatusBadge status={request.status} />
+
+                            {/* Desktop Hover Trigger Action, easily clickable on mobile */}
+                            <AlertDialog>
+                              <Button
+                                isIconOnly
+                                onClick={(e) =>
+                                  handleDeleteRequest(request._id, e)
+                                }
+                                className="opacity-0 group-hover:opacity-100 bg-white/40 hover:bg-red-50 hover:text-red-600 p-2 rounded-full transition-all duration-200"
+                              >
+                                <Trash2 className="w-4 h-4 text-red-500" />
+                              </Button>
+
+                              {/* Your existing context-safe AlertDialog configuration backdrop fits safely here */}
+                              <AlertDialog.Backdrop>
+                                <AlertDialog.Container>
+                                  <AlertDialog.Dialog className="sm:max-w-[400px]">
+                                    <AlertDialog.CloseTrigger />
+                                    <AlertDialog.Header>
+                                      <AlertDialog.Icon status="danger" />
+                                      <AlertDialog.Heading>
+                                        Delete request permanently?
+                                      </AlertDialog.Heading>
+                                    </AlertDialog.Header>
+                                    <AlertDialog.Body>
+                                      <p>
+                                        This will permanently delete{" "}
+                                        <strong>{request.itemName}</strong>.
+                                      </p>
+                                    </AlertDialog.Body>
+                                    <AlertDialog.Footer>
+                                      <Button slot="close" variant="tertiary">
+                                        Cancel
+                                      </Button>
+                                      <Button slot="close" variant="danger">
+                                        Delete
+                                      </Button>
+                                    </AlertDialog.Footer>
+                                  </AlertDialog.Dialog>
+                                </AlertDialog.Container>
+                              </AlertDialog.Backdrop>
+                            </AlertDialog>
                           </div>
                         </div>
-
-                        <div className="flex items-center gap-4 shrink-0">
-                          <StatusBadge status={request.status} />
-
-                          {/* Desktop Hover Trigger Action, easily clickable on mobile */}
-                          <AlertDialog>
-                            <Button
-                              isIconOnly
-                              onClick={(e) =>
-                                handleDeleteRequest(request._id, e)
-                              }
-                              className="opacity-0 group-hover:opacity-100 bg-white/40 hover:bg-red-50 hover:text-red-600 p-2 rounded-full transition-all duration-200"
-                            >
-                              <Trash2 className="w-4 h-4 text-red-500" />
-                            </Button>
-
-                            {/* Your existing context-safe AlertDialog configuration backdrop fits safely here */}
-                            <AlertDialog.Backdrop>
-                              <AlertDialog.Container>
-                                <AlertDialog.Dialog className="sm:max-w-[400px]">
-                                  <AlertDialog.CloseTrigger />
-                                  <AlertDialog.Header>
-                                    <AlertDialog.Icon status="danger" />
-                                    <AlertDialog.Heading>
-                                      Delete request permanently?
-                                    </AlertDialog.Heading>
-                                  </AlertDialog.Header>
-                                  <AlertDialog.Body>
-                                    <p>
-                                      This will permanently delete{" "}
-                                      <strong>{request.itemName}</strong>.
-                                    </p>
-                                  </AlertDialog.Body>
-                                  <AlertDialog.Footer>
-                                    <Button slot="close" variant="tertiary">
-                                      Cancel
-                                    </Button>
-                                    <Button slot="close" variant="danger">
-                                      Delete
-                                    </Button>
-                                  </AlertDialog.Footer>
-                                </AlertDialog.Dialog>
-                              </AlertDialog.Container>
-                            </AlertDialog.Backdrop>
-                          </AlertDialog>
-                        </div>
-                      </div>
                       </Link>
                     );
                   })

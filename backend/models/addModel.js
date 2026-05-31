@@ -37,6 +37,22 @@ const addSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  prescriptions: [
+    {
+      medicineId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Medecine" 
+      },
+      quantityGiven: {
+        type: Number,
+        required: true
+      },
+      dateGiven: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
 },{timestamps:true});
 const addedPatient = mongoose.model("addedPatient", addSchema);
 export default addedPatient;

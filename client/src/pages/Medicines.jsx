@@ -6,7 +6,7 @@ import { Plus } from "lucide-react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import { OrbitProgress } from "react-loading-indicators";
-
+import { Input } from "@heroui/react";
 const backendUrl = import.meta.env.VITE_BACKEND_URL;
 
 function Medicines() {
@@ -65,23 +65,26 @@ function Medicines() {
   }, {});
 
   const handleDeleteMedicine = async (id) => {
-    if(!window.confirm("Are you sure you want to delete this medicine?")){
+    if (!window.confirm("Are you sure you want to delete this medicine?")) {
       return;
     }
-    const token = localStorage.getItem("token");  
+    const token = localStorage.getItem("token");
     try {
-       const response = await axios.delete(`${backendUrl}/api/medicines/delete/${id}`,{
-        headers: { Authorization: `Bearer ${token}` },
-       })
-       if(response.data.success){
+      const response = await axios.delete(
+        `${backendUrl}/api/medicines/delete/${id}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      if (response.data.success) {
         toast.success("Medicine deleted successfully!");
         setMedicines((prev) => prev.filter((med) => med._id !== id));
-       }
-    }catch(error){
+      }
+    } catch (error) {
       console.log("Error deleting medicine", error?.message || error);
       toast.error("Error deleting medicine");
     }
-  }
+  };
 
   useEffect(() => {
     fetchMedicines();
@@ -207,8 +210,6 @@ function Medicines() {
                             />
                           </svg>
                         </div>
-
-                        
                       </div>
 
                       <h3 className="text-xl font-bold text-slate-800">
@@ -222,10 +223,13 @@ function Medicines() {
 
                       <div className="flex items-center justify-between pt-4 border-t border-slate-50">
                         <div>
-                          <Button variant="danger" className="absolute right-2 top-2" onClick={() => handleDeleteMedicine(medicine._id)}>
-                            <TrashBin  />
+                          <Button
+                            variant="danger"
+                            className="absolute right-2 top-2"
+                            onClick={() => handleDeleteMedicine(medicine._id)}
+                          >
+                            <TrashBin />
                           </Button>
-                          
 
                           <p className="text-lg font-semibold text-slate-700">
                             {medicine.quantity ?? 0} units
@@ -260,167 +264,223 @@ function Medicines() {
           onClick={() => setMedicineFormOpen(false)}
         >
           <div
-            className="modal-box w-full max-w-2xl p-8 bg-base-100 rounded-2xl shadow-2xl border border-base-200 max-h-[90vh] overflow-y-auto"
+            className="modal-box w-full max-w-2xl p-8 bg-white rounded-2xl shadow-2xl border border-gray-100 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
+            {/* Header Section */}
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-2xl font-bold tracking-tight text-base-content">
+                <h2 className="text-2xl font-bold tracking-tight text-gray-900">
                   Add New Medicine
                 </h2>
-                <p className="text-sm text-base-content/60 mt-1">
+                <p className="text-sm text-gray-500 mt-1">
                   Fill in the medicine details below.
                 </p>
               </div>
               <button
                 onClick={() => setMedicineFormOpen(false)}
-                className="btn btn-sm btn-circle btn-ghost"
+                className="btn btn-sm btn-circle btn-ghost text-gray-500 hover:bg-gray-100"
               >
                 ✕
               </button>
             </div>
 
             <form onSubmit={(e) => addMedicines(e)}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Medicine Name</span>
-                  </label>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-6">
+                {/* 1. Medicine Name Input */}
+                <div className="relative w-full">
                   <input
                     type="text"
-                    className="input input-bordered"
+                    id="medicineInput"
                     value={medicineName}
                     onChange={(e) => setMedicineName(e.target.value)}
-                    placeholder="e.g Paracetamol"
+                    placeholder=" "
+                    className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
                   />
+                  <label
+                    htmlFor="medicineInput"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white px-1 text-base text-gray-500 transition-all duration-200 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
+                  >
+                    Medicine Name (e.g. Paracetamol)
+                  </label>
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Category</span>
-                  </label>
+                {/* 2. Category Select (Native Styled Dropdown Wrapper) */}
+                <div className="relative w-full">
                   <select
-                    className="select select-bordered"
+                    id="categorySelect"
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
+                    className="peer w-full appearance-none rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
                   >
-                    <option disabled value="">
-                      Select category
-                    </option>
+                    <option value="" hidden></option>
                     <option value="pain">Pain</option>
                     <option value="antibiotics">Antibiotics</option>
                     <option value="relief">Relief</option>
                     <option value="vitamins">Vitamins</option>
                   </select>
+                  <label
+                    htmlFor="categorySelect"
+                    className={`absolute left-3 bg-white px-1 transition-all duration-200 pointer-events-none text-gray-500
+            peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600
+            ${category ? "top-0 text-xs" : "top-1/2 -translate-y-1/2 text-base"}`}
+                  >
+                    Category
+                  </label>
+                  {/* Custom Chevron Arrow Icon */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 peer-focus:text-blue-600 peer-focus:rotate-180 transition-transform duration-200">
+                    ▲
+                  </div>
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Dosage</span>
-                  </label>
+                {/* 3. Dosage Input */}
+                <div className="relative w-full">
                   <input
                     type="text"
-                    className="input input-bordered"
+                    id="dosageInput"
                     value={dosage}
                     onChange={(e) => setDosage(e.target.value)}
-                    placeholder="e.g 500mg"
+                    placeholder=" "
+                    className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
                   />
+                  <label
+                    htmlFor="dosageInput"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white px-1 text-base text-gray-500 transition-all duration-200 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
+                  >
+                    Dosage (e.g. 500mg)
+                  </label>
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Medicine Type</span>
-                  </label>
+                {/* 4. Medicine Type Select */}
+                <div className="relative w-full">
                   <select
-                    className="select select-bordered"
+                    id="medicineTypeSelect"
                     value={medicineType}
                     onChange={(e) => setMedicineType(e.target.value)}
+                    className="peer w-full appearance-none rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
                   >
-                    <option disabled value="">
-                      Select type
-                    </option>
+                    <option value="" hidden></option>
                     <option value="tablet">Tablet</option>
                     <option value="capsule">Capsule</option>
                     <option value="syrup">Syrup</option>
                     <option value="suspensions">Suspension</option>
                   </select>
+                  <label
+                    htmlFor="medicineTypeSelect"
+                    className={`absolute left-3 bg-white px-1 transition-all duration-200 pointer-events-none text-gray-500
+            peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600
+            ${medicineType ? "top-0 text-xs" : "top-1/2 -translate-y-1/2 text-base"}`}
+                  >
+                    Medicine Type
+                  </label>
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500 peer-focus:text-blue-600 peer-focus:rotate-180 transition-transform duration-200">
+                    ▲
+                  </div>
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Quantity</span>
-                  </label>
+                {/* 5. Quantity Input */}
+                <div className="relative w-full">
                   <input
                     type="number"
-                    className="input input-bordered"
+                    id="quantityInput"
                     value={quantity}
                     onChange={(e) => setQuantity(e.target.value)}
-                    placeholder="e.g 100"
+                    placeholder=" "
+                    className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
                   />
+                  <label
+                    htmlFor="quantityInput"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white px-1 text-base text-gray-500 transition-all duration-200 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
+                  >
+                    Quantity (e.g. 100)
+                  </label>
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Medicine Units</span>
-                  </label>
+                {/* 6. Medicine Units Input */}
+                <div className="relative w-full">
                   <input
                     type="number"
-                    className="input input-bordered"
+                    id="unitsInput"
                     value={medicineUnits}
                     onChange={(e) => setMedicineUnits(e.target.value)}
-                    placeholder="e.g 10 per strip"
+                    placeholder=" "
+                    className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
                   />
+                  <label
+                    htmlFor="unitsInput"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white px-1 text-base text-gray-500 transition-all duration-200 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
+                  >
+                    Medicine Units (e.g. 10 per strip)
+                  </label>
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Expiry Date</span>
-                  </label>
+                {/* 7. Expiry Date Picker */}
+                <div className="relative w-full md:col-span-2">
                   <input
                     type="date"
-                    className="input input-bordered"
+                    id="expiryInput"
                     value={expiryDate}
                     onChange={(e) => setExpiryDate(e.target.value)}
+                    placeholder=" "
+                    className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
                   />
+                  <label
+                    htmlFor="expiryInput"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white px-1 text-base text-gray-500 transition-all duration-200 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
+                  >
+                    Expiry Date
+                  </label>
                 </div>
               </div>
 
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">Instructions</span>
-                </label>
+              {/* 8. Instructions Textarea */}
+              <div className="relative w-full mt-6">
                 <textarea
-                  className="textarea textarea-bordered"
+                  id="instructionsInput"
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
-                  placeholder="How to use the medicine"
+                  placeholder=" "
+                  rows="3"
+                  className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600 resize-none"
                 />
+                <label
+                  htmlFor="instructionsInput"
+                  className="absolute left-3 top-6 -translate-y-1/2 bg-white px-1 text-base text-gray-500 transition-all duration-200 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
+                >
+                  Instructions (How to use the medicine)
+                </label>
               </div>
 
-              <div className="form-control mt-4">
-                <label className="label">
-                  <span className="label-text">Side Effects</span>
-                </label>
+              {/* 9. Side Effects Textarea */}
+              <div className="relative w-full mt-6">
                 <textarea
-                  className="textarea textarea-bordered"
+                  id="sideEffectsInput"
                   value={sideEffects}
                   onChange={(e) => setSideEffects(e.target.value)}
-                  placeholder="Possible side effects"
+                  placeholder=" "
+                  rows="3"
+                  className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600 resize-none"
                 />
+                <label
+                  htmlFor="sideEffectsInput"
+                  className="absolute left-3 top-6 -translate-y-1/2 bg-white px-1 text-base text-gray-500 transition-all duration-200 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
+                >
+                  Side Effects (Possible side effects)
+                </label>
               </div>
 
-              <div className="card-actions justify-between mt-6">
+              {/* Action Buttons */}
+              <div className="flex justify-between items-center mt-8">
                 <button
                   type="button"
-                  className="btn btn-ghost"
+                  className="px-6 py-2 rounded-lg text-gray-600 hover:bg-gray-100 font-medium transition-colors duration-200"
                   onClick={() => setMedicineFormOpen(false)}
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="btn btn-primary"
+                  className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors duration-200 shadow-md"
                   disabled={loading}
                 >
                   {loading ? "Saving..." : "Add Medicine"}

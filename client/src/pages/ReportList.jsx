@@ -193,8 +193,8 @@ const ReportList = () => {
         <div
           className={`${close ? "hidden" : "fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"} `}
         >
-          <X onClick={() => setClose(true)} />
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          <X onClick={() => setClose(true)} className="absolute top-25 right-109 rounded-full p-2 z-99 bg-red-300 text-red-600" />
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-100 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-slate-800">
                 Report Details
@@ -205,7 +205,7 @@ const ReportList = () => {
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 text-gray-500"
+                  className="h-6 w-6 text-lime-500"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
