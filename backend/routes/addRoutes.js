@@ -34,6 +34,7 @@ addRouter.patch(
   requireRole(["nurse", "admin"]),
   hPatient,
 );
+
 addRouter.post(
   "/dispense-medicine",
   autheticate,

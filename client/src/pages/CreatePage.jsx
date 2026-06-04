@@ -671,7 +671,7 @@ export default function NursePage() {
                     </h2>
                     <div className="relative z-10 mt-4 flex items-center gap-2">
                       <span className="bg-emerald-500/20 text-emerald-100 text-xs px-2 py-1 rounded-lg border border-emerald-500/30">
-                        +2 New
+                        +{patients.length} New
                       </span>
                     </div>
                   </div>
@@ -703,7 +703,7 @@ export default function NursePage() {
                     </h2>
                     <div className="mt-4 flex items-center gap-2">
                       <span className="bg-rose-50 text-rose-600 text-xs px-2 py-1 rounded-lg">
-                        Critical Care
+                        {patients.filter(p => p.isHospitalized).length} Currently
                       </span>
                     </div>
                   </div>
@@ -735,7 +735,7 @@ export default function NursePage() {
                     </h2>
                     <div className="mt-4 flex items-center gap-2">
                       <span className="bg-amber-50 text-amber-600 text-xs px-2 py-1 rounded-lg">
-                        Awaiting Approval
+                        {myRequests.filter((r) => r.Status === "pending").length} Awaiting Approval
                       </span>
                     </div>
                   </div>
@@ -767,7 +767,7 @@ export default function NursePage() {
                     </h2>
                     <div className="mt-4 flex items-center gap-2">
                       <span className="bg-blue-50 text-blue-600 text-xs px-2 py-1 rounded-lg">
-                        This Month
+                        {reports.length} Created this {new Date().toLocaleDateString("en-US", { month: "long" })}
                       </span>
                     </div>
                   </div>
@@ -901,15 +901,16 @@ export default function NursePage() {
                                     >
                                       <Trash2 className="w-4 h-4 text-red-500" />
                                     </button>
-                                    <button
+                                    <Button
                                       onClick={() => {
                                         setSelectedPatient(patient);
                                         setIsModalOpen(true);
                                       }}
-                                      className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow"
+                                      variant="secondary"
+                                      
                                     >
                                       Prescribe Medicine
-                                    </button>
+                                    </Button>
                                   </div>
                                 </td>
                               </tr>
@@ -933,7 +934,7 @@ export default function NursePage() {
                       Recent Activity
                     </h2>
                     <button
-                      onClick={() => navigate("/reports")}
+                      onClick={() => navigate("/home/reports")}
                       className="text-sm font-semibold text-blue-600 flex items-center gap-1 hover:underline"
                     >
                       View All <ArrowRight size={14} />
@@ -1020,11 +1021,18 @@ export default function NursePage() {
                   )}
                 </div>
               </div>
-
-              <h1 className="text-[#202124] text-4xl leading-[1.2222222222] font-normal tracking-[-0.25px] mb-8 pt-20">
+              <div className="flex items-center justify-between mb-8 pt-20">
+              <h1 className="text-[#202124] text-4xl leading-[1.2222222222] font-normal tracking-[-0.25px] ">
                 Requests
               </h1>
-
+              <Button
+                  onClick={() => setShowRequestForm(true)}
+                  variant="secondary"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add new request
+                </Button>
+               </div>
               <div className="space-y-4">
                 {myRequests.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16 text-gray-400 border-2 border-dashed border-gray-200 rounded-xl">
@@ -1101,7 +1109,7 @@ export default function NursePage() {
                                       </AlertDialog.Heading>
                                     </AlertDialog.Header>
                                     <AlertDialog.Body>
-                                      <p>
+                                      <p className="text-black/89`">
                                         This will permanently delete{" "}
                                         <strong>{request.itemName}</strong>.
                                       </p>
@@ -1124,12 +1132,7 @@ export default function NursePage() {
                     );
                   })
                 )}
-                <Button
-                  onClick={() => setShowRequestForm(true)}
-                  variant="primary"
-                >
-                  Add new request
-                </Button>
+                
               </div>
             </>
           ) : (

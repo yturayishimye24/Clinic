@@ -93,6 +93,56 @@ function PatientDetails() {
                 </div>
               </div>
             </section>
+
+            {/* Prescriptions Section */}
+            <section className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
+              <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4 border-b pb-2">
+                Prescribed Medicines
+              </h3>
+              {patients.prescriptions && patients.prescriptions.length > 0 ? (
+                <div className="space-y-4">
+                  {patients.prescriptions.map((prescription, idx) => (
+                    <div key={idx} className="border-l-4 border-blue-500 pl-4 py-2">
+                      <p className="text-slate-500 text-xs">Medicine</p>
+                      <p className="font-semibold text-slate-800 mb-2">
+                        {prescription.medicineId?.medicineName || "Unknown Medicine"}
+                      </p>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <p className="text-slate-500">Quantity Given</p>
+                          <p className="font-medium text-slate-700">{prescription.quantityGiven} units</p>
+                        </div>
+                        <div>
+                          <p className="text-slate-500">Date Given</p>
+                          <p className="font-medium text-slate-700">{new Date(prescription.dateGiven).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      {prescription.dosingSchedule && (
+                        <div className="mt-3 p-3 bg-blue-50 rounded">
+                          <p className="text-xs font-semibold text-slate-600 mb-2">Dosing Schedule:</p>
+                          <div className="grid grid-cols-3 gap-2 text-xs">
+                            <div>
+                              <span className="text-slate-500">🌅 Morning:</span> {prescription.dosingSchedule.morning || "—"}
+                            </div>
+                            <div>
+                              <span className="text-slate-500">☀️ Noon:</span> {prescription.dosingSchedule.afternoon || "—"}
+                            </div>
+                            <div>
+                              <span className="text-slate-500">🌙 Evening:</span> {prescription.dosingSchedule.evening || "—"}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      {prescription.notes && (
+                        <p className="mt-2 text-sm text-slate-600 italic">📝 Notes: {prescription.notes}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-slate-500 text-sm">No medicines prescribed yet.</p>
+              )}
+            </section>
           </div>
         </div>
       </>

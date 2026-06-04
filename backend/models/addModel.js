@@ -37,11 +37,12 @@ const addSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+
   prescriptions: [
     {
       medicineId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Medecine" 
+        ref: "Medicine" 
       },
       quantityGiven: {
         type: Number,
@@ -50,6 +51,24 @@ const addSchema = new mongoose.Schema({
       dateGiven: {
         type: Date,
         default: Date.now
+      },
+      dosingSchedule: {
+        morning: {
+          type: String,
+          default: "0"
+        },
+        afternoon: {
+          type: String,
+          default: "0"
+        },
+        evening: {
+          type: String,
+          default: "0"
+        }
+      },
+      notes: {
+        type: String,
+        default: ""
       }
     }
   ]

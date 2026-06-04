@@ -8,6 +8,6 @@ const MedicineRouter = express.Router();
 MedicineRouter.post("/create",addMedicine);
 MedicineRouter.delete("/delete/:id",deleteMedicine);
 MedicineRouter.put("/update/:id",updateMedicine);
-MedicineRouter.get("/display",autheticate,getMedicine);
+MedicineRouter.get("/display",getMedicine);
 
 export default MedicineRouter;

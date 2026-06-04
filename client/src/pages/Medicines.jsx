@@ -17,8 +17,7 @@ function Medicines() {
   const [category, setCategory] = useState("");
   const [dosage, setDosage] = useState("");
   const [medicineType, setMedicineType] = useState("");
-  const [quantity, setQuantity] = useState("");
-  const [medicineUnits, setMedicineUnits] = useState("");
+    const [units, setUnits] = useState("");
   const [expiryDate, setExpiryDate] = useState("");
   const [instructions, setInstructions] = useState("");
   const [sideEffects, setSideEffects] = useState("");
@@ -104,8 +103,7 @@ function Medicines() {
           category,
           dosage,
           medicineType,
-          quantity,
-          medicineUnits,
+          units,
           expiryDate,
           instructions,
           sideEffects,
@@ -129,8 +127,7 @@ function Medicines() {
         setCategory("");
         setDosage("");
         setMedicineType("");
-        setQuantity("");
-        setMedicineUnits("");
+        setUnits("");
         setExpiryDate("");
         setInstructions("");
         setSideEffects("");
@@ -158,7 +155,7 @@ function Medicines() {
             Manage and track your pharmaceutical inventory.
           </p>
         </div>
-        <Button onClick={() => setMedicineFormOpen(true)}>
+        <Button onClick={() => setMedicineFormOpen(true)} variant="secondary">
           <Plus /> Add New Medicine
         </Button>
       </div>
@@ -232,7 +229,7 @@ function Medicines() {
                           </Button>
 
                           <p className="text-lg font-semibold text-slate-700">
-                            {medicine.quantity ?? 0} units
+                            {medicine.units ?? 0} units
                           </p>
                         </div>
 
@@ -378,31 +375,15 @@ function Medicines() {
                   </div>
                 </div>
 
-                {/* 5. Quantity Input */}
-                <div className="relative w-full">
-                  <input
-                    type="number"
-                    id="quantityInput"
-                    value={quantity}
-                    onChange={(e) => setQuantity(e.target.value)}
-                    placeholder=" "
-                    className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
-                  />
-                  <label
-                    htmlFor="quantityInput"
-                    className="absolute left-3 top-1/2 -translate-y-1/2 bg-white px-1 text-base text-gray-500 transition-all duration-200 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
-                  >
-                    Quantity (e.g. 100)
-                  </label>
-                </div>
+                
 
-                {/* 6. Medicine Units Input */}
+                
                 <div className="relative w-full">
                   <input
                     type="number"
                     id="unitsInput"
-                    value={medicineUnits}
-                    onChange={(e) => setMedicineUnits(e.target.value)}
+                    value={units}
+                    onChange={(e) => setUnits(e.target.value)}
                     placeholder=" "
                     className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
                   />

@@ -1,4 +1,6 @@
 import Medicine from "../models/medicinesModel.js";
+import Notification from "../models/notificationsModal.js";
+import { io } from "../server.js";
 
 export const addMedicine = async (req, res) => {
   try {
@@ -6,12 +8,12 @@ export const addMedicine = async (req, res) => {
       medicineName,
       category,
       dosage,
-      quantity,
+     
       expiryDate,
       instructions,
       sideEffects,
       medicineType,
-      medicineUnits,
+      units,
     } = req.body;
 
     const CreatedMedicine = await Medicine.create({
@@ -21,8 +23,8 @@ export const addMedicine = async (req, res) => {
       instructions,
       sideEffects,
       expiryDate,
-      medicineUnits,
-      quantity,
+      units,
+    
       medicineType,
     });
 
@@ -34,6 +36,14 @@ export const addMedicine = async (req, res) => {
           msg: "Erroring creating a medicine! Please try again later",
         });
     } else {
+      const notification = await Notification.create({
+        title: "New medicine added",
+        message: `${CreatedMedicine.medicineName} (${CreatedMedicine.dosage}) was added to inventory.`,
+        type: "medicine",
+      });
+
+      io.to("admins").emit("newNotification", notification);
+
       res
         .status(201)
         .json({
@@ -107,11 +117,10 @@ export const updateMedicine = async (req, res) => {
         category,
         dosage,
         expiryDate,
-        quantity,
         instructions,
         sideEffects,
         medicineType,
-        medicineUnits,
+        units,
       },
       { new: true },
     );

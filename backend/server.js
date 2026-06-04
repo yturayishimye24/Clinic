@@ -16,6 +16,7 @@ import reportRouter from "./routes/reportRoute.js";
 import path from "path";
 import MedicineRouter from "./routes/medicinesRoutes.js";
 import requestAccountRouter from "./routes/requestAccountRoute.js";
+import Notificationrouter from "./routes/notificationRoute.js";
 dotenv.config();
 
 const port = process.env.PORT || 4000;
@@ -45,6 +46,7 @@ app.use("/api/verify", router);
 app.use("/api/report", reportRouter);
 app.use("/api/request-account", requestAccountRouter);
 app.use("/api/medicines",MedicineRouter);
+app.use("/api/notifications", Notificationrouter);
 
 const server = http.createServer(app);
 export const io = new Server(server, {

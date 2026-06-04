@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Button } from "@heroui/react";
+import { FileQuestion } from "lucide-react";
+import { toast } from "react-toastify";
+const backendUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:4000";
 
 export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPrescriptionSuccess }) {
   const [medicinesList, setMedicinesList] = useState([]);
   const [selectedMedicine, setSelectedMedicine] = useState("");
-  const [quantity, setQuantity] = useState("");
+  const [units, setUnits] = useState("");
   const [morningDose, setMorningDose] = useState("");
   const [afternoonDose, setAfternoonDose] = useState("");
   const [eveningDose, setEveningDose] = useState("");
@@ -18,7 +22,7 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
       const fetchMedicines = async () => {
         try {
           const token = localStorage.getItem("token"); // or how you manage tokens
-          const response = await axios.get("http://localhost:4000/api/medicines/display", {
+          const response = await axios.get(`${backendUrl}/api/medicines/display`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           if (response.data.success) {
@@ -37,8 +41,20 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!selectedMedicine || !quantity) {
-      setError("Please select a medicine and state the overall quantity.");
+    if (!selectedMedicine || !units) {
+      setError("Please select a medicine and state the overall units.");
+      return;
+    }
+
+    // Validate dosing schedule sum does not exceed total units
+    const totalUnits = Number(units || 0);
+    const morningNum = Number(morningDose || 0);
+    const afternoonNum = Number(afternoonDose || 0);
+    const eveningNum = Number(eveningDose || 0);
+    const dosingSum = morningNum + afternoonNum + eveningNum;
+
+    if (dosingSum > totalUnits) {
+      setError(`Dosing total (${dosingSum}) exceeds total units (${totalUnits}).`);
       return;
     }
 
@@ -48,16 +64,17 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
-        "http://localhost:4000/api/patients/dispense-medicine",
+        `${backendUrl}/api/patients/dispense-medicine`,
         {
           patientId: patient._id,
           medicineId: selectedMedicine,
-          quantityGiven: quantity,
+          quantityGiven: units,
           morningDose,
           afternoonDose,
           eveningDose,
-          notes
+          notes,
         },
+
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -66,11 +83,12 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
         onClose();
         // Reset local form variables
         setSelectedMedicine("");
-        setQuantity("");
+        setUnits("");
         setMorningDose("");
         setAfternoonDose("");
         setEveningDose("");
         setNotes("");
+        toast.success("Medicine prescribed successfully!");
       }
     } catch (err) {
       setError(err.response?.data?.message || "An error occurred while prescribing.");
@@ -109,7 +127,12 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Custom Floating Label Dropdown (References Screenshot 2026-05-31 110715.png) */}
           <div className="relative w-full">
-            <select
+           {medicinesList.length === 0 ? (
+              <div className="w-full rounded border-[1.5px] border-gray-300 bg-gray-50 px-4 py-3.5 text-base text-gray-500">
+                <FileQuestion size={40} color={"green"}/>
+                No medicines available. Please add medicines to the database first.
+              </div>
+            ) : (  <select
               id="medicineSelect"
               value={selectedMedicine}
               onChange={(e) => setSelectedMedicine(e.target.value)}
@@ -118,10 +141,11 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
               <option value="" hidden></option>
               {medicinesList.map((med) => (
                 <option key={med._id} value={med._id}>
-                  {med.medicineName} ({med.dosage}) - Stock: {med.quantity}
+                  {med.medicineName} ({med.dosage}) - Stock: {med.units}
                 </option>
               ))}
-            </select>
+            </select>)}
+          
             <label
               htmlFor="medicineSelect"
               className={`absolute left-3 bg-white px-1 transition-all duration-200 pointer-events-none text-gray-500
@@ -139,17 +163,17 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
           <div className="relative w-full">
             <input
               type="number"
-              id="quantityInput"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
+              id="unitsInput"
+              value={units}
+              onChange={(e) => setUnits(e.target.value)}
               placeholder=" "
               className="peer w-full rounded border-[1.5px] border-gray-300 bg-transparent px-4 py-3.5 text-base text-gray-900 outline-none transition-all duration-200 focus:border-2 focus:border-blue-600"
             />
             <label
-              htmlFor="quantityInput"
+              htmlFor="unitsInput"
               className="absolute left-3 top-1/2 -translate-y-1/2 bg-white px-1 text-base text-gray-500 transition-all duration-200 pointer-events-none peer-focus:top-0 peer-focus:text-xs peer-focus:text-blue-600 peer-[:not(:placeholder-shown)]:top-0 peer-[:not(:placeholder-shown)]:text-xs"
             >
-              Total Quantity To Dispense (e.g. 15)
+              Total Units To Dispense (e.g. 15)
             </label>
           </div>
 
@@ -187,7 +211,6 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
                 </label>
               </div>
 
-              {/* Evening */}
               <div className="relative w-full">
                 <input
                   type="text"
@@ -222,7 +245,7 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
             </label>
           </div>
 
-          {/* Actions */}
+        
           <div className="flex justify-between items-center pt-4 border-t border-gray-100">
             <button
               type="button"
@@ -231,13 +254,14 @@ export default function PrescribeMedicineModal({ patient, isOpen, onClose, onPre
             >
               Cancel
             </button>
-            <button
+            <Button
+            variant="secondary"
               type="submit"
               className="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed transition-colors duration-200 shadow-md"
               disabled={loading}
             >
               {loading ? "Prescribing..." : "Prescribe Medicine"}
-            </button>
+            </Button>
           </div>
         </form>
       </div>

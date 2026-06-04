@@ -21,11 +21,8 @@ const newMedicinesSchema = new mongoose.Schema({
         enum: ["tablet","capsule","syrup","suspensions"],
         required:true,  
     },
-    quantity:{
-        type:Number,
-        required:true,
-    },
-    medicineUnits:{
+    
+    units:{
         type:Number,
         required:true,
     },
@@ -43,5 +40,5 @@ const newMedicinesSchema = new mongoose.Schema({
     }
 },{timestamps:true})
 
-const Medecine = mongoose.model("Medecine",newMedicinesSchema);
+const Medecine = mongoose.model("Medicine",newMedicinesSchema);
 export default Medecine;
