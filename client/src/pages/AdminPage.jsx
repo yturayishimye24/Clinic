@@ -35,7 +35,7 @@ import {
 
 export default function AdminPage() {
   const navigate = useNavigate();
-
+  const backendUrl = import.meta.env.VITE_BACKEND_URL;
   // --- STATE ---
   const [patients, setPatients] = useState([]);
   const [requests, setRequests] = useState([]);
@@ -593,11 +593,11 @@ export default function AdminPage() {
                     <Megaphone className=" relative w-6 h-6 text-blue-500" />
                     <div className="absolute -top-2 right-0 w-5 h-5 rounded-full bg-emerald-700 flex items-center justify-center text-white text-xs font-bold">{notifications.length}</div>
                     <span className="font-medium">Notifications</span>
-                    {notifications.length > 0 && (
+                    {/* {notifications.length > 0 && (
                       <span className="text-white text-[10px] font-semibold bg-blue-500 rounded-full px-2 py-0.5">
                         {notifications.length}
                       </span>
-                    )}
+                    )} */}
 
                     {/* Invisible padding bridge to prevent dropdown from disappearing on mouse movement */}
                     <div className="absolute top-full right-0 w-full h-2 hidden group-hover:block"></div>
@@ -609,10 +609,8 @@ export default function AdminPage() {
                           <p className="text-sm font-semibold text-gray-900">
                             Recent notifications
                           </p>
-                          <p className="text-xs text-gray-500 flex items-center justify-center flex-col gap-10">
-                            <FileQuestion/>
-                            No Notifications yet.
-                          </p>
+                        
+                        
                         </div>
                         <span className="text-xs text-gray-500">
                           {notifications.length} total
