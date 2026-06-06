@@ -251,6 +251,12 @@ export default function AdminPage() {
       setNotifications((prev) => [notification, ...prev]);
       toast.info(notification.message);
     });
+    socket.on("deletedMedicine", (id) => {
+      setMedicines((prev) => prev.filter((m) => m._id !== id));
+    });
+    socket.on("reportDeleted", (id) => {
+      setReports((prev) => prev.filter((r) => r._id !== id));
+    });
 
     return () => {
       socket.off("newNurse");
@@ -258,6 +264,8 @@ export default function AdminPage() {
       socket.off("requestDeleted");
       socket.off("patientCreated");
       socket.off("newNotification");
+      socket.off("deletedMedicine");
+      socket.off("reportDeleted");
     };
   }, [navigate]);
 
@@ -593,16 +601,12 @@ export default function AdminPage() {
                     <Megaphone className=" relative w-6 h-6 text-blue-500" />
                     <div className="absolute -top-2 right-0 w-5 h-5 rounded-full bg-emerald-700 flex items-center justify-center text-white text-xs font-bold">{notifications.length}</div>
                     <span className="font-medium">Notifications</span>
-                    {/* {notifications.length > 0 && (
-                      <span className="text-white text-[10px] font-semibold bg-blue-500 rounded-full px-2 py-0.5">
-                        {notifications.length}
-                      </span>
-                    )} */}
+                  
 
-                    {/* Invisible padding bridge to prevent dropdown from disappearing on mouse movement */}
+                    
                     <div className="absolute top-full right-0 w-full h-2 hidden group-hover:block"></div>
 
-                    {/* 2. The Popover Panel */}
+                 \
                     <div className="absolute right-0 top-[calc(100%+8px)] w-96 bg-white border border-gray-200 hidden group-hover:block z-50 shadow-xl transition-all duration-200 animate-fade-in origin-top-right">
                       <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                         <div>
@@ -1342,6 +1346,7 @@ export default function AdminPage() {
               </div>
             </div>
           )}
+          
           {activeSection === "settings" && (
             <>
               <h1 className="text-3xl font-bold text-gray-900 tracking-tight mb-8">

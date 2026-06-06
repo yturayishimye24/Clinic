@@ -16,6 +16,7 @@ import {
   FileText,
   Trash2,
   BarChart3,
+  
   Download,
   Package,
 } from "lucide-react";
@@ -360,29 +361,41 @@ const LandingPage = () => {
           </section>
         </div>
 
-        <div className="bg-white shadow-lg rounded-full py-4 px-6 max-w-2xl mx-auto flex justify-center items-center gap-8 text-gray-600 text-sm mt-10 mb-10 sticky top-3 z-40 border border-gray-200">
-          <ul className="flex items-center justify-center gap-8">
-            <li
-              onClick={scrollToServices}
-              className="cursor-pointer hover:text-black transition-colors font-medium"
-            >
-              What's included
-            </li>
-            <li
-              onClick={scrollToFaqs}
-              className="cursor-pointer hover:text-black transition-colors font-medium"
-            >
-              How it works
-            </li>
-            <li
-              onClick={scrollToWhyUs}
-              className="cursor-pointer hover:text-black transition-colors font-medium"
-            >
-              Why us
-            </li>
-          </ul>
-        </div>
+      <div className="bg-white shadow-md rounded-full p-2 max-w-3xl mx-auto flex items-center justify-between text-gray-600 text-sm mt-10 mb-10 sticky top-3 z-40 border border-gray-100">
+      
+  {/* Removed mt-3 for perfect vertical alignment */}
+  <ul className="flex items-center justify-center gap-2 pl-4 font-medium">
+    <li
+      onClick={scrollToServices}
+      className="cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-full transition-all duration-200"
+    >
+      What's included
+    </li>
+    
+    <li
+      onClick={scrollToFaqs}
+      className="cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-full transition-all duration-200"
+    >
+      How it works
+    </li>
+    
+    <li
+      onClick={scrollToWhyUs}
+      className="cursor-pointer text-gray-600 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-full transition-all duration-200"
+    >
+      Why us
+    </li>
+  </ul>
 
+  {/* Right-Aligned Get Started Action Button */}
+  <button 
+    onClick={() => setSelectionOpen(true)}
+    className="bg-gray-100 hover:bg-gray-200 text-white font-medium px-6 py-2.5 rounded-full shadow-sm transition-colors"
+  >
+    Get started
+  </button>
+  
+</div>
         <div ref={teamRef} className="py-5 px-4 bg-white">
           <TEAM />
         </div>

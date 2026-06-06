@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -92,6 +92,9 @@ export default function NursePage() {
   const [disease, setDisease] = useState("");
   const [maritalStatus, setMaritalStatus] = useState("");
   const [formError, setFormError] = useState("");
+  const [patientImage, setPatientImage] = useState(null);
+  const [patientImagePreview, setPatientImagePreview] = useState("");
+  const patientFileRef = useRef(null);
 
   // Report States
   const [reportTitle, setReportTitle] = useState("");
@@ -366,9 +369,7 @@ export default function NursePage() {
     setMaritalStatus(patient.maritalStatus || "");
     setDisease(patient.disease || "");
     setPatientImage(null);
-    setPatientImagePreview(
-      patient.image ? `${backendUrl}${patient.image}` : "",
-    );
+    setPatientImagePreview(patient.image ? `${backendUrl}${patient.image}` : "");
     setShowForm(true);
   };
 
@@ -381,6 +382,8 @@ export default function NursePage() {
     setDisease("");
     setEditingPatientId(null);
     setFormError("");
+    setPatientImage(null);
+    setPatientImagePreview("");
   };
 
   const handleSubmit = async (e) => {
@@ -390,40 +393,74 @@ export default function NursePage() {
 
     try {
       const token = localStorage.getItem("token");
-      const payload = {
-        firstName,
-        lastName,
-        gender,
-        date,
-        disease,
-      };
+      // If an image file was selected, send multipart/form-data
+      if (patientImage) {
+        const formData = new FormData();
+        formData.append("firstName", firstName);
+        formData.append("lastName", lastName);
+        formData.append("gender", gender);
+        formData.append("date", date);
+        formData.append("disease", disease);
+        formData.append("image", patientImage);
 
-      if (editingPatientId) {
-        const response = await axios.put(
-          `${backendUrl}/api/patients/${editingPatientId}`,
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
+        if (editingPatientId) {
+          const response = await axios.put(
+            `${backendUrl}/api/patients/${editingPatientId}`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+              },
             },
-          },
-        );
-        setPatients((prev) =>
-          prev.map((p) => (p._id === editingPatientId ? response.data : p)),
-        );
-        toast.success("Patient updated");
+          );
+          setPatients((prev) =>
+            prev.map((p) => (p._id === editingPatientId ? response.data : p)),
+          );
+          toast.success("Patient updated");
+        } else {
+          const response = await axios.post(
+            `${backendUrl}/api/patients/create`,
+            formData,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "multipart/form-data",
+              },
+            },
+          );
+          setPatients((prev) => [...prev, response.data.patient]);
+          toast.success("Patient added");
+        }
       } else {
-        const response = await axios.post(
-          `${backendUrl}/api/patients/create`,
-          payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
+        const payload = { firstName, lastName, gender, date, disease };
+        if (editingPatientId) {
+          const response = await axios.put(
+            `${backendUrl}/api/patients/${editingPatientId}`,
+            payload,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
             },
-          },
-        );
-        setPatients((prev) => [...prev, response.data.patient]);
-        toast.success("Patient added");
+          );
+          setPatients((prev) =>
+            prev.map((p) => (p._id === editingPatientId ? response.data : p)),
+          );
+          toast.success("Patient updated");
+        } else {
+          const response = await axios.post(
+            `${backendUrl}/api/patients/create`,
+            payload,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
+          setPatients((prev) => [...prev, response.data.patient]);
+          toast.success("Patient added");
+        }
       }
       setShowForm(false);
       resetForm();
@@ -506,6 +543,11 @@ export default function NursePage() {
       ? imagePath
       : `${backendUrl}${imagePath}`;
   };
+
+  // Prefer the report creator's image when showing recent activity
+  const reporterImage = latestReport?.createdBy?.image
+    ? getPatientImageUrl(latestReport.createdBy.image)
+    : image;
 
   const StatusBadge = ({ status }) => {
     const s = status?.toLowerCase() || "";
@@ -948,7 +990,7 @@ export default function NursePage() {
                       <div className="flex items-center gap-4 mb-6">
                         <div className="relative">
                           <Avatar>
-                            <Avatar.Image alt="Blue" src={image} />
+                            <Avatar.Image alt="Blue" src={reporterImage} />
                             <Avatar.Fallback>B</Avatar.Fallback>
                           </Avatar>
                         </div>
@@ -1398,6 +1440,40 @@ export default function NursePage() {
                   <option value="Male">Male</option>
                   <option value="Female">Female</option>
                 </select>
+              </div>
+
+              {/* Photo Upload */}
+              <div className="form-control w-full md:col-span-2">
+                <label className="label">
+                  <span className="label-text text-xs font-bold uppercase tracking-wider opacity-70">
+                    Photo (optional)
+                  </span>
+                </label>
+                <div className="flex items-center gap-4">
+                  <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 border">
+                    {patientImagePreview ? (
+                      <img src={patientImagePreview} alt="preview" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-400">No Photo</div>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      ref={patientFileRef}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setPatientImage(file);
+                          setPatientImagePreview(URL.createObjectURL(file));
+                        }
+                      }}
+                      className=""
+                    />
+                    <p className="text-xs text-gray-500 mt-2">Upload a profile photo for the patient (optional).</p>
+                  </div>
+                </div>
               </div>
 
               {/* Condition / Disease */}

@@ -11,6 +11,12 @@ export const createReport = async(req,res)=>{
        })
        const savedReport = await newReport.save();
        const populatedReport = await Report.findById(savedReport._id).populate("createdBy","username email");
+       const notification = await Notification.create({
+         title: "New report created",
+         message: `${populatedReport.title} was created.`,
+         type: "reports",
+       });
+       io.to("admins").emit("newNotification", notification);
        res.status(201).json(populatedReport);
     }catch(error){
         console.log("Error creating report",error.message)
@@ -35,6 +41,12 @@ export const updateReport = async(req,res) =>{
      const {id} = req.params;
      const {title,body,conclusion} = req.body;
      const updatedReport = await Report.findByIdAndUpdate(id,{title,body,conclusion},{new:true})
+     const notification = await Notification.create({
+       title: "Report updated",
+       message: `${updatedReport.title} was updated.`,
+       type: "reports",
+     });
+     io.to("admins").emit("newNotification", notification);
      res.status(201).json(updatedReport);
     }catch(error){
         console.log("Error updating report")
@@ -47,6 +59,16 @@ export const deleteReport = async(req,res)=>{
     try{
         const {id} = req.params;
         const deletedReport = await Report.findByIdAndDelete(id);
+        const notification = await Notification.create({
+          title: "Report deleted",
+          message: `${deletedReport.title} was deleted.`,
+          type: "reports",
+        });
+        const reportTitle = deletedReport ? deletedReport.title : "Unknown Report";
+        const notificationMessage = `${reportTitle} was deleted.`;
+        
+        io.to("admins").emit("reportDeleted", id);
+        io.to("admins").emit("newNotification", notification);
         if(!deletedReport){
             return res.status(404).json({message:"Report not found"})
         }else{

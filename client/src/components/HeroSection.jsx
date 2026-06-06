@@ -42,12 +42,9 @@ const HeroSection = () => {
           }}
         />
 
-        {/* CONTENT LAYER 
-          - relative z-10: stays on top of the background
-          - Removed 'absolute': allows the section to take up actual space in the document flow
-        */}
+      
         <section className="relative z-10 max-w-7xl mx-auto px-6 pt-40 pb-32 flex flex-col lg:flex-row items-center justify-between gap-12">
-          {/* Left Content */}
+        
           <div
             className="flex-1 text-center lg:text-left"
             data-aos="fade-right"
@@ -79,7 +76,7 @@ const HeroSection = () => {
                 loop
                 muted
                 preload="metadata"
-                className="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] object-cover rounded-full shadow-2xl border-8 border-white"
+                className="relative w-[300px] h-[300px] md:w-[400px] md:h-[400px] object-cover rounded-full shadow-2xl"
               />
 
               {/* Top Floating Video - Positioned relative to Main Video */}
@@ -89,7 +86,7 @@ const HeroSection = () => {
                 loop
                 muted
                 preload="metadata"
-                className="absolute -top-12 -right-8 w-[140px] h-[140px] md:w-[200px] md:h-[200px] object-cover rounded-full border-4 border-white shadow-xl"
+                className="absolute -top-12 -right-8 w-[140px] h-[140px] md:w-[200px] md:h-[200px] object-cover rounded-full"
               />
 
               {/* Bottom Floating Video - Positioned relative to Main Video */}
@@ -99,7 +96,7 @@ const HeroSection = () => {
                 loop
                 muted
                 preload="metadata"
-                className="absolute -bottom-10 -left-4 md:-left-10 w-[120px] h-[120px] md:w-[180px] md:h-[180px] object-cover rounded-full border-4 border-white shadow-xl"
+                className="absolute -bottom-10 -left-4 md:-left-10 w-[120px] h-[120px] md:w-[180px] md:h-[180px] object-cover rounded-full"
               />
             </div>
           </div>

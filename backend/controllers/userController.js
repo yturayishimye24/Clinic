@@ -172,6 +172,7 @@ export const updateNurse = async (req, res) => {
 
     const payload = updatedNurse.toObject ? updatedNurse.toObject() : updatedNurse;
     io.to("admins").emit("nurseUpdated", payload);
+    io.to("admins").emit("newNotification", notification);
     res.status(200).json({ success: true, message: "Nurse updated successfully!", nurse: payload });
   } catch (error) {
     console.log("Error updating nurse", error.message);

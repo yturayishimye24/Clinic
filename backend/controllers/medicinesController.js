@@ -92,7 +92,13 @@ export const deleteMedicine = async (req, res) => {
         message: "Medicine not found",
       });
     }
-
+    const notification = await Notification.create({
+      title: "Medicine deleted",
+      message: `${deletedMedicine.medicineName} (${deletedMedicine.dosage}) was removed from inventory.`,
+      type: "medicine",
+    });
+    io.to("admins").emit("deletedMedicine", req.params.id);
+    io.to("admins").emit("newNotification", notification);
     return res.status(200).json({
       success: true,
       message: "Medicine deleted successfully",
@@ -127,6 +133,7 @@ export const updateMedicine = async (req, res) => {
     if (!updatedMedicine) {
       res.status(500).json({ message: "Error updating", success: false });
     } else {
+      io.to("admins").emit("newNotification", notification);
       res.json({ updatedMedicine });
     }
   } catch (error) {
