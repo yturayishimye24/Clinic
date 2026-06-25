@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import GoogleButton from "react-google-button";
+import { GoogleLogin } from "@react-oauth/google";
 import { Button } from "@heroui/react";
 import { useNavigate } from "react-router-dom";
 import { House } from "lucide-react";
@@ -12,6 +13,11 @@ import { OrbitProgress } from "react-loading-indicators";
 import { delay } from "../utils/Delay.jsx";
 import ValidationError from "../components/ValidationError.jsx";
 import Navbar from "../components/landingPageNavbar.jsx"
+
+//firebase login imports
+import { auth, googleProvider } from "../../firebase.js";
+import { signInWithPopup } from "firebase/auth";
+
 const LoginPageDoctor = () => {
   const navigate = useNavigate();
   const backendUrl = import.meta.env.VITE_BACKEND_URL;
@@ -36,6 +42,69 @@ const LoginPageDoctor = () => {
       passwordRef.current.focus();
     }
   }, [showPassword]);
+//firebase login handler function
+const loginWithGoogle = async () => {
+  setProgressing(true);
+  try {
+    // 1. Trigger the Firebase Google Sign-In popup
+    const result = await signInWithPopup(auth, googleProvider);
+    const user = result.user;
+
+    // 2. Retrieve the secure ID Token from Firebase to send to your backend
+    const idToken = await user.getIdToken(); 
+
+    // 3. Send the token and user details to your backend to register/verify the user
+    const response = await axios.post(`${backendUrl}/api/accounts/google-login`, {
+      idToken,
+      email: user.email,
+      username: user.displayName,
+      image: user.photoURL,
+      intendedRole: "doctor",
+    });
+
+    if (!response.data.success) {
+      toast.error(response.data.message || "Google registration failed on backend");
+      setProgressing(false);
+      return;
+    }
+
+    const { token, role, user: userData } = response.data;
+
+    if (role !== "admin" && role !== "doctor") {
+      toast.error(
+        `This Google account is registered as ${role}. Please use the Nurse login page instead.`,
+      );
+      setProgressing(false);
+      navigate("/nurseLogin");
+      return;
+    }
+
+    // 4. Save to localStorage (Identical to your standard handleSubmit)
+    localStorage.setItem("token", token);
+    localStorage.setItem("role", role);
+    localStorage.setItem(`${role}Username`, userData.username);
+    localStorage.setItem(`${role}Email`, userData.email || "");
+    if (userData.image) {
+      localStorage.setItem(`${role}Image`, userData.image);
+    }
+    localStorage.setItem("username", userData.username);
+    localStorage.setItem("email", userData.email || "");
+
+    // 5. Update your React Context and Redirect
+    login(userData);
+    toast.success("Welcome, " + userData.username);
+    navigate("/home/admin");
+
+  } catch (error) {
+    console.error("Sign-in failed:", error);
+    toast.error(
+      error.response?.data?.message || error.message || "Google sign-in failed",
+    );
+  } finally {
+    setProgressing(false);
+  }
+};
+
 
   const handleNext = () => {
     if (email.trim() === "") {
@@ -140,8 +209,8 @@ const LoginPageDoctor = () => {
             </p>
 
             <GoogleButton
-              onClick={handleGoogleSignIn}
-              style={{ backgroundColor: "#10B985" }}
+              onClick={loginWithGoogle}
+            
             />
 
             <div className="my-8 flex w-full items-center">

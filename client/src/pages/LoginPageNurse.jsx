@@ -18,6 +18,9 @@ import { GoogleLogin } from "@react-oauth/google";
 import { jwtDecode } from "jwt-decode";
 import Navbar from "../components/landingPageNavbar.jsx"
 import { Button } from "@heroui/react";
+//firebase imports
+import { auth, googleProvider } from "../../firebase.js";
+import { signInWithPopup } from "firebase/auth";
 
 const LoginPageNurse = () => {
   const navigate = useNavigate();
@@ -27,13 +30,71 @@ const LoginPageNurse = () => {
   useEffect(() => {
     AOS.init();
   }, []);
-  const handleGoogleSignIn = async () => {
+  //firebase google login handler function
+  const loginWithGoogle = async () => {
+    setProgressing(true);
     try {
-      await googleSignIn();
+      // 1. Trigger the Firebase Google Sign-In popup
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+  
+      // 2. Retrieve the secure ID Token from Firebase to send to your backend
+      const idToken = await user.getIdToken(); 
+  
+      // 3. Send the token and user details to your backend to register/verify the user
+      const response = await axios.post(`${backendUrl}/api/accounts/google-login`, {
+        idToken,
+        email: user.email,
+        username: user.displayName,
+        image: user.photoURL,
+        intendedRole: "nurse",
+      });
+  
+      if (!response.data.success) {
+        toast.error(response.data.message || "Google registration failed on backend");
+        setProgressing(false);
+        return;
+      }
+  
+      const { token, role, user: userData } = response.data;
+      console.log("Google login response - role:", role, "userData:", userData);
+  
+      if (role !== "nurse") {
+        console.warn(`Role mismatch: received role '${role}' instead of 'nurse'`);
+        toast.error(
+          `This Google account is registered as ${role}. Please use the Doctor login page instead.`,
+        );
+        setProgressing(false);
+        navigate("/doctorLogin");
+        return;
+      }
+  
+      // 4. Save to localStorage (Identical to your standard handleSubmit)
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+      localStorage.setItem(`${role}Username`, userData.username);
+      localStorage.setItem(`${role}Email`, userData.email || "");
+      if (userData.image) {
+        localStorage.setItem(`${role}Image`, userData.image);
+      }
+      localStorage.setItem("username", userData.username);
+      localStorage.setItem("email", userData.email || "");
+  
+      // 5. Update your React Context and Redirect
+      login(userData);
+      toast.success("Welcome, " + userData.username);
+      navigate("/home");
+  
     } catch (error) {
-      console.log("Error during Google Sign-In:", error);
+      console.error("Sign-in failed:", error);
+      toast.error(
+        error.response?.data?.message || error.message || "Google sign-in failed",
+      );
+    } finally {
+      setProgressing(false);
     }
   };
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -174,18 +235,8 @@ const LoginPageNurse = () => {
 
           {/* SSO Buttons */}
           <div className="w-full gap-3 flex align-items-center justify-center">
-            <GoogleLogin
-              onSuccess={(credentialResponse) => {
-                console.log("Google Sign-In successful!", credentialResponse);
-                console.log(
-                  "Decoded JWT:",
-                  jwtDecode(credentialResponse.credential),
-                );
-                navigate("/home");
-              }}
-              onError={() => console.log("Error Signing in with google")}
-              auto_select={true}
-              useOneTap
+            <GoogleButton
+              onClick={loginWithGoogle}
             />
           </div>
 

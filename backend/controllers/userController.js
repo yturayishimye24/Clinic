@@ -85,17 +85,53 @@ export const signupController = async (req, res) => {
   }
 };
 
+export const googleLoginController = async (req, res) => {
+  try {
+    const { email, username, image, intendedRole } = req.body;
+    console.log("Google login request - intendedRole:", intendedRole, "email:", email);
+    
+    if (!email) {
+      return res.json({ success: false, message: "Email is required for Google login." });
+    }
+
+    let user = await Nurse.findOne({ email });
+    if (!user) {
+      const newRole = intendedRole || "doctor";
+      console.log("Creating new user with role:", newRole);
+      user = new Nurse({
+        username: username || email.split("@")[0],
+        email,
+        role: newRole,
+        image: image || undefined,
+      });
+      await user.save();
+    } else {
+      console.log("User exists with role:", user.role);
+    }
+
+    const token = userToken(user._id, user.role);
+    console.log("Returning role:", user.role);
+    res.json({
+      success: true,
+      message: "Login successful!",
+      token,
+      role: user.role,
+      user,
+    });
+  } catch (error) {
+    console.log("Google login error", error);
+    res.json({ success: false, message: error.message || "Google login failed" });
+  }
+};
+
 export const getNurses = async (req, res) => {
   try {
     const nurses = await Nurse.find({ role: "nurse" });
-    if (!nurses || nurses.length === 0) {
-      return res.status(404).json({ success: false, message: "No nurses Found" });
-    }
     const nurseEmails = nurses.map(nurse => nurse.email);
     const userName = nurses.map(nurse => nurse.username);
     const role = nurses.map(nurse => nurse.role);
     const hireDate= nurses.map(nurse => nurse.hireDate)
-    res.status(200).json({ success: true,nurses,hireDate, emails: nurseEmails, usernames: userName, roles: role });
+    res.status(200).json({ success: true, nurses, hireDate, emails: nurseEmails, usernames: userName, roles: role });
   } catch (error) {
     console.log("Error getting nurses", error.message);
     res.status(500).json({ success: false, message: error.message || "Error getting nurses" });

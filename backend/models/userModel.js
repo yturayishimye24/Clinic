@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
     },
     role:{
       type:String,
-      enum:["admin","nurse","user"],
+      enum:["admin","nurse","user","doctor"],
       required: true,
     },
     email: {

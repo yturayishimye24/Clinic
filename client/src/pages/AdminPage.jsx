@@ -11,6 +11,10 @@ import { Envelope, Globe, Plus, TrashBin } from "@gravity-ui/icons";
 import Metric from "../components/DailyMetric.jsx";
 import { Button } from "@heroui/react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
+//firebase imports
+// Add these at the top of your AdminPage file
+import { auth } from "../../firebase.js";
+import { signOut } from "firebase/auth";
 
 import {
   Users,
@@ -218,7 +222,7 @@ export default function AdminPage() {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
 
-    if (!token || role !== "admin") {
+    if (!token || (role !== "admin" && role !== "doctor")) {
       navigate("/");
       return;
     }
@@ -335,20 +339,30 @@ export default function AdminPage() {
       setApproving(false);
     }
   };
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    localStorage.removeItem("username");
-    localStorage.removeItem("email");
-    localStorage.removeItem("adminUsername");
-    localStorage.removeItem("adminEmail");
-    localStorage.removeItem("doctorUsername");
-    localStorage.removeItem("doctorEmail");
-    localStorage.removeItem("nurseUsername");
-    localStorage.removeItem("nurseEmail");
-    toast.success("Logged out successfully");
-    navigate("/doctorLogin");
-  };
+  const handleLogout = async () => {
+  try {
+    // 1. Terminate the active Google / Firebase session
+    await signOut(auth);
+  } catch (err) {
+    console.error("Firebase sign out failed", err.message);
+  }
+
+  // 2. Clear all local storage values (Your exact code)
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  localStorage.removeItem("username");
+  localStorage.removeItem("email");
+  localStorage.removeItem("adminUsername");
+  localStorage.removeItem("adminEmail");
+  localStorage.removeItem("doctorUsername");
+  localStorage.removeItem("doctorEmail");
+  localStorage.removeItem("nurseUsername");
+  localStorage.removeItem("nurseEmail");
+  
+  toast.success("Logged out successfully");
+  navigate("/doctorLogin");
+};
+
   const handleDeleteRequest = async (requestId) => {
     if (!window.confirm("Delete this request?")) return;
     try {
