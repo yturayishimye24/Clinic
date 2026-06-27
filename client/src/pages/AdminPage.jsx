@@ -620,7 +620,7 @@ export default function AdminPage() {
                     
                     <div className="absolute top-full right-0 w-full h-2 hidden group-hover:block"></div>
 
-                 \
+                 
                     <div className="absolute right-0 top-[calc(100%+8px)] w-96 bg-white border border-gray-200 hidden group-hover:block z-50 shadow-xl transition-all duration-200 animate-fade-in origin-top-right">
                       <div className="p-4 border-b border-gray-100 flex items-center justify-between">
                         <div>
